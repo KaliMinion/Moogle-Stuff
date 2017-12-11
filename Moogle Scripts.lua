@@ -2,7 +2,7 @@ local tbl =
 {
 	[1] = {
 		name = "Moogle Updater",
-		table = MoogleUpdater1,
+		table = MoogleUpdater,
 		url = "",
 		version = "1.0.0",
 		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
