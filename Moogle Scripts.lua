@@ -2,6 +2,7 @@ local tbl =
 {
 	[1] = {
 		name = "Moogle Updater",
+		filename = "MoogleUpdater.lua",
 		table = "return MoogleUpdater",
 		url = "",
 		version = "1.0.0",
@@ -10,6 +11,7 @@ local tbl =
 	},
 	[2] = {
 		name = "Main Window",
+		filename = "MainWindow.lua",
 		table  = "return KaliMainWindow",
 		url = "",
 		version = "1.0.0",
@@ -19,6 +21,7 @@ local tbl =
 	},
 	[3] = {
 		name = "Moogle Functions",
+		filename = "Functions.lua",
 		table = "return MoogleFunctions",
 		url = "",
 		version = "1.0.0",
@@ -27,6 +30,7 @@ local tbl =
 	},
 	[4] = {
 		name = "Moogle Text to Speech",
+		filename = "Moogle TTS.lua",
 		table = "return MoogleTTS",
 		url = "",
 		version = "1.0.0",
@@ -35,6 +39,7 @@ local tbl =
 	},
 	[5] = {
 		name = "Moogle Hoarder",
+		filename = "Moogle Hoarder.lua",
 		table = "return MoogleHoarder",
 		url = "https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Hoarder.lua",
 		version = "1.0.0",
