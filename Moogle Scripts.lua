@@ -30,7 +30,7 @@ local tbl =
 	},
 	[4] = {
 		name = "Moogle Text to Speech",
-		filepath = [[\Moogle Scripts\Moogle TTS\Moogle TTS.lua]],
+		filepath = [[Moogle Scripts\Moogle TTS\Moogle TTS.lua]],
 		table = "return MoogleTTS",
 		url = "",
 		version = "1.0.0",
@@ -39,7 +39,7 @@ local tbl =
 	},
 	[5] = {
 		name = "Moogle Hoarder",
-		filepath = [[\Moogle Scripts\Moogle Hoarder\Moogle Hoarder.lua]],
+		filepath = [[Moogle Scripts\Moogle Hoarder\Moogle Hoarder.lua]],
 		table = "return MoogleHoarder",
 		url = "https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Hoarder.lua",
 		version = "1.0.0",
