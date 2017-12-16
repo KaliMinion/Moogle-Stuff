@@ -15,19 +15,24 @@ MoogleFunctions.Settings = {
 	end
 
 	MoogleFunctions.DownloadQueue = {}
+	local LastTry = 0
 	MoogleFunctions.FinishedDownloads = {}
 	function Download(url,path)
-		if not FileExists(path) then
-			if IsNil(table.find(MoogleFunctions.DownloadQueue,url)) then
-				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
-				InsertIfNil(MoogleFunctions.DownloadQueue,url)
-			end
-		else
-			InsertIfNil(MoogleFunctions.FinishedDownloads,url)
-			if NotNil(table.find(MoogleFunctions.DownloadQueue,url)) then
-				for k,v in pairs(MoogleFunctions.DownloadQueue) do
-					if v == url then
-						MoogleFunctions.DownloadQueue[k] = nil
+		if not In(url,""," ",nil) then
+			if not FileExists(path) then
+				d("url: "..url.." path: "..path)
+				if IsNil(table.find(MoogleFunctions.DownloadQueue,url)) or TimeSince(LastTry) > 1000 then
+					io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+					MoogleFunctions.DownloadQueue[url] = path
+					LastTry = Now()
+				end
+			else
+				MoogleFunctions.FinishedDownloads[url] = path
+				if NotNil(table.find(MoogleFunctions.DownloadQueue,url)) then
+					for k,v in pairs(MoogleFunctions.DownloadQueue) do
+						if k == url then
+							MoogleFunctions.DownloadQueue[k] = nil
+						end
 					end
 				end
 			end
