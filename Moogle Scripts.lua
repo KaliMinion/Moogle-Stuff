@@ -4,7 +4,7 @@ local tbl =
 		name = "Moogle Updater",
 		filepath = [[MoogleUpdater.lua]],
 		table = "return MoogleUpdater",
-		url = "",
+		url = "https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleUpdater.lua",
 		version = "1.0.0",
 		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
 		lastupdate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
