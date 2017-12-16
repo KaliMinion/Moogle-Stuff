@@ -36,6 +36,12 @@ local tbl =
 		version = "1.0.0",
 		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
 		lastupdate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
+		module = [[[Module]
+Name=Moogle TTS
+Dependencies=minionlib
+Version=1
+Files=Moogle TTS.lua
+enabled=1]],
 	},
 	[5] = {
 		name = "Moogle Hoarder",
@@ -45,6 +51,12 @@ local tbl =
 		version = "1.0.0",
 		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
 		lastupdate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
+		module = [[[Module]
+Name=Moogle Hoarder
+Dependencies=minionlib
+Version=1
+Files=Moogle Hoarder.lua
+enabled=1]]
 	},
 }
 
