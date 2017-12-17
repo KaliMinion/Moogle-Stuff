@@ -46,38 +46,6 @@ end
 
 MoogleUpdater.TimeUnits = {"Seconds","Minutes","Hours","Days","Weeks","Months"}
 
-
--- function MoogleUpdater.InvokeWebRequest(url,path,param1,param2)
--- 	if not In(param1,nil,"") then param1 = "."..param1 else param1 = "" end
--- 	if not In(param2,nil,"") then param2 = "."..param2 else param2 = "" end
-
--- 	local TempPath = MooglePath..[[temp.lua]]
--- 	if not In(path,"",nil) and FileExists(path) then TempPath = path end
--- 	if FileExists(TempPath) and NeedWebContent and NeedWebRequest == false then
-
--- 		local file = io.open(TempPath,"r")
--- 		local filesize = 0
--- 		if file ~= nil then
--- 			filesize = file:seek("end")
--- 			file:close()
--- 		end
-
--- 		if filesize ~= 0 then
--- 			-- We have recieved the webpage information that was requested --
--- 			local webpage = FileLoad(TempPath)
--- 			if table.valid(webpage) then 
--- 				NeedWebContent = false
--- 			end
--- 			return webpage
--- 		end
--- 	elseif NeedWebRequest then
--- 		io.popen([[powershell -Command "(iwr -uri ]]..url..[[ -OutFile ']]..TempPath..[[')]]..param1..param2..[["]])
--- 		NeedWebRequest = false
--- 		NeedWebContent = true
--- 		return nil
--- 	end
--- end
-
 local ModuleDownloads = {}
 function MoogleUpdater.Draw()
 	if KaliMainWindow ~= nil then
