@@ -279,81 +279,85 @@ function MoogleHoarder.ModuleInit()
 end
 
 function MoogleHoarder.Draw()
-	local main = KaliMainWindow.GUI
-	local nav = KaliMainWindow.GUI.NavigationMenu
-	local settings = MoogleHoarder.Settings
+	if NotNil(MoogleHoarder) then
+		local main = KaliMainWindow.GUI
+		local nav = KaliMainWindow.GUI.NavigationMenu
+		local settings = MoogleHoarder.Settings
 
-	if nav.selected == MoogleHoarder.GUI.NavName then
-		main.Contents = function()
-			local TotalInventoryCount = Size(MoogleHoarder.Inventory.Player) + Size(MoogleHoarder.Inventory.Armoury)
-			for k,v in pairs(MoogleHoarder.Inventory.Retainers) do
-				TotalInventoryCount = TotalInventoryCount + Size(v)
+		if nav.selected == MoogleHoarder.GUI.NavName then
+			main.Contents = function()
+				local TotalInventoryCount = Size(MoogleHoarder.Inventory.Player) + Size(MoogleHoarder.Inventory.Armoury)
+				for k,v in pairs(MoogleHoarder.Inventory.Retainers) do
+					TotalInventoryCount = TotalInventoryCount + Size(v)
+				end
+				Text("Number of items owned: "..TotalInventoryCount)
 			end
-			Text("Number of items owned: "..TotalInventoryCount)
 		end
 	end
 end
 
 function MoogleHoarder.OnUpdate( event, tickcount )
-	local main = KaliMainWindow.GUI
-	local nav = KaliMainWindow.GUI.NavigationMenu
-	local settings = MoogleHoarder.Settings
-	local inv = MoogleHoarder.Inventory
+	if NotNil(MoogleHoarder) then
+		local main = KaliMainWindow.GUI
+		local nav = KaliMainWindow.GUI.NavigationMenu
+		local settings = MoogleHoarder.Settings
+		local inv = MoogleHoarder.Inventory
 
-	-- Add entry to sidewindow navigation list --
-	if table.find(nav.Menu,MoogleHoarder.GUI.NavName) == nil then
-		table.insert(nav.Menu,MoogleHoarder.GUI.NavName)
-	end
+		-- Add entry to sidewindow navigation list --
+		if table.find(nav.Menu,MoogleHoarder.GUI.NavName) == nil then
+			table.insert(nav.Menu,MoogleHoarder.GUI.NavName)
+		end
 
 
-	-- Step Detection Logic --
-		local Step = MoogleHoarder.Settings.Step
-		local CurrentRetainer = MoogleHoarder.Settings.CurrentRetainer
-		local sstr = GetControlStrings("SelectString")
-		local retalk = GetControlStrings("Talk")
+		-- Step Detection Logic --
+			local Step = MoogleHoarder.Settings.Step
+			local CurrentRetainer = MoogleHoarder.Settings.CurrentRetainer
+			local sstr = GetControlStrings("SelectString")
+			local retalk = GetControlStrings("Talk")
 
-		if Is(CurrentTarget("name"),"Summoning Bell") then
-			if NotNil(sstr) then
-				local str = sstr[2]
+			if Is(CurrentTarget("name"),"Summoning Bell") then
+				if NotNil(sstr) then
+					local str = sstr[2]
 
-				if Is(str,"Select retainer.") then MoogleHoarder.Settings.Step = 1 Step = 1
-				else MoogleHoarder.Settings.Step = 3 Step = 3 end
-			end
-			if IsControlOpen("Talk") and NotNil(retalk) then
-				MoogleHoarder.Settings.Step = 2 Step = 2
-				if CurrentRetainer ~= retalk[2] then
-					MoogleHoarder.Settings.CurrentRetainer = retalk[2]
+					if Is(str,"Select retainer.") then MoogleHoarder.Settings.Step = 1 Step = 1
+					else MoogleHoarder.Settings.Step = 3 Step = 3 end
+				end
+				if IsControlOpen("Talk") and NotNil(retalk) then
+					MoogleHoarder.Settings.Step = 2 Step = 2
+					if CurrentRetainer ~= retalk[2] then
+						MoogleHoarder.Settings.CurrentRetainer = retalk[2]
+						MoogleHoarder.UpdateRetainerInventory()
+					end
+					InsertIfNil(MoogleHoarder.Inventory.Retainers,retalk[2])
 					MoogleHoarder.UpdateRetainerInventory()
 				end
-				InsertIfNil(MoogleHoarder.Inventory.Retainers,retalk[2])
-				MoogleHoarder.UpdateRetainerInventory()
+			else
+				MoogleHoarder.Settings.Step = 0 Step = 0
 			end
-		else
-			MoogleHoarder.Settings.Step = 0 Step = 0
-		end
-	-- End Step Detection Logic --
+		-- End Step Detection Logic --
 
-	-- Initalize the entire data gathering process by checking if your current target is the Summoning Bell --
-	if Is(MoogleHoarder.OpenAllStatus.Status) then
-		MoogleHoarder.OpenAllRetainers()
-	elseif Not(Step,0) then
-		if Is(Step,1) then
-			if Empty(MoogleHoarder.Settings.RetainerOrder) then
-				d("Retainer Table is empty, doing first run populate retainer inventory update.")
-				for k,v in pairs(GetControl("SelectString"):GetData()) do
-					v = tostring(v):match("(%a+)%.")
-					if Not(v,"Quit") then
-						InsertIfNil(MoogleHoarder.Settings.RetainerOrder,k+1,v)
+		-- Initalize the entire data gathering process by checking if your current target is the Summoning Bell --
+		if Is(MoogleHoarder.OpenAllStatus.Status) then
+			MoogleHoarder.OpenAllRetainers()
+		elseif Not(Step,0) then
+			if Is(Step,1) then
+				if Empty(MoogleHoarder.Settings.RetainerOrder) then
+					d("Retainer Table is empty, doing first run populate retainer inventory update.")
+					for k,v in pairs(GetControl("SelectString"):GetData()) do
+						v = tostring(v):match("(%a+)%.")
+						if Not(v,"Quit") then
+							InsertIfNil(MoogleHoarder.Settings.RetainerOrder,k+1,v)
+						end
 					end
+					MoogleHoarder.OpenAllStatus.Status = true
 				end
-				MoogleHoarder.OpenAllStatus.Status = true
 			end
 		end
-	end
 
-	if TimeSince(MoogleHoarder.Settings.LastPlayerUpdate) >= MoogleHoarder.Settings.PlayerInventoryUpdateInterval then
-		MoogleHoarder.Settings.LastPlayerUpdate = Now()
-		MoogleHoarder.UpdatePlayerInventory()
+		if TimeSince(MoogleHoarder.Settings.LastPlayerUpdate) >= MoogleHoarder.Settings.PlayerInventoryUpdateInterval then
+			MoogleHoarder.Settings.LastPlayerUpdate = Now()
+			MoogleHoarder.UpdatePlayerInventory()
+		end
 	end
 end
 
