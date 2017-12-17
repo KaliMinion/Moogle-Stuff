@@ -1,7 +1,7 @@
 MoogleFunctions = {}
 
 MoogleFunctions.Settings = {
-	enable = true
+	enable = false
 }
 
 -- Start Minion Helper Functions --
