@@ -33,8 +33,8 @@ MoogleUpdater.NewScripts = {}
 MoogleUpdater.NewLabelScripts = {}
 MoogleUpdater.UpdatedScripts = {}
 MoogleUpdater.UpdatedLabelScripts = {}
-local MooglePath = GetLuaModsPath()..[[\MoogleStuff Files\]]
-local ImageFolder = GetLuaModsPath()..[[\MoogleStuff Files\Moogle Images\]]
+local MooglePath = GetLuaModsPath()..[[MoogleStuff Files\]]
+local ImageFolder = GetLuaModsPath()..[[MoogleStuff Files\Moogle Images\]]
 local NeedWebRequest = true
 local NeedWebContent = true
 
@@ -58,6 +58,8 @@ function MoogleUpdater.Draw()
 			Download([[https://i.imgur.com/3gGlOb5.png]],ImageFolder..[[KaliDownloaded.png]])
 			Download([[https://i.imgur.com/qmxNnED.png]],ImageFolder..[[MoogleStuff.png]])
 			Download([[https://i.imgur.com/YCrtrUW.png]],ImageFolder..[[MoogleStuff2.png]])
+			Download([[https://i.imgur.com/f94SN16.png]],ImageFolder..[[CoreModule.png]])
+			Download([[https://i.imgur.com/ySDKO55.png]],ImageFolder..[[DeleteModule.png]])
 		-- End Image Downloading --
 
 		-- Add entry to sidewindow navigation list --
@@ -80,20 +82,32 @@ function MoogleUpdater.Draw()
 						Text("to use your "..Size(ModuleDownloads).." new moogle "..check..".",0,true)
 					end
 				-- End Pending Download Checks --
+
 				local scripts = MoogleUpdater.MoogleScripts
 				if Valid(scripts) then
 					for k,v in table.pairsbykeys(scripts) do
 						GUI:BeginChild("##"..v.name:gsub(" ",""),0,50,true)
 							if In(v.name,"Moogle Updater", "Main Window", "Moogle Functions") then
-								GUI:Checkbox(v.name.." v"..v.version,true)
+								-- Core Files ignore all checks --
+									if FileExists(ImageFolder..[[CoreModule.png]]) then
+										local c = GUI:Image(ImageFolder..[[CoreModule.png]],19,19)
+										if GUI:IsItemHovered(c) then
+											Tooltip("Core Moogle Module")
+										end
+										GUI:SameLine(0,4)
+										GUI:Text(v.name.."  v"..v.version)
+									else
+										GUI:SameLine(0,23) Text(v.name.."  v"..v.version)
+									end
+									GUI:Checkbox(v.name.."  v"..v.version)
+								-- End Core Module Check --
 							else
 								local tbl = loadstring(v.table)() or "NotInstalled"
 								if Not(tbl,"NotInstalled") then
-									tbl.Settings.enable = GUI:Checkbox(v.name.." v"..v.version,tbl.Settings.enable)
+									tbl.Settings.enable = GUI:Checkbox(v.name.."  v"..v.version,tbl.Settings.enable)
 								else
 									if FileExists(ImageFolder..[[KaliDownload.png]]) then
 										if not FileExists(MooglePath..v.filepath) then
-											GUI:AlignFirstTextHeightToWidgets()
 											local c = GUI:Image(ImageFolder..[[KaliDownload.png]],19,19)
 											if GUI:IsItemHovered(c) then
 												Tooltip("Download and Install Lua")
@@ -108,14 +122,13 @@ function MoogleUpdater.Draw()
 												end
 											end
 											GUI:SameLine(0,4)
-											GUI:Text(v.name.." v"..v.version)
+											GUI:Text(v.name.."  v"..v.version)
 										else
 											-- File Exists but need to create module.def file --
 											if FileExists(string.gsub(MooglePath..v.filepath,"([^\\]+)$","")..[[module.def]]) then
 												-- Module.def file exists, now ready for Lua Reload --
 												InsertIfNil(ModuleDownloads,v.name)
 												if FileExists(ImageFolder..[[KaliDownloaded.png]]) then
-													GUI:AlignFirstTextHeightToWidgets()
 													local c = GUI:Image(ImageFolder..[[KaliDownloaded.png]],19,19)
 													if GUI:IsItemHovered(c) then
 														Tooltip("Finished Downloading, click to reload Lua")
@@ -124,9 +137,9 @@ function MoogleUpdater.Draw()
 														end
 													end
 													GUI:SameLine(0,4)
-													GUI:Text(v.name.." v"..v.version)
+													GUI:Text(v.name.."  v"..v.version)
 												else
-													GUI:SameLine(0,23) Text(v.name.." v"..v.version)
+													GUI:SameLine(0,23) Text(v.name.."  v"..v.version)
 												end
 											else
 												if NotNil(v.module) then
@@ -135,7 +148,51 @@ function MoogleUpdater.Draw()
 											end
 										end
 									else
-										GUI:SameLine(0,23) Text(v.name.." v"..v.version)
+										GUI:SameLine(0,23) Text(v.name.."  v"..v.version)
+									end
+								end
+								-- Begin right side options for non core files --
+								local x = GUI:GetContentRegionAvailWidth()
+								local start,starty = GUI:CalcTextSize(v.name.."  v"..v.version)
+								local labels = " Category:  Stability:  "
+								local category = tostring(v.category)
+								local stability = tostring(v.stability)
+								local x2,y2 = GUI:CalcTextSize(labels)
+								local x3,y3 = GUI:CalcTextSize(category)
+								local x4,y4 = GUI:CalcTextSize(stability)
+								local trashcan = 0
+								if Not(tbl,"NotInstalled") or FileExists(MooglePath..v.filepath) then trashcan = 19 end
+								local x5 = x - (start + x2 + x3 + x4 + 19 + trashcan + 3)
+								GUI:SameLine(0,x5)
+								Text("Category:",true) GUI:PushStyleColor(GUI.Col_Text,1,1,0,1) Text(category,true) GUI:PopStyleColor() Text(" Stability:",true) GUI:PushStyleColor(GUI.Col_Text,1,1,0,1) Text(stability.." ",true) GUI:PopStyleColor()
+								if Not(tbl,"NotInstalled") or FileExists(MooglePath..v.filepath) then
+									SameLine()
+									if FileExists(ImageFolder..[[DeleteModule.png]]) then
+										local c = GUI:Image(ImageFolder..[[DeleteModule.png]],19,19)
+										if GUI:IsItemHovered(c) then
+											Tooltip("Permanently Delete Moogle Module")
+											if GUI:IsItemClicked(c) then
+												if NotNil(loadstring(v.table)()) then
+													local key = table.find(KaliMainWindow.GUI.NavigationMenu.Menu,loadstring(v.table..[[.GUI.NavName]])())
+													KaliMainWindow.GUI.NavigationMenu.Menu[key] = nil
+												end
+												if NotNil(MoogleFunctions.DownloadQueue[v.url]) then
+													MoogleFunctions.DownloadQueue[v.url] = nil
+												end
+												local tbl = v.table:gsub("return ","")
+												loadstring(tbl.." = nil")()
+												if not In(v.filepath,""," ",nil) then
+													local lastfolder = string.gsub(MooglePath..v.filepath,"([^\\]+)$","")
+													if FolderExists(lastfolder) then
+														io.popen([[rmdir /s /q "]]..lastfolder..[["]])
+													end
+												end
+												local key = table.find(ModuleDownloads,v.name)
+												if NotNil(key) then
+													ModuleDownloads[key] = nil
+												end
+											end
+										end
 									end
 								end
 							end
