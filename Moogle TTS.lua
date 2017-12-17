@@ -184,7 +184,7 @@ next]])
 end
 
 function MoogleTTS.Draw()
-	if NotNil(MoogleTTS) then
+	if NotNil(MoogleTTS) and MoogleTTS.Settings.enable then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleTTS.Settings
@@ -233,7 +233,7 @@ function MoogleTTS.Draw()
 end
 
 function MoogleTTS.OnUpdate( event, tickcount )
-	if NotNil(MoogleTTS) then
+	if NotNil(MoogleTTS) and MoogleTTS.Settings.enable then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleTTS.Settings
@@ -305,6 +305,7 @@ function MoogleTTS.OnUpdate( event, tickcount )
 							text = string.gsub( text, "%\r", " ")
 							text = string.gsub( text, "%<", " - ")
 							text = string.gsub( text, "%>", " - ")
+							text = string.gsub( text, "Kalila", "kahleela")
 							-- text = string.gsub( text, "%c", "")
 
 							if speaker ~= "" then

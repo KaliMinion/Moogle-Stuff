@@ -279,7 +279,7 @@ function MoogleHoarder.ModuleInit()
 end
 
 function MoogleHoarder.Draw()
-	if NotNil(MoogleHoarder) then
+	if NotNil(MoogleHoarder) and MoogleHoarder.Settings.enable then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleHoarder.Settings
@@ -297,7 +297,7 @@ function MoogleHoarder.Draw()
 end
 
 function MoogleHoarder.OnUpdate( event, tickcount )
-	if NotNil(MoogleHoarder) then
+	if NotNil(MoogleHoarder) and MoogleHoarder.Settings.enable  then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleHoarder.Settings
