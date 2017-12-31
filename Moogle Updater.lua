@@ -33,8 +33,23 @@ MoogleUpdater.NewScripts = {}
 MoogleUpdater.NewLabelScripts = {}
 MoogleUpdater.UpdatedScripts = {}
 MoogleUpdater.UpdatedLabelScripts = {}
-local MooglePath = GetLuaModsPath()..[[MoogleStuff Files\]]
-local ImageFolder = GetLuaModsPath()..[[MoogleStuff Files\Moogle Images\]]
+-- Helper Variables --
+	local MinionPath = MoogleLib.API.MinionPath
+	local LuaPath = MoogleLib.API.LuaPath
+	local MooglePath = MoogleLib.API.MooglePath
+	local ImageFolder = MoogleLib.API.ImageFolder
+	local ScriptsFolder = MoogleLib.API.ScriptsFolder
+	local API = MoogleLib.API
+	local Lua = MoogleLib.Lua
+	local Debug = Lua.debug
+	local General = Lua.general
+	local IO = Lua.io
+	local Math = Lua.math
+	local OS = Lua.os
+	local String = Lua.string
+	local Table = Lua.table
+	local Gui = MoogleLib.Gui
+-- End Helper Variables --
 local NeedWebRequest = true
 local NeedWebContent = true
 
@@ -42,24 +57,46 @@ function MoogleUpdater.ModuleInit()
 	if FileExists(MooglePath..[[Moogle Scripts.lua]]) then
 		MoogleUpdater.MoogleScripts = FileLoad(MooglePath..[[Moogle Scripts.lua]])
 	end
+	ml_error("test")
+	table.print(MoogleUpdater.MoogleScripts)
 end
 
 MoogleUpdater.TimeUnits = {"Seconds","Minutes","Hours","Days","Weeks","Months"}
 
 local ModuleDownloads = {}
+local NeedImages = true
 function MoogleUpdater.Draw()
 	if KaliMainWindow ~= nil then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleUpdater.Settings
+		local Download = OS.Download
+		local InsertIfNil = Table.InsertIfNil
 
 		-- Download Images needed for Draw process --
-			Download([[https://i.imgur.com/7fi6fyo.png]],ImageFolder..[[KaliDownload.png]])
-			Download([[https://i.imgur.com/3gGlOb5.png]],ImageFolder..[[KaliDownloaded.png]])
-			Download([[https://i.imgur.com/qmxNnED.png]],ImageFolder..[[MoogleStuff.png]])
-			Download([[https://i.imgur.com/YCrtrUW.png]],ImageFolder..[[MoogleStuff2.png]])
-			Download([[https://i.imgur.com/f94SN16.png]],ImageFolder..[[CoreModule.png]])
-			Download([[https://i.imgur.com/ySDKO55.png]],ImageFolder..[[DeleteModule.png]])
+			if NeedImages then
+				local Images = {
+					["https://i.imgur.com/7fi6fyo.png"] = "KaliDownload.png",
+					["https://i.imgur.com/3gGlOb5.png"] = "KaliDownloaded.png",
+					["https://i.imgur.com/qmxNnED.png"] = "MoogleStuff.png",
+					["https://i.imgur.com/YCrtrUW.png"] = "MoogleStuff2.png",
+					["https://i.imgur.com/f94SN16.png"] = "CoreModule.png",
+					["https://i.imgur.com/ySDKO55.png"] = "DeleteModule.png",
+				}
+				local downloading = false
+				for url,image in pairs(Images) do
+					if FileExists(ImageFolder..image) then
+						-- File Exists --
+					elseif not downloading then
+						-- Need to download --
+						downloading = true
+						Download(url,ImageFolder..image)
+					end
+				end
+				if not downloading then
+					NeedImages = false
+				end
+			end
 		-- End Image Downloading --
 
 		-- Add entry to sidewindow navigation list --
@@ -68,17 +105,31 @@ function MoogleUpdater.Draw()
 
 		if nav.selected == MoogleUpdater.GUI.NavName then
 			main.Contents = function()
+				local Text = Gui.Text
+				local Valid = Table.Valid
+				local Space = Gui.Space
+				local SameLine = Gui.SameLine
+				local Tooltip = Gui.Tooltip
+				local Checkbox = Gui.Checkbox
+				local Not = General.Not
+				local NotNil = General.NotNil
+				local CreateFolder = OS.CreateFolder
+
 				-- Check to see if you have pending Download Checks --
 					if Valid(ModuleDownloads) then
-						-- GUI:AlignFirstTextHeightToWidgets()
 						Text("You need to",0)
+						
 						local x,y = GUI:CalcTextSize("Reload Lua")
 						local c = GUI:Button("Reload Lua",x+10,y+10)
 						if GUI:IsItemClicked(c) then
 							Reload()
 						end
+
 						local check = "module"
-						if Size(ModuleDownloads) > 1 then check = check.."s" end
+						if Size(ModuleDownloads) > 1 then
+							check = check.."s"
+						end
+						
 						Text("to use your "..Size(ModuleDownloads).." new moogle "..check..".",0,true)
 					end
 				-- End Pending Download Checks --
@@ -87,24 +138,28 @@ function MoogleUpdater.Draw()
 				if Valid(scripts) then
 					for k,v in table.pairsbykeys(scripts) do
 						GUI:BeginChild("##"..v.name:gsub(" ",""),0,50,true)
-							if In(v.name,"Moogle Updater", "Main Window", "Moogle Functions") then
+							if In(v.name,"Moogle Updater", "Main Window", "MoogleLib") then
 								-- Core Files ignore all checks --
 									if FileExists(ImageFolder..[[CoreModule.png]]) then
 										local c = GUI:Image(ImageFolder..[[CoreModule.png]],19,19)
+
 										if GUI:IsItemHovered(c) then
 											Tooltip("Core Moogle Module")
 										end
-										GUI:SameLine(0,4)
-										GUI:Text(v.name.."  v"..v.version)
+										
+										Space(4)
+										Text(v.name.."  v"..v.version)
 									else
-										GUI:SameLine(0,23) Text(v.name.."  v"..v.version)
+										Space(23) Text(v.name.."  v"..v.version)
 									end
-									GUI:Checkbox(v.name.."  v"..v.version)
+
+									local temp = true
+									Checkbox(v.name.."  v"..v.version,temp,"temp1",false,"test")
 								-- End Core Module Check --
 							else
 								local tbl = loadstring(v.table)() or "NotInstalled"
 								if Not(tbl,"NotInstalled") then
-									tbl.Settings.enable = GUI:Checkbox(v.name.."  v"..v.version,tbl.Settings.enable)
+									tbl.Settings.enable = GUI:Checkbox(v.name.."  v"..v.version,tbl.Settings.enable,"ScriptEnabled",false,"test")
 								else
 									if FileExists(ImageFolder..[[KaliDownload.png]]) then
 										if not FileExists(MooglePath..v.filepath) then
@@ -115,14 +170,14 @@ function MoogleUpdater.Draw()
 													if not In(v.filepath,""," ",nil) then
 														local lastfolder = string.gsub(MooglePath..v.filepath,"([^\\]+)$","")
 														if not FolderExists(lastfolder) then
-															FolderCreate(lastfolder)
+															CreateFolder(lastfolder)
 														end
 														Download(v.url,MooglePath..v.filepath)
 													end
 												end
 											end
-											GUI:SameLine(0,4)
-											GUI:Text(v.name.."  v"..v.version)
+											Space(4)
+											Text(v.name.."  v"..v.version)
 										else
 											-- File Exists but need to create module.def file --
 											if FileExists(string.gsub(MooglePath..v.filepath,"([^\\]+)$","")..[[module.def]]) then
@@ -136,10 +191,11 @@ function MoogleUpdater.Draw()
 															Reload()
 														end
 													end
-													GUI:SameLine(0,4)
+
+													Space(4)
 													GUI:Text(v.name.."  v"..v.version)
 												else
-													GUI:SameLine(0,23) Text(v.name.."  v"..v.version)
+													Space(23) Text(v.name.."  v"..v.version)
 												end
 											else
 												if NotNil(v.module) then
@@ -148,9 +204,10 @@ function MoogleUpdater.Draw()
 											end
 										end
 									else
-										GUI:SameLine(0,23) Text(v.name.."  v"..v.version)
+										Space(23) Text(v.name.."  v"..v.version)
 									end
 								end
+
 								-- Begin right side options for non core files --
 								local x = GUI:GetContentRegionAvailWidth()
 								local start,starty = GUI:CalcTextSize(v.name.."  v"..v.version)
@@ -161,32 +218,52 @@ function MoogleUpdater.Draw()
 								local x3,y3 = GUI:CalcTextSize(category)
 								local x4,y4 = GUI:CalcTextSize(stability)
 								local trashcan = 0
-								if Not(tbl,"NotInstalled") or FileExists(MooglePath..v.filepath) then trashcan = 19 end
+
+								if Not(tbl,"NotInstalled") or FileExists(MooglePath..v.filepath) then
+									trashcan = 19
+								end
+								
 								local x5 = x - (start + x2 + x3 + x4 + 19 + trashcan + 3)
-								GUI:SameLine(0,x5)
-								Text("Category:",true) GUI:PushStyleColor(GUI.Col_Text,1,1,0,1) Text(category,true) GUI:PopStyleColor() Text(" Stability:",true) GUI:PushStyleColor(GUI.Col_Text,1,1,0,1) Text(stability.." ",true) GUI:PopStyleColor()
+								Space(x5) Text("Category:",true)
+
+								GUI:PushStyleColor(GUI.Col_Text,1,1,0,1)
+									Text(category,true)
+								GUI:PopStyleColor()
+
+								Text(" Stability:",true)
+
+								GUI:PushStyleColor(GUI.Col_Text,1,1,0,1)
+									Text(stability.." ",true)
+								GUI:PopStyleColor()
+
 								if Not(tbl,"NotInstalled") or FileExists(MooglePath..v.filepath) then
 									SameLine()
 									if FileExists(ImageFolder..[[DeleteModule.png]]) then
+
 										local c = GUI:Image(ImageFolder..[[DeleteModule.png]],19,19)
 										if GUI:IsItemHovered(c) then
 											Tooltip("Permanently Delete Moogle Module")
+
 											if GUI:IsItemClicked(c) then
 												if NotNil(loadstring(v.table)()) then
 													local key = table.find(KaliMainWindow.GUI.NavigationMenu.Menu,loadstring(v.table..[[.GUI.NavName]])())
 													KaliMainWindow.GUI.NavigationMenu.Menu[key] = nil
 												end
+
 												if NotNil(MoogleFunctions.DownloadQueue[v.url]) then
 													MoogleFunctions.DownloadQueue[v.url] = nil
 												end
+
 												local tbl = v.table:gsub("return ","")
 												loadstring(tbl.." = nil")()
+												
 												if not In(v.filepath,""," ",nil) then
 													local lastfolder = string.gsub(MooglePath..v.filepath,"([^\\]+)$","")
 													if FolderExists(lastfolder) then
 														io.popen([[rmdir /s /q "]]..lastfolder..[["]])
 													end
 												end
+
 												local key = table.find(ModuleDownloads,v.name)
 												if NotNil(key) then
 													ModuleDownloads[key] = nil
