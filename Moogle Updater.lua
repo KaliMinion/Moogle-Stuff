@@ -70,6 +70,20 @@ function MoogleUpdater.Draw()
 		local settings = MoogleUpdater.Settings
 		local Download = OS.Download
 		local InsertIfNil = Table.InsertIfNil
+		local Text = Gui.Text
+		local Valid = Table.Valid
+		local Space = Gui.Space
+		local SameLine = Gui.SameLine
+		local Tooltip = Gui.Tooltip
+		local Checkbox = Gui.Checkbox
+		local Not = General.Not
+		local NotNil = General.NotNil
+		local CreateFolder = OS.CreateFolder
+		local Size = General.Size
+		local DownloadQueue = OS.DownloadQueue
+		local DownloadQueueBackup = OS.DownloadQueueBackup
+		local DownloadNextAttempt = OS.DownloadNextAttempt
+		local FinishedDownloads = OS.FinishedDownloads
 
 		-- Download Images needed for Draw process --
 			if NeedImages then
@@ -101,16 +115,6 @@ function MoogleUpdater.Draw()
 
 		if nav.selected == MoogleUpdater.GUI.NavName then
 			main.Contents = function()
-				local Text = Gui.Text
-				local Valid = Table.Valid
-				local Space = Gui.Space
-				local SameLine = Gui.SameLine
-				local Tooltip = Gui.Tooltip
-				local Checkbox = Gui.Checkbox
-				local Not = General.Not
-				local NotNil = General.NotNil
-				local CreateFolder = OS.CreateFolder
-
 				-- Check to see if you have pending Download Checks --
 					if Valid(ModuleDownloads) then
 						Text("You need to",0)
@@ -148,14 +152,11 @@ function MoogleUpdater.Draw()
 									else
 										Space(23) Text(v.name.."  v"..v.version)
 									end
-
-									local temp = true
-									Checkbox(v.name.."  v"..v.version,temp,"temp1",false,"test")
 								-- End Core Module Check --
 							else
 								local tbl = loadstring(v.table)() or "NotInstalled"
 								if Not(tbl,"NotInstalled") then
-									tbl.Settings.enable = GUI:Checkbox(v.name.."  v"..v.version,tbl.Settings.enable,"ScriptEnabled",false,"test")
+									tbl.Settings.enable = Checkbox(v.name.."  v"..v.version,tbl.Settings.enable,"ScriptEnabled",false,"test")
 								else
 									if FileExists(ImageFolder..[[KaliDownload.png]]) then
 										if not FileExists(MooglePath..v.filepath) then
@@ -245,10 +246,11 @@ function MoogleUpdater.Draw()
 													local key = table.find(KaliMainWindow.GUI.NavigationMenu.Menu,loadstring(v.table..[[.GUI.NavName]])())
 													KaliMainWindow.GUI.NavigationMenu.Menu[key] = nil
 												end
-
-												if NotNil(MoogleFunctions.DownloadQueue[v.url]) then
-													MoogleFunctions.DownloadQueue[v.url] = nil
-												end
+												
+												if DownloadQueue[v.url] ~= nil then DownloadQueue[v.url] = nil end
+												if DownloadQueueBackup[v.url] ~= nil then DownloadQueueBackup[v.url] = nil end
+												if DownloadNextAttempt[v.url] ~= nil then DownloadNextAttempt[v.url] = nil end
+												if FinishedDownloads[v.url] ~= nil then FinishedDownloads[v.url] = nil end
 
 												local tbl = v.table:gsub("return ","")
 												loadstring(tbl.." = nil")()
@@ -290,11 +292,12 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			FolderCreate(MooglePath..[[Moogle Scripts]])
 		end
 	-- Check to see if you have backed up downloads --
-		-- if MoogleFunctions ~= nil then
-		-- 	for k,v in pairs(MoogleFunctions.DownloadQueue) do
-		-- 		Download(k,v)
-		-- 	end
-		-- end
+		if MoogleLib ~= nil and table.valid(OS.DownloadQueueBackup) then
+			local Download = OS.Download
+			for k,v in pairs(OS.DownloadQueueBackup) do
+				Download(k,v)
+			end
+		end
 	-- End Download Check --
 
 	local CheckInterval = MoogleUpdater.Settings.CheckInterval
