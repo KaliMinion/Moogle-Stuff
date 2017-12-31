@@ -33,23 +33,6 @@ MoogleUpdater.NewScripts = {}
 MoogleUpdater.NewLabelScripts = {}
 MoogleUpdater.UpdatedScripts = {}
 MoogleUpdater.UpdatedLabelScripts = {}
--- Helper Variables --
-	local MinionPath = MoogleLib.API.MinionPath
-	local LuaPath = MoogleLib.API.LuaPath
-	local MooglePath = MoogleLib.API.MooglePath
-	local ImageFolder = MoogleLib.API.ImageFolder
-	local ScriptsFolder = MoogleLib.API.ScriptsFolder
-	local API = MoogleLib.API
-	local Lua = MoogleLib.Lua
-	local Debug = Lua.debug
-	local General = Lua.general
-	local IO = Lua.io
-	local Math = Lua.math
-	local OS = Lua.os
-	local String = Lua.string
-	local Table = Lua.table
-	local Gui = MoogleLib.Gui
--- End Helper Variables --
 local NeedWebRequest = true
 local NeedWebContent = true
 
@@ -68,6 +51,23 @@ function MoogleUpdater.Draw()
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleUpdater.Settings
+		-- Helper Variables --
+			local MinionPath = MoogleLib.API.MinionPath
+			local LuaPath = MoogleLib.API.LuaPath
+			local MooglePath = MoogleLib.API.MooglePath
+			local ImageFolder = MoogleLib.API.ImageFolder
+			local ScriptsFolder = MoogleLib.API.ScriptsFolder
+			local API = MoogleLib.API
+			local Lua = MoogleLib.Lua
+			local Debug = Lua.debug
+			local General = Lua.general
+			local IO = Lua.io
+			local Math = Lua.math
+			local OS = Lua.os
+			local String = Lua.string
+			local Table = Lua.table
+			local Gui = MoogleLib.Gui
+		-- End Helper Variables --
 		local Download = OS.Download
 		local InsertIfNil = Table.InsertIfNil
 		local Text = Gui.Text
@@ -103,7 +103,6 @@ function MoogleUpdater.Draw()
 					end
 				end
 				if not downloading then
-					ml_error("test")
 					NeedImages = false
 				end
 			end
@@ -285,6 +284,7 @@ local FirstRun = false
 local docheck = true
 function MoogleUpdater.OnUpdate(event, tickcount)
 	-- Check if all the folders are created --
+		local MooglePath = GetLuaModsPath()..[[MoogleStuff Files\]]
 		if not FolderExists(MooglePath..[[Moogle Images]]) then
 			FolderCreate(MooglePath..[[Moogle Images]])
 		end
@@ -292,10 +292,13 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			FolderCreate(MooglePath..[[Moogle Scripts]])
 		end
 	-- Check to see if you have backed up downloads --
-		if MoogleLib ~= nil and table.valid(OS.DownloadQueueBackup) then
-			local Download = OS.Download
-			for k,v in pairs(OS.DownloadQueueBackup) do
-				Download(k,v)
+		if MoogleLib ~= nil then
+			local OS = MoogleLib.Lua.os
+			if table.valid(OS.DownloadQueueBackup) then
+				local Download = OS.Download
+				for k,v in pairs(OS.DownloadQueueBackup) do
+					Download(k,v)
+				end
 			end
 		end
 	-- End Download Check --
@@ -332,6 +335,23 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			if FirstRun then
 				Reload()
 			else
+			-- Helper Variables --
+				local MinionPath = MoogleLib.API.MinionPath
+				local LuaPath = MoogleLib.API.LuaPath
+				local MooglePath = MoogleLib.API.MooglePath
+				local ImageFolder = MoogleLib.API.ImageFolder
+				local ScriptsFolder = MoogleLib.API.ScriptsFolder
+				local API = MoogleLib.API
+				local Lua = MoogleLib.Lua
+				local Debug = Lua.debug
+				local General = Lua.general
+				local IO = Lua.io
+				local Math = Lua.math
+				local OS = Lua.os
+				local String = Lua.string
+				local Table = Lua.table
+				local Gui = MoogleLib.Gui
+			-- End Helper Variables --
 				-- Check to see if Moogle Scripts has been updated --
 					if table.size(webpage) == 0 then
 						if NeedWebRequest == true and NeedWebContent == true then
