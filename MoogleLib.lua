@@ -391,10 +391,11 @@ MoogleLib.Settings = {
 			local Size = General.Size
 			local PowerShell = OS.PowerShell
 			local CreateFolder = OS.CreateFolder
+			ml_error("download test")
 
 			if type(url) == "string" then
-				if IsNil(DownloadNextAttempt[url]) or Now() > DownloadNextAttempt[url] then
-					if not FileExists(path) then
+				if not FileExists(path) then
+					if IsNil(DownloadNextAttempt[url]) or Now() > DownloadNextAttempt[url] then
 						-- File does not exist, check to make sure the parent folder exists --
 						local FolderPath = path:match("(.*"..[[\]]..")")
 						if FolderExists(FolderPath) and Size(DownloadQueue,"=",0) then
@@ -407,13 +408,16 @@ MoogleLib.Settings = {
 							if IsNil(DownloadNextAttempt[url]) then
 								CreateFolder(FolderPath)
 							end
-							DownloadNextAttempt[url] = Now()+250
+							DownloadNextAttempt[url] = Now()+100
 						end
-					else
-						-- File now exists, time for cleanup --
-						InsertIfNil(FinishedDownloads,url,path)
-						DownloadQueue[url] = nil
 					end
+					return true
+				else
+					-- File now exists, time for cleanup --
+					InsertIfNil(FinishedDownloads,url,path)
+					DownloadQueue[url] = nil
+					DownloadNextAttempt[url] = nil
+					return false
 				end
 			end
 		end
@@ -437,6 +441,7 @@ MoogleLib.Settings = {
 			local Type = General.Type
 			local NotNil = General.NotNil
 			local IsNil = General.IsNil
+			local Not = General.Not
 
 			if Type(tbl,"table") then
 				if NotNil(value) then
