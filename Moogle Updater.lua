@@ -284,6 +284,7 @@ end
 local webpage = {}
 local timevalue = 0
 local FirstRun = false
+local docheck = true
 function MoogleUpdater.OnUpdate(event, tickcount)
 	-- Check if all the folders are created --
 		if not FolderExists(MooglePath..[[Moogle Images]]) then
@@ -293,11 +294,11 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			FolderCreate(MooglePath..[[Moogle Scripts]])
 		end
 	-- Check to see if you have backed up downloads --
-		if MoogleFunctions ~= nil then
-			for k,v in pairs(MoogleFunctions.DownloadQueue) do
-				Download(k,v)
-			end
-		end
+		-- if MoogleFunctions ~= nil then
+		-- 	for k,v in pairs(MoogleFunctions.DownloadQueue) do
+		-- 		Download(k,v)
+		-- 	end
+		-- end
 	-- End Download Check --
 
 	local CheckInterval = MoogleUpdater.Settings.CheckInterval
@@ -317,69 +318,71 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 		if timevalue ~= CheckInterval * 2592000 then timevalue = CheckInterval * 2592000 end
 	end
 
-	if not FileExists(MooglePath..[[Moogle Scripts.lua]]) or not FileExists(MooglePath..[[MainWindow.lua]]) or not FileExists(MooglePath..[[Functions.lua]]) then
+	if docheck and not FileExists(MooglePath..[[Moogle Scripts.lua]]) or not FileExists(MooglePath..[[Main Window.lua]]) or not FileExists(MooglePath..[[MoogleLib.lua]]) then
 		if not FirstRun then
 			io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Scripts.lua',']]..MooglePath..[[Moogle Scripts.lua')]])
-			io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MainWindow.lua',']]..MooglePath..[[MainWindow.lua')]])
-			io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Functions.lua',']]..MooglePath..[[Functions.lua')]])
+			io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Main%20Window.lua',']]..MooglePath..[[Main Window.lua')]])
+			io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleLib.lua',']]..MooglePath..[[MoogleLib.lua')]])
 			FirstRun = true
 		end
-	elseif MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue then
-		if FirstRun then
-			Reload()
-		else
-			-- Check to see if Moogle Scripts has been updated --
-				if table.size(webpage) == 0 then
-					if NeedWebRequest == true and NeedWebContent == true then
-						io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Scripts.lua',']]..MooglePath..[[Moogle Scripts.lua')]])
-						NeedWebRequest = false
-					elseif NeedWebRequest == false and NeedWebContent == true then
-						local file = io.open(MooglePath..[[Moogle Scripts.lua]],"r")
-						local filesize = 0
-						if file ~= nil then
-							filesize = file:seek("end")
-							file:close()
-						end
+	else
+		if docheck ~= false then docheck = false end
+		if MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue then
+			if FirstRun then
+				Reload()
+			else
+				-- Check to see if Moogle Scripts has been updated --
+					if table.size(webpage) == 0 then
+						if NeedWebRequest == true and NeedWebContent == true then
+							io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Scripts.lua',']]..MooglePath..[[Moogle Scripts.lua')]])
+							NeedWebRequest = false
+						elseif NeedWebRequest == false and NeedWebContent == true then
+							local file = io.open(MooglePath..[[Moogle Scripts.lua]],"r")
+							local filesize = 0
+							if file ~= nil then
+								filesize = file:seek("end")
+								file:close()
+							end
 
-						if filesize ~= 0 then
-							webpage = FileLoad(MooglePath..[[Moogle Scripts.lua]])
-							if table.valid(webpage) then 
-								NeedWebContent = false
+							if filesize ~= 0 then
+								webpage = FileLoad(MooglePath..[[Moogle Scripts.lua]])
+								if table.valid(webpage) then 
+									NeedWebContent = false
+								end
 							end
 						end
-					end
-				elseif table.valid(webpage) and table.size(webpage) ~= 0 then
-					local different = false
-					for i,e in pairs(webpage) do
-						if MoogleUpdater.MoogleScripts[i] == nil then
-							-- New Script --
-							MoogleUpdater.NewScripts[i] = true
-						elseif MoogleUpdater.MoogleScripts[i].version ~= e.version then
-							-- New Script --
-							d("MoogleUpdater.MoogleScripts[i].version: "..tostring(MoogleUpdater.MoogleScripts[i].version).." e.version: "..tostring(e.version))
-							MoogleUpdater.UpdatedScripts[i] = true
+					elseif table.valid(webpage) and table.size(webpage) ~= 0 then
+						local different = false
+						for i,e in pairs(webpage) do
+							if MoogleUpdater.MoogleScripts[i] == nil then
+								-- New Script --
+								MoogleUpdater.NewScripts[i] = true
+							elseif MoogleUpdater.MoogleScripts[i].version ~= e.version then
+								-- New Script --
+								d("MoogleUpdater.MoogleScripts[i].version: "..tostring(MoogleUpdater.MoogleScripts[i].version).." e.version: "..tostring(e.version))
+								MoogleUpdater.UpdatedScripts[i] = true
+							end
+
+							if os.difftime(os.time(),e.releasedate) < 604800 then
+								-- New label scripts, released within 1 week --
+								MoogleUpdater.NewLabelScripts[i] = true
+							end
+
+							if os.difftime(os.time(),e.lastupdate) < 604800 then
+								-- New label scripts, released within 1 week --
+								MoogleUpdater.UpdatedLabelScripts[i] = true
+							end				
 						end
 
-						if os.difftime(os.time(),e.releasedate) < 604800 then
-							-- New label scripts, released within 1 week --
-							MoogleUpdater.NewLabelScripts[i] = true
+						if table.deepcompare(MoogleUpdater.MoogleScripts,webpage) == false then
+							MoogleUpdater.MoogleScripts = table.deepcopy(webpage)
 						end
-
-						if os.difftime(os.time(),e.lastupdate) < 604800 then
-							-- New label scripts, released within 1 week --
-							MoogleUpdater.UpdatedLabelScripts[i] = true
-						end				
+						MoogleUpdater.Settings.LastCheck = os.time()
+						table.clear(webpage)
+						NeedWebContent = true
 					end
-
-					if table.deepcompare(MoogleUpdater.MoogleScripts,webpage) == false then
-						MoogleUpdater.MoogleScripts = table.deepcopy(webpage)
-					end
-					MoogleUpdater.Settings.LastCheck = os.time()
-					table.clear(webpage)
-					NeedWebRequest = true
-					NeedWebContent = true
-				end
-			-- End Moogle Scripts Check --
+				-- End Moogle Scripts Check --
+			end
 		end
 	else
 		if FileExists(MooglePath..[[temp.lua]]) then
