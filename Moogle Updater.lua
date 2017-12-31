@@ -318,16 +318,18 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 		if timevalue ~= CheckInterval * 2592000 then timevalue = CheckInterval * 2592000 end
 	end
 
-	if docheck and not FileExists(MooglePath..[[Moogle Scripts.lua]]) or not FileExists(MooglePath..[[Main Window.lua]]) or not FileExists(MooglePath..[[MoogleLib.lua]]) then
-		if not FirstRun then
-			io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Scripts.lua',']]..MooglePath..[[Moogle Scripts.lua')]])
-			io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Main%20Window.lua',']]..MooglePath..[[Main Window.lua')]])
-			io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleLib.lua',']]..MooglePath..[[MoogleLib.lua')]])
-			FirstRun = true
+	if docheck then
+		if not FileExists(MooglePath..[[Moogle Scripts.lua]]) or not FileExists(MooglePath..[[Main Window.lua]]) or not FileExists(MooglePath..[[MoogleLib.lua]]) then
+			if not FirstRun then
+				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Scripts.lua',']]..MooglePath..[[Moogle Scripts.lua')]])
+				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Main%20Window.lua',']]..MooglePath..[[Main Window.lua')]])
+				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleLib.lua',']]..MooglePath..[[MoogleLib.lua')]])
+				FirstRun = true
+			end
+		else
+			docheck = false
 		end
-	else
-		if docheck ~= false then docheck = false end
-		if MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue then
+	elseif MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue then
 			if FirstRun then
 				Reload()
 			else
@@ -383,7 +385,6 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 					end
 				-- End Moogle Scripts Check --
 			end
-		end
 	else
 		if FileExists(MooglePath..[[temp.lua]]) then
 			local TempPath = MooglePath..[[temp.lua]]
