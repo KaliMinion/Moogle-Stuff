@@ -2,6 +2,7 @@ local tbl =
 {
 	[1] = {
 		name = "Moogle Updater",
+		status = "open",
 		filepath = [[Moogle Updater.lua]],
 		table = "return MoogleUpdater",
 		url = "https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Updater.lua",
@@ -13,6 +14,7 @@ local tbl =
 	},
 	[2] = {
 		name = "Main Window",
+		status = "open",
 		filepath = [[Main Window.lua]],
 		table  = "return KaliMainWindow",
 		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/Main%20Window.lua]],
@@ -25,6 +27,7 @@ local tbl =
 	},
 	[3] = {
 		name = "MoogleLib",
+		status = "open",
 		filepath = [[MoogleLib.lua]],
 		table = "return MoogleLib",
 		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleLib.lua]],
@@ -36,6 +39,7 @@ local tbl =
 	},
 	[4] = {
 		name = "Moogle Text to Speech",
+		status = "open",
 		filepath = [[Moogle Scripts\Moogle TTS\Moogle TTS.lua]],
 		table = "return MoogleTTS",
 		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle TTS.lua]],
@@ -53,6 +57,7 @@ enabled=1]],
 	},
 	[5] = {
 		name = "Moogle Hoarder",
+		status = "closed",
 		filepath = [[Moogle Scripts\Moogle Hoarder\Moogle Hoarder.lua]],
 		table = "return MoogleHoarder",
 		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle Hoarder.lua]],
