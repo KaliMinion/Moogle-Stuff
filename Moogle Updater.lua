@@ -57,8 +57,6 @@ function MoogleUpdater.ModuleInit()
 	if FileExists(MooglePath..[[Moogle Scripts.lua]]) then
 		MoogleUpdater.MoogleScripts = FileLoad(MooglePath..[[Moogle Scripts.lua]])
 	end
-	ml_error("test")
-	table.print(MoogleUpdater.MoogleScripts)
 end
 
 MoogleUpdater.TimeUnits = {"Seconds","Minutes","Hours","Days","Weeks","Months"}
@@ -85,15 +83,13 @@ function MoogleUpdater.Draw()
 				}
 				local downloading = false
 				for url,image in pairs(Images) do
-					if FileExists(ImageFolder..image) then
-						-- File Exists --
-					elseif not downloading then
+					if not downloading then
 						-- Need to download --
-						downloading = true
-						Download(url,ImageFolder..image)
+						downloading = Download(url,ImageFolder..image)
 					end
 				end
 				if not downloading then
+					ml_error("test")
 					NeedImages = false
 				end
 			end
