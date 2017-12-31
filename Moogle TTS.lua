@@ -184,6 +184,13 @@ next]])
 end
 
 function MoogleTTS.Draw()
+	local General = MoogleLib.Lua.general
+	local Gui = MoogleLib.Gui
+	local NotNil = General.NotNil
+	local Indent = Gui.Indent
+	local Unindent = Gui.Unindent
+	local Text = Gui.Text
+
 	if NotNil(MoogleTTS) and MoogleTTS.Settings.enable then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
@@ -233,6 +240,9 @@ function MoogleTTS.Draw()
 end
 
 function MoogleTTS.OnUpdate( event, tickcount )
+	local General = MoogleLib.Lua.general
+	local NotNil = General.NotNil
+
 	if NotNil(MoogleTTS) and MoogleTTS.Settings.enable then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
