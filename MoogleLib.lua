@@ -379,10 +379,12 @@ MoogleLib.Settings = {
 		end
 
 		OS.DownloadQueue = {}
+		OS.DownloadQueueBackup = {}
 		OS.DownloadNextAttempt = {}
 		OS.FinishedDownloads = {}
 		function OS.Download(url,path)
 			local DownloadQueue = OS.DownloadQueue
+			local DownloadQueueBackup = OS.DownloadQueueBackup
 			local DownloadNextAttempt = OS.DownloadNextAttempt
 			local FinishedDownloads = OS.FinishedDownloads
 			local NotNil = General.NotNil
@@ -391,7 +393,6 @@ MoogleLib.Settings = {
 			local Size = General.Size
 			local PowerShell = OS.PowerShell
 			local CreateFolder = OS.CreateFolder
-			ml_error("download test")
 
 			if type(url) == "string" then
 				if not FileExists(path) then
@@ -409,6 +410,7 @@ MoogleLib.Settings = {
 								CreateFolder(FolderPath)
 							end
 							DownloadNextAttempt[url] = Now()+100
+							DownloadQueueBackup[url] = path
 						end
 					end
 					return true
@@ -417,6 +419,7 @@ MoogleLib.Settings = {
 					InsertIfNil(FinishedDownloads,url,path)
 					DownloadQueue[url] = nil
 					DownloadNextAttempt[url] = nil
+					DownloadQueueBackup[url] = nil
 					return false
 				end
 			end
@@ -792,12 +795,12 @@ MoogleLib.Settings = {
 					Tooltip(tooltip, 400)
 				end
 				Space()
-				c = GUI:Checkbox("##"..varstring, varname)
+				varname = GUI:Checkbox("##"..varstring, varname)
 				if tooltip ~= nil and GUI:IsItemHovered(c) then
 					Tooltip(tooltip, 400)
 				end
 			else
-				c = GUI:Checkbox("##"..varstring, varname)
+				varname = GUI:Checkbox("##"..varstring, varname)
 				if tooltip ~= nil and GUI:IsItemHovered(c) then
 					Tooltip(tooltip, 400)
 				end
@@ -807,6 +810,7 @@ MoogleLib.Settings = {
 					Tooltip(tooltip, 400)
 				end
 			end
+			return varname
 		end
 
 		-- function Gui.SliderInt(string, varname, varstring, min, max, width, reverse, tooltip)
