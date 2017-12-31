@@ -11,6 +11,24 @@ KaliMainWindow.Info = {
 	}
 }
 
+-- Helper Variables --
+	local MinionPath = MoogleLib.API.MinionPath
+	local LuaPath = MoogleLib.API.LuaPath
+	local MooglePath = MoogleLib.API.MooglePath
+	local ImageFolder = MoogleLib.API.ImageFolder
+	local ScriptsFolder = MoogleLib.API.ScriptsFolder
+	local API = MoogleLib.API
+	local Lua = MoogleLib.Lua
+	local Debug = Lua.debug
+	local General = Lua.general
+	local IO = Lua.io
+	local Math = Lua.math
+	local OS = Lua.os
+	local String = Lua.string
+	local Table = Lua.table
+	local Gui = MoogleLib.Gui
+-- End Helper Variables --
+
 KaliMainWindow.GUI = {
 	WindowName = "KaliMainWindow##KaliMainWindow", -- Window Name, each GUI Window must be unique, in all caps
 	name = "Moogle Stuff Window of Moogles", -- Official Name of your Module
@@ -150,6 +168,10 @@ local count = 0
 -- local TestTable = {}
 
 function KaliMainWindow.Draw()
+	local WindowStyle = Gui.WindowStyle
+	local WindowStyleClose = Gui.WindowStyleClose
+	local Type = General.Type
+
 	local gamestate = GetGameState()
 	if (gamestate == FFXIV.GAMESTATE.INGAME) then
 
@@ -344,7 +366,7 @@ function KaliMainWindow.Draw()
 							GUI:PushStyleColor(GUI.Col_FrameBg, 0,0,0,0)
 							GUI:ListBoxHeader("##NavigationList", table.size(KaliMainWindow.GUI.NavigationMenu.Menu), math.floor((MainH - 70)/18))
 								local function IsSelected(str)
-									if type(str) == "string" then
+									if Type(str,"string") then
 										-- d("str: "..str.." NavMenu.selected: "..KaliMainWindow.GUI.NavigationMenu.selected.." IsTheSame: "..tostring(KaliMainWindow.GUI.NavigationMenu.selected == str))
 										if KaliMainWindow.GUI.NavigationMenu.selected == str then
 											return true
