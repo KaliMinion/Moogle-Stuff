@@ -13,7 +13,9 @@ MoogleLib = {
 }
 
 MoogleLib.Settings = {
-	enable = true
+	enable = true,
+	MainMenuType = 2,
+	MainMenuEntryCreated = false
 }
 
 -- Helper Variables --
@@ -47,6 +49,59 @@ MoogleLib.Settings = {
 
 -- Core Functions & Helper Functions --
 	-- API Functions --
+		function API.Initialize(ModuleTable)
+			local MenuType = MoogleLib.Settings.MainMenuType
+			local MainIcon = ImageFolder..[[MoogleStuff.png]]
+			local ModuleIcon = ImageFolder..ModuleTable.name..[[.png]]
+			local created = MoogleLib.Settings.MainMenuEntryCreated
+
+			-- Create the Main Menu entry if it hasn't been created yet --
+				if not created then
+					local ImGuiIcon = GetStartupPath().."\\GUI\\UI_Textures\\ImGUI.png"
+					local MetricsIcon = GetStartupPath().."\\GUI\\UI_Textures\\Metrics.png"
+					local ImGuiToolTip = "ImGui Demo is an overview of what's possible with the UI."
+					local MetricsToolTip = "ImGui Metrics shows every window's rendering information, visible or hidden."
+
+					if MenuType == 1 then
+						-- No Main Menu Entry --
+						-- Adding the ImGUI Test Window as a Minion Menu entry
+							ml_gui.ui_mgr:AddMember({ id = "ImGuiDemo", name = "ImGui Demo", onClick = function () ml_gui.showtestwindow = true end, tooltip = ImGuiToolTip, texture = ImGuiIcon}, "FFXIVMINION##MENU_HEADER")
+						-- Adding the ImGUI Test Window as a Minion Menu entry
+							ml_gui.ui_mgr:AddMember({ id = "ImGuiMetrics", name = "ImGuiMetrics", onClick = function () ml_gui.showmetricswindow = true end, tooltip = MetricsToolTip, texture = MetricsIcon}, "FFXIVMINION##MENU_HEADER")
+					elseif MenuType == 2 then
+						-- Expansion Submenu inside of Main Menu --
+							ml_gui.ui_mgr:AddMember({ id = [[MOOGLESTUFF##MENU_HEADER]], name = "MoogleStuff", texture = MainIcon}, "FFXIVMINION##MENU_HEADER")
+						-- Adding the ImGUI Test Window as a Minion Menu entry
+							ml_gui.ui_mgr:AddSubMember({ id = "ImGuiDemo", name = "ImGui Demo", onClick = function () ml_gui.showtestwindow = not ml_gui.showtestwindow end, tooltip = ImGuiToolTip, texture = ImGuiIcon}, "FFXIVMINION##MENU_HEADER", "MOOGLESTUFF##MENU_HEADER")
+						-- Adding the ImGUI Test Window as a Minion Menu entry
+							ml_gui.ui_mgr:AddSubMember({ id = "ImGuiMetrics", name = "ImGuiMetrics", onClick = function () ml_gui.showmetricswindow = not ml_gui.showmetricswindow end, tooltip = MetricsToolTip, texture = MetricsIcon}, "FFXIVMINION##MENU_HEADER", "MOOGLESTUFF##MENU_HEADER")
+					elseif MenuType == 3 then
+						-- New Component Header that branches off to the right --
+							ml_gui.ui_mgr:AddComponent({header = { id = [[MOOGLESTUFF##MENU_HEADER]], expanded = false, name = "MoogleStuff", texture = MainIcon}, members = {}})
+						-- Adding the ImGUI Test Window as a Minion Menu entry
+							ml_gui.ui_mgr:AddMember({ id = "ImGuiDemo", name = "ImGui Demo", onClick = function () ml_gui.showtestwindow = true end, tooltip = ImGuiToolTip, texture = ImGuiIcon}, "MOOGLESTUFF##MENU_HEADER")
+						-- Adding the ImGUI Test Window as a Minion Menu entry
+							ml_gui.ui_mgr:AddMember({ id = "ImGuiMetrics", name = "ImGuiMetrics", onClick = function () ml_gui.showmetricswindow = true end, tooltip = MetricsToolTip, texture = MetricsIcon}, "MOOGLESTUFF##MENU_HEADER")
+					end
+
+					MoogleLib.Settings.MainMenuEntryCreated = true
+				end
+
+			-- Creating Module Entry --
+				if MenuType == 1 then
+					ml_gui.ui_mgr:AddMember({ id = ModuleTable.WindowName, name = ModuleTable.name, onClick = function () ModuleTable.OnClick() end, tooltip = ModuleTable.ToolTip, texture = ModuleIcon}, "FFXIVMINION##MENU_HEADER")
+				elseif MenuType == 2 then
+					ml_gui.ui_mgr:AddSubMember({ id = ModuleTable.WindowName, name = ModuleTable.name, onClick = function () ModuleTable.OnClick() end, tooltip = ModuleTable.ToolTip, texture = ModuleIcon}, "FFXIVMINION##MENU_HEADER", "MOOGLESTUFF##MENU_HEADER")
+				elseif MenuType == 3 then
+					ml_gui.ui_mgr:AddMember({ id = ModuleTable.WindowName, name = ModuleTable.name, onClick = function () ModuleTable.OnClick() end, tooltip = ModuleTable.ToolTip, texture = ModuleIcon}, "MOOGLESTUFF##MENU_HEADER")
+				end
+
+			-- Mini Button --
+				if ModuleTable.MiniButton then
+					table.insert(ml_global_information.menu.windows, {name = ModuleTable.name, openWindow = function() ModuleTable.OnClick() end, isOpen = function() return ModuleTable.IsOpen() end})
+				end
+		end
+
 		function API.SaveVar(varstr,var)
 			if In(varstr,"help","Help","?") then
 				d([[SaveVar Function Example: MoogleLib.API.SaveVar("a.b.c[d][test]",tbl)]])
@@ -367,6 +422,16 @@ MoogleLib.Settings = {
 	-- End Input and Output (IO) Functions --
 
 	-- Math Functions --
+	function Math.Sign(value)
+		return (value >= 0 and 1) or - 1
+	end
+
+	function Math.Round(value, bracket)
+		bracket = bracket or 1
+		local floor = math.floor
+		local sign = Math.Sign
+		return floor(value / bracket + sign(value) * 0.5) * bracket
+	end
 	-- End Math Functions --
 
 	-- Operating System (OS) Functions --
