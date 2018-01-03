@@ -66,7 +66,7 @@ enabled=1]],
 		stability = "Working",
 		releasedate = os.time { year = 2017, month = 05, day = 29, hour = 00, min = 00 },
 		lastupdate = os.time { year = 2018, month = 01, day = 03, hour = 05, min = 20 },
-		module = [[Module]
+		module = [[[Module]
 Name=Moogle FPS
 Dependencies=minionlib
 Version=1
