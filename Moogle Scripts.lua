@@ -56,21 +56,21 @@ Files=Moogle TTS.lua
 enabled=1]],
 	},
 	[5] = {
-		name = "Moogle Hoarder",
-		status = "closed",
-		filepath = [[Moogle Scripts\Moogle Hoarder\Moogle Hoarder.lua]],
-		table = "return MoogleHoarder",
-		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle Hoarder.lua]],
-		version = "0.0.0",
+		name = "Moogle FPS",
+		status = "open",
+		filepath = [[Moogle Scripts\Moogle FPS\Moogle FPS.lua]],
+		table = "return MoogleFPS",
+		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20FPS.lua]],
+		version = "1.2.0",
 		category = "Utility",
-		stability = "Not Converted",
-		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
-		lastupdate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
-		module = [[[Module]
-Name=Moogle Hoarder
+		stability = "Working",
+		releasedate = os.time { year = 2017, month = 05, day = 29, hour = 00, min = 00 },
+		lastupdate = os.time { year = 2018, month = 01, day = 03, hour = 05, min = 20 },
+		module = [[Module]
+Name=Moogle FPS
 Dependencies=minionlib
 Version=1
-Files=Moogle Hoarder.lua
+Files=Moogle FPS.lua
 enabled=1]]
 	},
 }
