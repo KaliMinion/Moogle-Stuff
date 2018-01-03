@@ -315,7 +315,6 @@ function MoogleTTS.OnUpdate( event, tickcount )
 							text = string.gsub( text, "%\r", " ")
 							text = string.gsub( text, "%<", " - ")
 							text = string.gsub( text, "%>", " - ")
-							text = string.gsub( text, "Kalila", "kahleela")
 							-- text = string.gsub( text, "%c", "")
 
 							if speaker ~= "" then
