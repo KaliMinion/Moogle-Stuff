@@ -4,9 +4,9 @@ If(!(test-path $MoogleStuff))
 {
 md -Force $MoogleStuff
 }
-If(!(test-path $MoogleStuff'\MoogleUpdater.lua'))
+If(!(test-path $MoogleStuff'\Moogle Updater.lua'))
 {
-(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleUpdater.lua',$MoogleStuff+'\MoogleUpdater.lua')
+(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Updater.lua',$MoogleStuff+'\Moogle Updater.lua')
 }
 If(!(test-path $MoogleStuff'\module.def'))
 {
