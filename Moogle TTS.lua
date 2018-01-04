@@ -2,12 +2,14 @@ MoogleTTS = {}
 
 MoogleTTS.Info = {
 	Creator = "Kali",
-	Version = "1.0.0",
+	Version = "1.1.1",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
 	ChangeLog = {
-		["1.0.0"] = "Initial release"
+		["1.0.0"] = "Initial release",
+		["1.1.0"] = "Updated for MoogleLib",
+		["1.1.1"] = "Updated Initialize Function"
 	}
 }
 
