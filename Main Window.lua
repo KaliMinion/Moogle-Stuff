@@ -2,12 +2,14 @@ KaliMainWindow = {}
 
 KaliMainWindow.Info = {
 	Creator = "Kali",
-	Version = "1.0.0",
+	Version = "1.2.0",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
 	ChangeLog = {
-		["1.0.0"] = "Initial release"
+		["1.0.0"] = "Initial release",
+		["1.1.0"] = "Rework for MoogleLib",
+		["1.2.0"] = "Updated to match current Initialize standard."
 	}
 }
 
@@ -30,19 +32,15 @@ KaliMainWindow.Info = {
 -- End Helper Variables --
 
 KaliMainWindow.GUI = {
-	WindowName = "KaliMainWindow##KaliMainWindow", -- Window Name, each GUI Window must be unique, in all caps
-	name = "Moogle Stuff Window of Moogles", -- Official Name of your Module
-	open = true, -- if your window is open when the bot starts
-	visible = true, -- if it is visible when opened.
-	MiniButton = false, -- The blue mini buttons at the bottom of the screen
-	MainMenuType = 2, -- 0 = No Main Menu Entry, 1 = Normal Main Menu Entry, 2 = Expansion Menu inside Main Menu 3 = FFXIV ADDON Menu
-	AddonMenuName = "MoogleStuff", -- The text you'll see in your personal submenu header
-	Available = true,
-	AddonMenuId = "MOOGLESTUFF##MENU_HEADER", -- Unique MenuID for your personal menu header
-	AddonMenuRefName = "ffxiv_MoogleStuff", -- lowercase, no space, coding purposes only but unique to you
-	ToolTip = "A simple yet powerful companion to extend the usefulness of Sense.", -- The tooltip you see when your hover over the Minion Menu entry
-	-- To have icons with your module and/or add-on menu, name the .png files the same as "name" and/or AddonMenuName
-	-- Limit MainMenuType3 to personal use only
+	WindowName = "KaliMainWindow##KaliMainWindow",
+	name = "Moogle Script Management",
+	NavName = "Moogle Script Management",
+	open = false,
+	visible = true,
+	MiniButton = false,
+	OnClick = loadstring("KaliMainWindow.GUI.open = not KaliMainWindow.GUI.open"),
+	IsOpen = loadstring("return KaliMainWindow.GUI.open"),
+	ToolTip = "Module HUB for updating and downloading Moogle Scripts.",
 	WindowStyle = {
 		["Text"] = { [1] = 0, [2] = 0, [3] = 0, [4] = 0 },
 		["TextDisabled"] = { [1] = 0, [2] = 0, [3] = 0, [4] = 0 },
@@ -151,6 +149,10 @@ KaliMainWindow.Settings = {
 	enable = true
 }
 
+function KaliMainWindow.ModuleInit()
+	MoogleLib.API.Initialize(KaliMainWindow.GUI)
+end
+
 local AnimatedLastHover = 0
 local AnimatedLastNotHover = 0
 local AnimatedHovering = false
@@ -174,43 +176,6 @@ function KaliMainWindow.Draw()
 
 	local gamestate = GetGameState()
 	if (gamestate == FFXIV.GAMESTATE.INGAME) then
-
-		-- TestTable = FileLoad(GetLuaModsPath()..[[\MoogleStuff Files\ScriptList.lua]])
-
-		-- if table.valid(TestTable) then table.print(TestTable) end
-
-		-- local ControlWindow = "ItemSearch"
-		-- if IsControlOpen(ControlWindow) and TimeSince(time) > 250 then
-		-- 	time = Now()
-		-- 	ml_gui.showconsole = true
-		-- 	if step == 1 then
-		-- 		x = max
-		-- 		if x == max and y == max then
-		-- 			GetControl(ControlWindow):PushButton(x,y)
-		-- 			step = 2
-		-- 			x = 0
-		-- 		else
-		-- 			GetControl(ControlWindow):PushButton(x,y)
-		-- 			if y < max then
-		-- 				y = y + 1
-		-- 			end
-		-- 		end
-		-- 	elseif step == 2 then
-		-- 		y = max
-		-- 		if x == max and y == max then
-		-- 			step = 1
-		-- 			y = 0
-		-- 			max = max + 1
-		-- 		else
-		-- 			GetControl(ControlWindow):PushButton(i,1)
-		-- 			if x < max then
-		-- 				x = x + 1
-		-- 			end
-		-- 		end
-		-- 	end
-		-- 	count = count + 1
-		-- 	d("["..count.."] x: "..x.." y: "..y)
-		-- end
 
 		-- START MAIN WINDOW --
 			local MainX = 0
@@ -308,17 +273,6 @@ function KaliMainWindow.Draw()
 							else
 								KaliMainWindow.GUI.NavigationMenu.x = MinDistance
 							end
-
-
-
-
-
-
-
-
-
-
-
 
 							if GUI:GetWindowWidth() < 10 then
 								KaliMainWindow.GUI.NavigationMenu.x = 8
