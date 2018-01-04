@@ -2,12 +2,14 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.0.0",
+	Version = "1.2.0",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
 	ChangeLog = {
-		["1.0.0"] = "Initial release"
+		["1.0.0"] = "Initial release",
+		["1.1.0"] = "Updated for MoogleLib",
+		["1.2.0"] = "Tweaks"
 	}
 }
 
@@ -37,8 +39,8 @@ local NeedWebRequest = true
 local NeedWebContent = true
 
 function MoogleUpdater.ModuleInit()
-	if FileExists(MooglePath..[[Moogle Scripts.lua]]) then
-		MoogleUpdater.MoogleScripts = FileLoad(MooglePath..[[Moogle Scripts.lua]])
+	if FileExists(MoogleLib.API.MooglePath..[[Moogle Scripts.lua]]) then
+		MoogleUpdater.MoogleScripts = FileLoad(MoogleLib.API.MooglePath..[[Moogle Scripts.lua]])
 	end
 end
 
@@ -94,6 +96,8 @@ function MoogleUpdater.Draw()
 					["https://i.imgur.com/YCrtrUW.png"] = "MoogleStuff2.png",
 					["https://i.imgur.com/f94SN16.png"] = "CoreModule.png",
 					["https://i.imgur.com/ySDKO55.png"] = "DeleteModule.png",
+					["https://i.imgur.com/p0r73pU.png"] = "ImGUI.png",
+					["https://i.imgur.com/ZNizSZM.png"] = "Metrics.png"
 				}
 				local downloading = false
 				for url,image in pairs(Images) do
