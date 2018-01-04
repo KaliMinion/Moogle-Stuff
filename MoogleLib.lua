@@ -12,6 +12,18 @@ MoogleLib = {
 	Gui = {}, 
 }
 
+MoogleLib.Info = {
+	Creator = "Kali",
+	Version = "1.1.0",
+	StartDate = "12/28/17",
+	ReleaseDate = "12/30/17",
+	LastUpdate = "01/04/18",
+	ChangeLog = {
+		["1.0.0"] = "Initial release",
+		["1.1.0"] = "Rework for MoogleLib",
+	}
+}
+
 MoogleLib.Settings = {
 	enable = true,
 	MainMenuType = 2,
@@ -447,7 +459,7 @@ MoogleLib.Settings = {
 		OS.DownloadQueueBackup = {}
 		OS.DownloadNextAttempt = {}
 		OS.FinishedDownloads = {}
-		function OS.Download(url,path)
+		function OS.Download(url,path,overwrite)
 			local DownloadQueue = OS.DownloadQueue
 			local DownloadQueueBackup = OS.DownloadQueueBackup
 			local DownloadNextAttempt = OS.DownloadNextAttempt
@@ -460,13 +472,15 @@ MoogleLib.Settings = {
 			local CreateFolder = OS.CreateFolder
 
 			if type(url) == "string" then
-				if not FileExists(path) then
+				if not FileExists(path) or overwrite then
 					if IsNil(DownloadNextAttempt[url]) or Now() > DownloadNextAttempt[url] then
 						-- File does not exist, check to make sure the parent folder exists --
 						local FolderPath = path:match("(.*"..[[\]]..")")
 						if FolderExists(FolderPath) and Size(DownloadQueue,"=",0) then
 							-- Folder exists, just need to start the download --
-							PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+							local ModifiedURL = url.."?t="..tostring(os.time())
+
+							PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..ModifiedURL..[[',']]..path..[[')]])
 							InsertIfNil(DownloadQueue,url,true)
 							DownloadNextAttempt[url] = nil
 						else
