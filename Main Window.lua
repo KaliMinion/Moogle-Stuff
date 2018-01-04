@@ -35,7 +35,7 @@ KaliMainWindow.GUI = {
 	WindowName = "KaliMainWindow##KaliMainWindow",
 	name = "Moogle Script Management",
 	NavName = "Moogle Script Management",
-	open = false,
+	open = true,
 	visible = true,
 	MiniButton = false,
 	OnClick = loadstring("KaliMainWindow.GUI.open = not KaliMainWindow.GUI.open"),
