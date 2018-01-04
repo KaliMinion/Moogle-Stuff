@@ -2,14 +2,14 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.0",
+	Version = "1.1.1",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
 	ChangeLog = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Updated for MoogleLib",
-		["1.2.0"] = "Tweaks"
+		["1.1.1"] = "Tweaks"
 	}
 }
 
@@ -355,11 +355,13 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 				local String = Lua.string
 				local Table = Lua.table
 				local Gui = MoogleLib.Gui
+				local Download = OS.Download
 			-- End Helper Variables --
 				-- Check to see if Moogle Scripts has been updated --
 					if table.size(webpage) == 0 then
+
 						if NeedWebRequest == true and NeedWebContent == true then
-							io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Scripts.lua',']]..MooglePath..[[Moogle Scripts.lua')]])
+							Download([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Scripts.lua]],MooglePath..[[Moogle Scripts.lua]],true)
 							NeedWebRequest = false
 						elseif NeedWebRequest == false and NeedWebContent == true then
 							local file = io.open(MooglePath..[[Moogle Scripts.lua]],"r")
@@ -381,21 +383,27 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 						for i,e in pairs(webpage) do
 							if MoogleUpdater.MoogleScripts[i] == nil then
 								-- New Script --
-								MoogleUpdater.NewScripts[i] = true
+								MoogleUpdater.NewScripts[i] = e.name
 							elseif MoogleUpdater.MoogleScripts[i].version ~= e.version then
 								-- New Script --
-								d("MoogleUpdater.MoogleScripts[i].version: "..tostring(MoogleUpdater.MoogleScripts[i].version).." e.version: "..tostring(e.version))
-								MoogleUpdater.UpdatedScripts[i] = true
+								MoogleUpdater.UpdatedScripts[i] = e.name
+							else
+								local InstalledScriptVersion = (loadstring(e.table..[[.Info.Version]])())
+								if MoogleUpdater.MoogleScripts[i].version ~= InstalledScriptVersion then
+									-- New Script --
+									MoogleUpdater.UpdatedScripts[i] = e.name
+									ml_error(e.name.." - MoogleUpdater.MoogleScripts[i].version: "..tostring(MoogleUpdater.MoogleScripts[i].version).." - InstalledScriptVersion: "..tostring(InstalledScriptVersion))
+								end
 							end
 
 							if os.difftime(os.time(),e.releasedate) < 604800 then
 								-- New label scripts, released within 1 week --
-								MoogleUpdater.NewLabelScripts[i] = true
+								MoogleUpdater.NewLabelScripts[i] = e.name
 							end
 
 							if os.difftime(os.time(),e.lastupdate) < 604800 then
 								-- New label scripts, released within 1 week --
-								MoogleUpdater.UpdatedLabelScripts[i] = true
+								MoogleUpdater.UpdatedLabelScripts[i] = e.name
 							end				
 						end
 
@@ -404,6 +412,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 						end
 						MoogleUpdater.Settings.LastCheck = os.time()
 						table.clear(webpage)
+						NeedWebRequest = true
 						NeedWebContent = true
 					end
 				-- End Moogle Scripts Check --
@@ -423,6 +432,27 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			end
 		end
 	end
+	-- if table.valid(MoogleUpdater.NewScripts) or table.valid(MoogleUpdater.UpdatedScripts) then
+	-- 	ml_error("==============================================")
+	-- 	ml_error("==============================================")
+	-- 	ml_error("==============================================")
+	-- end
+	-- if table.valid(MoogleUpdater.NewScripts) then
+	-- 	ml_error("MoogleUpdater.NewScripts:")
+	-- 	table.print(MoogleUpdater.NewScripts)
+	-- end
+	-- if table.valid(MoogleUpdater.UpdatedScripts) then
+	-- 	ml_error("MoogleUpdater.UpdatedScripts:")
+	-- 	table.print(MoogleUpdater.UpdatedScripts)
+	-- end
+		-- if table.valid(MoogleUpdater.NewLabelScripts) then
+		-- 	ml_error("MoogleUpdater.NewLabelScripts:")
+		-- 	table.print(MoogleUpdater.NewLabelScripts)
+		-- end
+		-- if table.valid(MoogleUpdater.UpdatedLabelScripts) then
+		-- 	ml_error("MoogleUpdater.UpdatedLabelScripts:")
+		-- 	table.print(MoogleUpdater.UpdatedLabelScripts)
+		-- end
 end
 
 RegisterEventHandler("Module.Initalize", MoogleUpdater.ModuleInit)
