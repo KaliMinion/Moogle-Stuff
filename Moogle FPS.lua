@@ -2,7 +2,7 @@ MoogleFPS = {}
 
 MoogleFPS.Info = {
 	Creator = "Kali",
-	Version = "1.2.0",
+	Version = "1.2.1",
 	StartDate = "05/26/17",
 	ReleaseDate = "05/29/17",
 	LastUpdate = "01/03/18",
@@ -74,7 +74,8 @@ MoogleFPS.Data = {
 }
 
 function MoogleFPS.ModuleInit()
-	if MoogleLib ~= nil then MoogleLib.API.Initialize(MoogleFPS.GUI) end
+	MoogleLib.API.Initialize(MoogleFPS.GUI)
+	MoogleLib.Lua.os.Download([[https://i.imgur.com/cdbXSLt.png]],MoogleLib.API.ImageFolder..MoogleFPS.GUI.name..".png")
 end
 
 function MoogleFPS.Draw()
