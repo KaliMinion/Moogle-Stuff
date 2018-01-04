@@ -12,20 +12,15 @@ MoogleTTS.Info = {
 }
 
 MoogleTTS.GUI = {
-	WindowName = "MoogleTTS##MoogleTTS", -- Window Name, each GUI Window must be unique, in all caps
-	name = "MoogleTTS", -- Official Name of your Module
+	WindowName = "MoogleTTS##MoogleTTS",
+	name = "MoogleTTS",
 	NavName = "NPC Dialog TTS",
-	open = false, -- if your window is open when the bot starts
-	visible = true, -- if it is visible when opened.
-	MiniButton = false, -- The blue mini buttons at the bottom of the screen
-	MainMenuType = 2, -- 0 = No Main Menu Entry, 1 = Normal Main Menu Entry, 2 = Expansion Menu inside Main Menu 3 = FFXIV ADDON Menu
-	AddonMenuName = "MoogleStuff", -- The text you'll see in your personal submenu header
-	Available = true,
-	AddonMenuId = "MOOGLESTUFF##MENU_HEADER", -- Unique MenuID for your personal menu header
-	AddonMenuRefName = "ffxiv_MoogleStuff", -- lowercase, no space, coding purposes only but unique to you
-	ToolTip = "A simple yet powerful MoogleTTS to extend the usefulness of Sense.", -- The tooltip you see when your hover over the Minion Menu entry
-	-- To have icons with your module and/or add-on menu, name the .png files the same as "name" and/or AddonMenuName
-	-- Limit MainMenuType3 to personal use only
+	open = false,
+	visible = true,
+	MiniButton = false,
+	OnClick = loadstring("MoogleTTS.GUI.open = not MoogleTTS.GUI.open"),
+	IsOpen = loadstring("return MoogleTTS.GUI.open"),
+	ToolTip = "A Text-to-Speech module for narrating NPC dialog."
 }
 
 MoogleTTS.Settings = {
@@ -50,98 +45,7 @@ MoogleTTS.Settings = {
 	NPCWideText = true
 }
 
-function MoogleTTS.ModuleInit()
-	local MainIcon = 0
-	local ModuleIcon = 0
-	local MainMenuTypeName = 0
-	local check = true
-	local function NameCheck(t)
-		for k, v in pairs(t) do
-			if k == "name" and v == MoogleTTS.GUI.AddonMenuName then
-				MoogleTTS.GUI.Available = false
-				if PreveiousK == "header" then
-					MoogleTTS.GUI.MainMenuType = 3
-					check = false
-				elseif type(PreveiousK) == "number" then
-					MoogleTTS.GUI.MainMenuType = 2
-					check = false
-				end
-			elseif type(v) == "table" then
-				PreveiousK = k
-				NameCheck(v)
-			end
-		end
-		if check then
-			for k, v in pairs(t) do
-				if k == "name" and v == "ImGUI Demo" then
-					MoogleTTS.GUI.Available = false
-					MoogleTTS.GUI.MainMenuType = 1
-				elseif type(v) == "table" then
-					NameCheck(v)
-				end
-			end
-		end
-	end
-	NameCheck(ml_gui.ui_mgr.menu.components)
-	-- Checking for icon locations for your Main Menu and Module
-	if FileExists(GetStartupPath().."\\GUI\\UI_Textures\\"..tostring(MoogleTTS.GUI.AddonMenuName)..".png") then
-		MainIcon = GetStartupPath().."\\GUI\\UI_Textures\\"..tostring(MoogleTTS.GUI.AddonMenuName)..".png"
-	elseif FileExists(GetStartupPath().."\\LuaMods\\"..MoogleTTS.GUI.AddonMenuName.."\\"..tostring(MoogleTTS.GUI.AddonMenuName)..".png") then
-		MainIcon = GetStartupPath().."\\LuaMods\\"..MoogleTTS.GUI.AddonMenuName.."\\"..tostring(MoogleTTS.GUI.AddonMenuName)..".png"
-	end
-	if FileExists(GetStartupPath().."\\GUI\\UI_Textures\\"..tostring(MoogleTTS.GUI.name)..".png") then
-		ModuleIcon = GetStartupPath().."\\GUI\\UI_Textures\\"..tostring(MoogleTTS.GUI.name)..".png"
-	elseif FileExists(GetStartupPath().."\\LuaMods\\"..MoogleTTS.GUI.name.."\\"..tostring(MoogleTTS.GUI.name)..".png") then
-		ModuleIcon = GetStartupPath().."\\LuaMods\\"..MoogleTTS.GUI.name.."\\"..tostring(MoogleTTS.GUI.name)..".png"
-	end
-	if MoogleTTS.GUI.MainMenuType == 0 then -- Determining Menu Type chosen by user
-		MainMenuTypeName = nil
-	elseif MoogleTTS.GUI.MainMenuType == 1 or MoogleTTS.GUI.MainMenuType == 2 then
-		MainMenuTypeName = "FFXIVMINION##MENU_HEADER"
-	elseif MoogleTTS.GUI.MainMenuType == 3 then
-		MainMenuTypeName = MoogleTTS.GUI.AddonMenuId
-	end
-	if MoogleTTS.GUI.Available then -- create your menu headers
-		if MoogleTTS.GUI.MainMenuType == 2 then
-			ml_gui.ui_mgr:AddMember({ id = MoogleTTS.GUI.AddonMenuId, name = MoogleTTS.GUI.AddonMenuName, texture = MainIcon}, MainMenuTypeName)
-		elseif MoogleTTS.GUI.MainMenuType == 3 then
-			ml_gui.ui_mgr:AddComponent({header = { id = MainMenuTypeName, expanded = false, name = MoogleTTS.GUI.AddonMenuName, texture = MainIcon}, members = {}})
-		end
-	end
-	if MoogleTTS.GUI.MainMenuType == 2 then
-		ml_gui.ui_mgr:AddSubMember({ id = MoogleTTS.GUI.WindowName, name = MoogleTTS.GUI.name, onClick = function () MoogleTTS.GUI.open = not MoogleTTS.GUI.open end, tooltip = MoogleTTS.GUI.ToolTip, texture = ModuleIcon}, MainMenuTypeName, MoogleTTS.GUI.AddonMenuId)
-	else
-		if FileExists(ModuleIcon) then -- Creating Minion Menu entry with icon
-			ml_gui.ui_mgr:AddMember({ id = MoogleTTS.GUI.WindowName, name = MoogleTTS.GUI.name, onClick = function () if (not MoogleTTS.GUI.open) then MoogleTTS.GUI.open = true else MoogleTTS.GUI.open = false end end, tooltip = MoogleTTS.GUI.ToolTip, texture = ModuleIcon}, MainMenuTypeName)
-		else -- Creating Minion Menu entry without icon
-			ml_gui.ui_mgr:AddMember({ id = MoogleTTS.GUI.WindowName, name = MoogleTTS.GUI.name, onClick = function () if (not MoogleTTS.GUI.open) then MoogleTTS.GUI.open = true else MoogleTTS.GUI.open = false end end, tooltip = MoogleTTS.GUI.ToolTip}, MainMenuTypeName)
-		end
-	end
-
-	if (MoogleTTS.GUI.MiniButton) then -- Mini Button
-		table.insert(ml_global_information.menu.windows, {name = MoogleTTS.GUI.name, openWindow = function() MoogleTTS.GUI.open = true end, isOpen = function() return MoogleTTS.GUI.open end})
-	end
-	if (MoogleTTS.GUI.MiniButton) then
-		table.insert(ml_global_information.menu.windows, menuTab) -- Mini Button
-	end
-	if MoogleTTS.GUI.Available then
-		if MoogleTTS.GUI.MainMenuType == 2 then
-			-- Adding the ImGUI Test Window as a Minion Menu entry
-			ml_gui.ui_mgr:AddSubMember({ id = "ImGui Demo", name = "ImGUI Demo", onClick = function () ml_gui.showtestwindow = not ml_gui.showtestwindow end, tooltip = "ImGui Demo is an overview of what's possible with the UI.", texture = GetStartupPath().."\\GUI\\UI_Textures\\ImGUI.png"}, MainMenuTypeName, MoogleTTS.GUI.AddonMenuId)
-			-- Adding the ImGUI Test Window as a Minion Menu entry
-			ml_gui.ui_mgr:AddSubMember({ id = "ImGui Metrics", name = "ImGUIMetrics", onClick = function () ml_gui.showmetricswindow = not ml_gui.showmetricswindow end, tooltip = "ImGui Metrics shows every window's rendering information, visible or hidden.", texture = GetStartupPath().."\\GUI\\UI_Textures\\Metrics.png"}, MainMenuTypeName, MoogleTTS.GUI.AddonMenuId)
-		else
-			-- Adding the ImGUI Test Window as a Minion Menu entry
-			ml_gui.ui_mgr:AddMember({ id = "ImGui Demo", name = "ImGUI Demo", onClick = function () ml_gui.showtestwindow = true end, tooltip = "ImGui Demo is an overview of what's possible with the UI.", texture = GetStartupPath().."\\GUI\\UI_Textures\\ImGUI.png"}, MainMenuTypeName)
-			-- Adding the ImGUI Test Window as a Minion Menu entry
-			ml_gui.ui_mgr:AddMember({ id = "ImGui Metrics", name = "ImGUIMetrics", onClick = function () ml_gui.showmetricswindow = true end, tooltip = "ImGui Metrics shows every window's rendering information, visible or hidden.", texture = GetStartupPath().."\\GUI\\UI_Textures\\Metrics.png"}, MainMenuTypeName)
-		end
-	end
-	--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
-	--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
-	--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==--==
-	if not FileExists(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]]) then
-		FileWrite(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]],[[Dim objVoice : Set objVoice = CreateObject("SAPI.SpVoice")
+MoogleTTS.VBS = [[Dim objVoice : Set objVoice = CreateObject("SAPI.SpVoice")
 Dim args, arg : Set args = WScript.Arguments
 
 Dim setrate : setrate = false
@@ -176,7 +80,12 @@ for each arg in args
 	objFile.Write timestamp & vbCrLf
 	objFile.Close
 	end if
-next]])
+next]]
+
+function MoogleTTS.ModuleInit()
+	MoogleLib.API.Initialize(MoogleTTS.GUI)
+	if not FileExists(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]]) then
+		FileWrite(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]],MoogleTTS.VBS)
 	end
 	if not FileExists(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) then
 		FileWrite(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]],"")
@@ -315,6 +224,7 @@ function MoogleTTS.OnUpdate( event, tickcount )
 							text = string.gsub( text, "%\r", " ")
 							text = string.gsub( text, "%<", " - ")
 							text = string.gsub( text, "%>", " - ")
+							text = string.gsub( text, "Kalila", "kahleela")
 							-- text = string.gsub( text, "%c", "")
 
 							if speaker ~= "" then
