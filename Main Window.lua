@@ -2,14 +2,14 @@ KaliMainWindow = {}
 
 KaliMainWindow.Info = {
 	Creator = "Kali",
-	Version = "1.2.0",
+	Version = "1.2.1",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
 	ChangeLog = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Rework for MoogleLib",
-		["1.2.0"] = "Updated to match current Initialize standard."
+		["1.2.1"] = "Updated to match current Initialize standard."
 	}
 }
 
