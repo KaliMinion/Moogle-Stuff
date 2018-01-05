@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.1.2",
+	Version = "1.1.3",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -23,6 +23,7 @@ MoogleLib.Info = {
 		["1.1.0"] = "Rework for MoogleLib",
 		["1.1.1"] = "Teaks",
 		["1.1.2"] = "Download Overwrite Fix",
+		["1.1.3"] = "Download Overwrite Fix 2",
 	}
 }
 
@@ -475,25 +476,23 @@ MoogleLib.Settings = {
 			local CreateFolder = OS.CreateFolder
 
 			if type(url) == "string" then
-				if not FileExists(path) or overwrite then
-					if IsNil(DownloadNextAttempt[url]) or Now() > DownloadNextAttempt[url] then
-						-- File does not exist, check to make sure the parent folder exists --
-						local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
-						if FolderExists(FolderPath) then
-							d(url.." - "..path)
-							-- Folder exists, just need to start the download --
-							PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
-							-- InsertIfNil(DownloadQueue,url,path)
-							DownloadQueue[url] = path
-							DownloadNextAttempt[url] = nil
-						else
-							-- Folder does not exist, to prevent conflict, create parent folder first before downloading --
-							if IsNil(DownloadNextAttempt[url]) then
-								CreateFolder(FolderPath)
-							end
-							DownloadNextAttempt[url] = Now()+100
-							DownloadQueueBackup[url] = path
+				if (not FileExists(path) or overwrite) and IsNil(DownloadQueue[url]) and (IsNil(DownloadNextAttempt[url]) or Now() > DownloadNextAttempt[url]) then
+					-- File does not exist, check to make sure the parent folder exists --
+					local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
+					if FolderExists(FolderPath) then
+						d(url.." - "..path)
+						-- Folder exists, just need to start the download --
+						PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+						-- InsertIfNil(DownloadQueue,url,path)
+						DownloadQueue[url] = path
+						DownloadNextAttempt[url] = nil
+					else
+						-- Folder does not exist, to prevent conflict, create parent folder first before downloading --
+						if IsNil(DownloadNextAttempt[url]) then
+							CreateFolder(FolderPath)
 						end
+						DownloadNextAttempt[url] = Now()+100
+						DownloadQueueBackup[url] = path
 					end
 					return true
 				else
