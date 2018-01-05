@@ -14,13 +14,14 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.1.0",
+	Version = "1.1.1",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
 	ChangeLog = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Rework for MoogleLib",
+		["1.1.1"] = "Teaks",
 	}
 }
 
@@ -110,7 +111,8 @@ MoogleLib.Settings = {
 
 			-- Mini Button --
 				if ModuleTable.MiniButton then
-					table.insert(ml_global_information.menu.windows, {name = ModuleTable.name, openWindow = function() ModuleTable.OnClick() end, isOpen = function() return ModuleTable.IsOpen() end})
+					local MiniNameStr = ModuleTable.MiniName or ModuleTable.name
+					table.insert(ml_global_information.menu.windows, {name = MiniNameStr, openWindow = function() ModuleTable.OnClick() end, isOpen = function() return ModuleTable.IsOpen() end})
 				end
 		end
 
@@ -807,10 +809,9 @@ MoogleLib.Settings = {
 
 			if NotNil(spacingX) then
 				GUI:SameLine(posX, spacingX)
-			elseif NotNil(posX) then
-				GUI:SameLine(0, spacingX)
 			else
-				GUI:SameLine(0, 0)
+				local x = posX or 0
+				GUI:SameLine(0, posX)
 			end
 		end
 
@@ -841,23 +842,58 @@ MoogleLib.Settings = {
 			GUI:SameLine(0, spacing)
 		end
 
-		function Gui.Text(string, SameLineSpacing, beforetext)
+		function Gui.Text(string, RGB, SameLineSpacing, beforetext)
 			local NotNil = General.NotNil
 			local SameLine = Gui.SameLine
+			local ColorText = false
+
+			local RGB = RGB
+			local SameLineSpacing = SameLineSpacing
+			local beforetext = beforetext
+
+			if type(RGB) ~= "table" then
+				SameLineSpacing = RGB
+				beforetext = SameLineSpacing
+			else
+				ColorText = true
+			end
 
 			if NotNil(SameLineSpacing) then
 				if beforetext then
-					SameLine(SameLineSpacing)
+					if ColorText then
+						SameLine(SameLineSpacing)
+						GUI:AlignFirstTextHeightToWidgets()
+						GUI:PushStyleColor(GUI.Col_Text,RGB[1],RGB[2],RGB[3],RGB[4])
+							GUI:Text(string)
+						GUI:PopStyleColor()
+					else
+						SameLine(SameLineSpacing)
+						GUI:AlignFirstTextHeightToWidgets()
+						GUI:Text(string)
+					end
+				else
+					if ColorText then
+						GUI:AlignFirstTextHeightToWidgets()
+						GUI:PushStyleColor(GUI.Col_Text,RGB[1],RGB[2],RGB[3],RGB[4])
+							GUI:Text(string)
+						GUI:PopStyleColor()
+						SameLine(SameLineSpacing)
+					else
+						GUI:AlignFirstTextHeightToWidgets()
+						GUI:Text(string)
+						SameLine(SameLineSpacing)
+					end
+				end
+			else
+				if ColorText then
 					GUI:AlignFirstTextHeightToWidgets()
-					GUI:Text(string)
+					GUI:PushStyleColor(GUI.Col_Text,RGB[1],RGB[2],RGB[3],RGB[4])
+						GUI:Text(string)
+					GUI:PopStyleColor()
 				else
 					GUI:AlignFirstTextHeightToWidgets()
 					GUI:Text(string)
-					SameLine(SameLineSpacing)
 				end
-			else
-				GUI:AlignFirstTextHeightToWidgets()
-				GUI:Text(string)
 			end
 		end
 
