@@ -23,7 +23,7 @@ local tbl =
 		stability = "Core",
 		instver = KaliMainWindow.Info.Version or false,
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = os.time { year = 2017, month = 12, day = 30, hour = 19, min = 53 },
+		lastupdate = 1515129721,
 	},
 	[3] = {
 		name = "MoogleLib",
