@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.1.4",
+	Version = "1.1.5",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -23,7 +23,7 @@ MoogleLib.Info = {
 		["1.1.0"] = "Rework for MoogleLib",
 		["1.1.1"] = "Teaks",
 		["1.1.2"] = "Download Overwrite Fix",
-		["1.1.4"] = "Download Overwrite Fix 3",
+		["1.1.5"] = "Download Overwrite Fix 4",
 	}
 }
 
@@ -475,6 +475,9 @@ MoogleLib.Settings = {
 
 			if type(url) == "string" then
 				if (not FileExists(path) or overwrite) then
+					if overwrite and NotNil(FinishedDownloads[url]) then
+						FinishedDownloads[url] = nil
+					end
 					if not table.valid(DownloadQueue) and (IsNil(DownloadNextAttempt[url]) or Now() > DownloadNextAttempt[url]) then
 						-- File does not exist, check to make sure the parent folder exists --
 						local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
