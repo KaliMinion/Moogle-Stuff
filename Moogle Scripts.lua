@@ -35,7 +35,7 @@ local tbl =
 		category = "Core",
 		stability = "Core",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = os.time { year = 2017, month = 12, day = 30, hour = 19, min = 59 },
+		lastupdate = 1515129879,
 	},
 	[4] = {
 		name = "Moogle Text to Speech",
