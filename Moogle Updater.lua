@@ -549,7 +549,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 					if table.valid(MoogleUpdater.UpdatedScripts) then
 						for k,v in pairs(MoogleUpdater.UpdatedScripts) do
 							if MoogleUpdater.UpdatedScriptsReady[k] == nil then
-								Download(MoogleUpdater.MoogleScripts[k].url,ScriptsFolder..MoogleUpdater.MoogleScripts[k]..filepath)
+								Download(MoogleUpdater.MoogleScripts[k].url,ScriptsFolder..MoogleUpdater.MoogleScripts[k].filepath)
 								same = false
 							end
 							if OS.FinishedDownloads[MoogleUpdater.MoogleScripts[k].url] ~= nil then
