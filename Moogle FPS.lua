@@ -2,7 +2,7 @@ MoogleFPS = {}
 
 MoogleFPS.Info = {
 	Creator = "Kali",
-	Version = "1.2.1",
+	Version = "1.2.2",
 	StartDate = "05/26/17",
 	ReleaseDate = "05/29/17",
 	LastUpdate = "01/03/18",
@@ -11,7 +11,8 @@ MoogleFPS.Info = {
 		["1.1.0"] = "Added hide ms and hide labels in Mini FPS window, fixed GW2 support, removed wait for in game check, and fixed table serialization in debug window.",
 		["1.1.1"] = "Fixed Debug window styling.",
 		["1.1.2"] = "Forgot to include BannedKeys for Debug.",
-		["1.2.0"] = "Rework for new Moolge Script Manager."
+		["1.2.0"] = "Rework for new Moolge Script Manager.",
+		["1.2.2"] = "Tweaks and MiniButton support"
 	}
 }
 
@@ -19,6 +20,7 @@ MoogleFPS.GUI = {
 	WindowName = "MoogleFPS##MoogleFPS",
 	name = "Moogle FPS",
 	NavName = "FPS Overlay",
+	MiniName = "FPS",
 	open = false,
 	visible = true,
 	MiniButton = false,
