@@ -556,9 +556,9 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 								MoogleUpdater.UpdatedScriptsReady[k] = v
 							end
 						end
-					end
-					if same and not FFXIV_Common_BotRunning then
-						Reload()
+						if same and not FFXIV_Common_BotRunning then
+							Reload()
+						end
 					end
 				-- End Moogle Scripts Check --
 			end
