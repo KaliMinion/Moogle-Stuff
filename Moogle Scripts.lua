@@ -6,7 +6,7 @@ local tbl =
 		filepath = [[Moogle Updater.lua]],
 		table = "return MoogleUpdater",
 		url = "https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle Updater.lua",
-		version = "1.1.1",
+		version = "1.1.2",
 		category = "Core",
 		stability = "Core",
 		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 10, min = 44 },
