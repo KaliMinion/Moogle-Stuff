@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.1.5",
+	Version = "1.1.6",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -12,6 +12,7 @@ MoogleUpdater.Info = {
 		["1.1.1"] = "Tweaks",
 		["1.1.2"] = "Adjusted Layout",
 		["1.1.5"] = "Added Auto Download and Auto Reload",
+		["1.1.6"] = "Download Fixes"
 	}
 }
 
@@ -208,7 +209,7 @@ function MoogleUpdater.Draw()
 														if not FolderExists(lastfolder) then
 															CreateFolder(lastfolder)
 														end
-														Download(url,MooglePath..filepath)
+														Download(url,MooglePath..filepath,true)
 													end
 												end
 											end
@@ -349,10 +350,20 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 	-- Check to see if you have backed up downloads --
 		if MoogleLib ~= nil then
 			local OS = MoogleLib.Lua.os
-			if table.valid(OS.DownloadQueueBackup) then
-				local Download = OS.Download
-				for k,v in pairs(OS.DownloadQueueBackup) do
+			local Download = OS.Download
+			if table.valid(OS.Downloading) then
+				for k,v in pairs(OS.Downloading) do
+					Download(k,v,true)
+				end
+			end
+			if table.valid(OS.DownloadQueue) then
+				for k,v in pairs(OS.DownloadQueue) do
 					Download(k,v)
+				end
+			end
+			if table.valid(OS.OverwriteQueue) then
+				for k,v in pairs(OS.OverwriteQueue) do
+					Download(k,v,true)
 				end
 			end
 		end
@@ -435,8 +446,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 					local OS = MoogleLib.Lua.os
 					local Download = OS.Download
 					local DownloadQueue = OS.DownloadQueue
-					local DownloadQueueBackup = OS.DownloadQueueBackup
-					local DownloadNextAttempt = OS.DownloadNextAttempt
+					local OverwriteQueue = OS.OverwriteQueue
 					local FinishedDownloads = OS.FinishedDownloads
 
 					-- Remove Folders and Files --
@@ -449,8 +459,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 						end
 
 					if DownloadQueue[url] ~= nil then DownloadQueue[url] = nil end
-					if DownloadQueueBackup[url] ~= nil then DownloadQueueBackup[url] = nil end
-					if DownloadNextAttempt[url] ~= nil then DownloadNextAttempt[url] = nil end
+					if OverwriteQueue[url] ~= nil then OverwriteQueue[url] = nil end
 					if FinishedDownloads[url] ~= nil then FinishedDownloads[url] = nil end
 					if table.valid(ModuleDownloads) then
 						for i,e in pairs(ModuleDownloads) do
@@ -591,8 +600,10 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 							if MoogleUpdater.UpdatedScriptsReady[k] == nil then
 								Download(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath,true)
 								same = false
-							end
-							if OS.FinishedDownloads[MoogleUpdater.MoogleScripts[k].url] ~= nil then
+							elseif OS.FinishedDownloads[MoogleUpdater.MoogleScripts[k].url] == nil then
+								-- Send Download Command one more time to add to finished downloads --
+								Download(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath,true)
+							else
 								MoogleUpdater.UpdatedScriptsReady[k] = v
 							end
 						end
