@@ -2,7 +2,7 @@ MoogleFPS = {}
 
 MoogleFPS.Info = {
 	Creator = "Kali",
-	Version = "1.2.2",
+	Version = "1.2.3",
 	StartDate = "05/26/17",
 	ReleaseDate = "05/29/17",
 	LastUpdate = "01/03/18",
@@ -12,7 +12,7 @@ MoogleFPS.Info = {
 		["1.1.1"] = "Fixed Debug window styling.",
 		["1.1.2"] = "Forgot to include BannedKeys for Debug.",
 		["1.2.0"] = "Rework for new Moolge Script Manager.",
-		["1.2.2"] = "Tweaks and MiniButton support"
+		["1.2.3"] = "Tweaks and MiniButton support"
 	}
 }
 
@@ -24,8 +24,8 @@ MoogleFPS.GUI = {
 	open = false,
 	visible = true,
 	MiniButton = false,
-	OnClick = loadstring("MoogleFPS.GUI.open = not MoogleFPS.GUI.open"),
-	IsOpen = loadstring("return MoogleFPS.GUI.open"),
+	OnClick = loadstring("KaliMainWindow.GUI.open = true KaliMainWindow.GUI.NavigationMenu.selected = MoogleFPS.GUI.NavName"),
+	IsOpen = loadstring("return KaliMainWindow.GUI.open"),
 	ToolTip = "FPS and stuff"
 }
 
