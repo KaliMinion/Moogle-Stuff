@@ -17,9 +17,10 @@ MoogleTTS.GUI = {
 	WindowName = "MoogleTTS##MoogleTTS",
 	name = "MoogleTTS",
 	NavName = "NPC Dialog TTS",
+	MiniName = "MoogleTTS",
 	open = false,
 	visible = true,
-	MiniButton = false,
+	MiniButton = true,
 	OnClick = loadstring("MoogleTTS.GUI.open = not MoogleTTS.GUI.open"),
 	IsOpen = loadstring("return MoogleTTS.GUI.open"),
 	ToolTip = "A Text-to-Speech module for narrating NPC dialog."
