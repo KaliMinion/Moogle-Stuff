@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.1.4",
+	Version = "1.1.5",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -11,7 +11,7 @@ MoogleUpdater.Info = {
 		["1.1.0"] = "Updated for MoogleLib",
 		["1.1.1"] = "Tweaks",
 		["1.1.2"] = "Adjusted Layout",
-		["1.1.4"] = "Added Auto Download and Auto Reload",
+		["1.1.5"] = "Added Auto Download and Auto Reload",
 	}
 }
 
