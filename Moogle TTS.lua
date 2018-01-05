@@ -2,14 +2,15 @@ MoogleTTS = {}
 
 MoogleTTS.Info = {
 	Creator = "Kali",
-	Version = "1.1.1",
+	Version = "1.1.2",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
 	ChangeLog = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Updated for MoogleLib",
-		["1.1.1"] = "Updated Initialize Function"
+		["1.1.1"] = "Updated Initialize Function",
+		["1.1.2"] = "Tweaks and MiniButton support"
 	}
 }
 
@@ -21,8 +22,8 @@ MoogleTTS.GUI = {
 	open = false,
 	visible = true,
 	MiniButton = false,
-	OnClick = loadstring("MoogleTTS.GUI.open = not MoogleTTS.GUI.open"),
-	IsOpen = loadstring("return MoogleTTS.GUI.open"),
+	OnClick = loadstring("KaliMainWindow.GUI.open = true KaliMainWindow.GUI.NavigationMenu.selected = MoogleTTS.GUI.NavName"),
+	IsOpen = loadstring("return KaliMainWindow.GUI.open"),
 	ToolTip = "A Text-to-Speech module for narrating NPC dialog."
 }
 
