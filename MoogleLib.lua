@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.1.5",
+	Version = "1.1.6",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -23,7 +23,7 @@ MoogleLib.Info = {
 		["1.1.0"] = "Rework for MoogleLib",
 		["1.1.1"] = "Teaks",
 		["1.1.2"] = "Download Overwrite Fix",
-		["1.1.5"] = "Download Overwrite Fix 4",
+		["1.1.6"] = "Download Overwrite Fix 5...",
 	}
 }
 
@@ -460,11 +460,12 @@ MoogleLib.Settings = {
 		end
 
 		OS.DownloadQueue = {}
-		OS.DownloadNextAttempt = {}
+		OS.OverwriteQueue = {}
 		OS.FinishedDownloads = {}
+		OS.Downloading = false
 		function OS.Download(url,path,overwrite)
 			local DownloadQueue = OS.DownloadQueue
-			local DownloadNextAttempt = OS.DownloadNextAttempt
+			local OverwriteQueue = OS.OverwriteQueue
 			local FinishedDownloads = OS.FinishedDownloads
 			local NotNil = General.NotNil
 			local IsNil = General.IsNil
@@ -474,36 +475,38 @@ MoogleLib.Settings = {
 			local CreateFolder = OS.CreateFolder
 
 			if type(url) == "string" then
-				if (not FileExists(path) or overwrite) then
-					if overwrite and NotNil(FinishedDownloads[url]) then
+				if not FileExists(path) or overwrite or NotNil(OverwriteQueue[url]) then
+					if overwrite and IsNil(OverwriteQueue[url]) then
 						FinishedDownloads[url] = nil
+						OverwriteQueue[url] = path
 					end
-					if not table.valid(DownloadQueue) and (IsNil(DownloadNextAttempt[url]) or Now() > DownloadNextAttempt[url]) then
+					if OS.Downloading == false then
 						-- File does not exist, check to make sure the parent folder exists --
 						local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
-						if FolderExists(FolderPath) then
-							ml_error("Downloading: "..url.." - "..path)
-							-- Folder exists, just need to start the download --
-							PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
-							DownloadQueue[url] = path
-							DownloadNextAttempt[url] = nil
-						else
-							-- Folder does not exist, to prevent conflict, create parent folder first before downloading --
-							if IsNil(DownloadNextAttempt[url]) then
-								CreateFolder(FolderPath)
-							end
-							DownloadNextAttempt[url] = Now()+100
-							DownloadQueueBackup[url] = path
+						if not FolderExists(FolderPath) then
+							CreateFolder(FolderPath)
 						end
+						ml_error("Downloading: "..url.." - "..path)
+						PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+						DownloadQueue[url] = nil
+						OverwriteQueue[url] = nil
+						OS.Downloading = true
 					else
 						d("In Queue: "..url.." - "..path)
+						InsertIfNil(DownloadQueue,url,path)
 						return true
 					end
 				else
 					-- File now exists, time for cleanup --
 					InsertIfNil(FinishedDownloads,url,path)
-					table.clear(DownloadQueue)
-					DownloadNextAttempt[url] = nil
+					if NotNil(DownloadQueue[url]) then
+						DownloadQueue[url] = nil
+						OS.Downloading = false
+					end
+					if NotNil(OverwriteQueue[url]) then
+						OverwriteQueue[url] = nil
+						OS.Downloading = false
+					end
 					return false
 				end
 			end
