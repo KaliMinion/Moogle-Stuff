@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.1.2",
+	Version = "1.1.3",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -10,7 +10,8 @@ MoogleUpdater.Info = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Updated for MoogleLib",
 		["1.1.1"] = "Tweaks",
-		["1.1.2"] = "Adjusted Layout"
+		["1.1.2"] = "Adjusted Layout",
+		["1.1.3"] = "Added Auto Download and Auto Reload",
 	}
 }
 
@@ -22,7 +23,7 @@ MoogleUpdater.GUI = {
 MoogleUpdater.Settings = {
 	enable = true,
 	AutoUpdate = false, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
-	CheckInterval = 5, -- in the unit of time the user has selected
+	CheckInterval = 30, -- in the unit of time the user has selected
 	CheckUnit = "Seconds",
 	LastCheck = 0,
 
@@ -35,6 +36,7 @@ MoogleUpdater.MoogleScripts = {}
 MoogleUpdater.NewScripts = {}
 MoogleUpdater.NewLabelScripts = {}
 MoogleUpdater.UpdatedScripts = {}
+MoogleUpdater.UpdatedScriptsReady = {}
 MoogleUpdater.UpdatedLabelScripts = {}
 local NeedWebRequest = true
 local NeedWebContent = true
@@ -519,7 +521,6 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 									if MoogleUpdater.MoogleScripts[i].version ~= InstalledScriptVersion then
 										-- New Script --
 										MoogleUpdater.UpdatedScripts[i] = e.name
-										-- ml_error(e.name.." - MoogleUpdater.MoogleScripts[i].version: "..tostring(MoogleUpdater.MoogleScripts[i].version).." - InstalledScriptVersion: "..tostring(InstalledScriptVersion))
 									end
 								end
 							end
@@ -542,6 +543,22 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 						table.clear(webpage)
 						NeedWebRequest = true
 						NeedWebContent = true
+					end
+
+					local same = true
+					if table.valid(MoogleUpdater.UpdatedScripts) then
+						for k,v in pairs(MoogleUpdater.UpdatedScripts) do
+							if MoogleUpdater.UpdatedScriptsReady[k] == nil then
+								Download(MoogleUpdater.MoogleScripts[k].url,ScriptsFolder..MoogleUpdater.MoogleScripts[k]..filepath)
+								same = false
+							end
+							if OS.FinishedDownloads[MoogleUpdater.MoogleScripts[k].url] ~= nil then
+								MoogleUpdater.UpdatedScriptsReady[k] = v
+							end
+						end
+					end
+					if same and not FFXIV_Common_BotRunning then
+						Reload()
 					end
 				-- End Moogle Scripts Check --
 			end
