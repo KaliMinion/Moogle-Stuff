@@ -22,8 +22,8 @@ MoogleUpdater.GUI = {
 
 MoogleUpdater.Settings = {
 	enable = true,
-	AutoUpdate = false, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
-	CheckInterval = 30, -- in the unit of time the user has selected
+	AutoUpdate = true, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
+	CheckInterval = 5, -- in the unit of time the user has selected
 	CheckUnit = "Seconds",
 	LastCheck = 0,
 
@@ -546,7 +546,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 					end
 
 					local same = true
-					if table.valid(MoogleUpdater.UpdatedScripts) then
+					if MoogleUpdater.Settings.AutoUpdate and table.valid(MoogleUpdater.UpdatedScripts) then
 						for k,v in pairs(MoogleUpdater.UpdatedScripts) do
 							if MoogleUpdater.UpdatedScriptsReady[k] == nil then
 								Download(MoogleUpdater.MoogleScripts[k].url,ScriptsFolder..MoogleUpdater.MoogleScripts[k].filepath)
@@ -556,7 +556,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 								MoogleUpdater.UpdatedScriptsReady[k] = v
 							end
 						end
-						if same and not FFXIV_Common_BotRunning then
+						if same and not FFXIV_Common_BotRunning and MoogleUpdater.Settings.AutoReload then
 							Reload()
 						end
 					end
