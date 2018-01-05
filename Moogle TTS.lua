@@ -20,7 +20,7 @@ MoogleTTS.GUI = {
 	MiniName = "MoogleTTS",
 	open = false,
 	visible = true,
-	MiniButton = true,
+	MiniButton = false,
 	OnClick = loadstring("MoogleTTS.GUI.open = not MoogleTTS.GUI.open"),
 	IsOpen = loadstring("return MoogleTTS.GUI.open"),
 	ToolTip = "A Text-to-Speech module for narrating NPC dialog."
