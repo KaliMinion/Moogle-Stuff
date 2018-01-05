@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.1.6",
+	Version = "1.1.7",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -23,7 +23,7 @@ MoogleLib.Info = {
 		["1.1.0"] = "Rework for MoogleLib",
 		["1.1.1"] = "Teaks",
 		["1.1.2"] = "Download Overwrite Fix",
-		["1.1.6"] = "Download Overwrite Fix 5...",
+		["1.1.7"] = "Download Overwrite Fix 6...",
 	}
 }
 
@@ -459,11 +459,14 @@ MoogleLib.Settings = {
 			io.popen([[MKDIR  "]]..path..[["]])
 		end
 
+		OS.Downloading = {}
+		OS.LastAttempt = {}
 		OS.DownloadQueue = {}
 		OS.OverwriteQueue = {}
 		OS.FinishedDownloads = {}
-		OS.Downloading = false
 		function OS.Download(url,path,overwrite)
+			local Downloading = OS.Downloading
+			local LastAttempt = OS.LastAttempt
 			local DownloadQueue = OS.DownloadQueue
 			local OverwriteQueue = OS.OverwriteQueue
 			local FinishedDownloads = OS.FinishedDownloads
@@ -475,40 +478,114 @@ MoogleLib.Settings = {
 			local CreateFolder = OS.CreateFolder
 
 			if type(url) == "string" then
-				if not FileExists(path) or overwrite or NotNil(OverwriteQueue[url]) then
-					if overwrite and IsNil(OverwriteQueue[url]) then
+				local bypass = false
+				if overwrite or NotNil(OverwriteQueue[url]) then
+					bypass = true
+				end
+				if not FileExists(path) or bypass then
+					if bypass then
 						FinishedDownloads[url] = nil
-						OverwriteQueue[url] = path
+						InsertIfNil(OverwriteQueue,url,path)
 					end
-					if OS.Downloading == false then
-						-- File does not exist, check to make sure the parent folder exists --
-						local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
-						if not FolderExists(FolderPath) then
-							CreateFolder(FolderPath)
+					-- File does not exist or overwriting file --
+					local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
+					if not FolderExists(FolderPath) then
+						CreateFolder(FolderPath)
+					end
+					if table.valid(Downloading) then
+						-- Currently Downloading, check if entry needs removed --
+						if NotNil(Downloading[url]) then
+							if FileExists(path) then
+								-- File Exists, remove entry --
+								Downloading[url] = nil
+								LastAttempt[url] = nil
+								DownloadQueue[url] = nil
+								OverwriteQueue[url] = nil
+								InsertIfNil(FinishedDownloads,url,path)
+							elseif TimeSince(LastAttempt[url]) > 3000 then
+								d("Downloading Again: "..url.." - "..path)
+								PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+								LastAttempt[url] = Now()
+							end
+						else
+							-- URL does not exist in Downloading table, add to Queue --
+							InsertIfNil(DownloadQueue,url,path)
+						end
+						return true
+					else
+						-- Free to download next file --
+						if FileExists(path) then
+							FileDelete(path)
 						end
 						d("Downloading: "..url.." - "..path)
 						PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
 						DownloadQueue[url] = nil
 						OverwriteQueue[url] = nil
-						OS.Downloading = true
-					else
-						InsertIfNil(DownloadQueue,url,path)
+						InsertIfNil(Downloading,url,path)
+						InsertIfNil(LastAttempt,url,Now())
 						return true
 					end
 				else
-					-- File now exists, time for cleanup --
+					-- File Exists --
+					Downloading[url] = nil
+					LastAttempt[url] = nil
+					DownloadQueue[url] = nil
+					OverwriteQueue[url] = nil
 					InsertIfNil(FinishedDownloads,url,path)
-					if NotNil(DownloadQueue[url]) then
-						DownloadQueue[url] = nil
-						OS.Downloading = false
+					if table.valid(Downloading) then
+						return true
+					else
+						return false
 					end
-					if NotNil(OverwriteQueue[url]) then
-						OverwriteQueue[url] = nil
-						OS.Downloading = false
-					end
-					return false
 				end
 			end
+
+
+
+
+
+
+
+			-- 	if OS.Downloading and not table.valid(OverwriteQueue) and not table.valid(OverwriteQueue) then
+			-- 		OS.Downloading = false
+			-- 	end
+			-- 	if not FileExists(path) and (overwrite or NotNil(OverwriteQueue[url]) or ()) then
+			-- 		if overwrite and IsNil(OverwriteQueue[url]) then
+			-- 			FinishedDownloads[url] = nil
+			-- 			OverwriteQueue[url] = path
+			-- 		end
+			-- 		if OS.Downloading == false then
+			-- 			-- File does not exist, check to make sure the parent folder exists --
+			-- 			local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
+			-- 			if not FolderExists(FolderPath) then
+			-- 				CreateFolder(FolderPath)
+			-- 			end
+			-- 			d("Downloading: "..url.." - "..path)
+			-- 			PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+			-- 			DownloadQueue[url] = nil
+			-- 			OverwriteQueue[url] = nil
+			-- 			OS.Downloading = true
+			-- 			InsertIfNil(FinishedDownloads,url,path)
+			-- 			return true
+			-- 		else
+			-- 			d("test2")
+			-- 			InsertIfNil(DownloadQueue,url,path)
+			-- 			return false
+			-- 		end
+			-- 	else
+			-- 		d("test")
+			-- 		-- File now exists, time for cleanup --
+			-- 		if NotNil(DownloadQueue[url]) then
+			-- 			DownloadQueue[url] = nil
+			-- 			OS.Downloading = false
+			-- 		end
+			-- 		if NotNil(OverwriteQueue[url]) then
+			-- 			OverwriteQueue[url] = nil
+			-- 			OS.Downloading = false
+			-- 		end
+			-- 		return false
+			-- 	end
+			-- end
 		end
 	-- End Operating System (OS) Functions --
 
