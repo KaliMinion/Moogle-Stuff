@@ -486,13 +486,12 @@ MoogleLib.Settings = {
 						if not FolderExists(FolderPath) then
 							CreateFolder(FolderPath)
 						end
-						ml_error("Downloading: "..url.." - "..path)
+						d("Downloading: "..url.." - "..path)
 						PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
 						DownloadQueue[url] = nil
 						OverwriteQueue[url] = nil
 						OS.Downloading = true
 					else
-						d("In Queue: "..url.." - "..path)
 						InsertIfNil(DownloadQueue,url,path)
 						return true
 					end
