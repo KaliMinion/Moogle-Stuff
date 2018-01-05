@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.1.1",
+	Version = "1.1.2",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -22,6 +22,7 @@ MoogleLib.Info = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Rework for MoogleLib",
 		["1.1.1"] = "Teaks",
+		["1.1.2"] = "Download Overwrite Fix",
 	}
 }
 
@@ -477,13 +478,13 @@ MoogleLib.Settings = {
 				if not FileExists(path) or overwrite then
 					if IsNil(DownloadNextAttempt[url]) or Now() > DownloadNextAttempt[url] then
 						-- File does not exist, check to make sure the parent folder exists --
-						local FolderPath = path:match("(.*"..[[\]]..")")
-						if FolderExists(FolderPath) and Size(DownloadQueue,"=",0) then
+						local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
+						if FolderExists(FolderPath) then
+							d(url.." - "..path)
 							-- Folder exists, just need to start the download --
-							local ModifiedURL = url.."?t="..tostring(os.time())
-
-							PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..ModifiedURL..[[',']]..path..[[')]])
-							InsertIfNil(DownloadQueue,url,true)
+							PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+							-- InsertIfNil(DownloadQueue,url,path)
+							DownloadQueue[url] = path
 							DownloadNextAttempt[url] = nil
 						else
 							-- Folder does not exist, to prevent conflict, create parent folder first before downloading --
