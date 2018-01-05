@@ -9,7 +9,7 @@ local tbl =
 		version = "1.1.4",
 		category = "Core",
 		stability = "Core",
-		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 0, min = 0, sec = 0},
+		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1515133233,
 	},
 	[2] = {
@@ -22,7 +22,7 @@ local tbl =
 		category = "Core",
 		stability = "Core",
 		instver = KaliMainWindow.Info.Version or false,
-		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 0, min = 0, sec = 0 },
+		releasedate = os.time { year = 2018, month = 01, day = 3 },
 		lastupdate = 1515129721,
 	},
 	[3] = {
@@ -34,7 +34,7 @@ local tbl =
 		version = "1.1.1",
 		category = "Core",
 		stability = "Core",
-		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 0, min = 0, sec = 0 },
+		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1515129879,
 	},
 	[4] = {
@@ -46,7 +46,7 @@ local tbl =
 		version = "1.1.2",
 		category = "Utility",
 		stability = "WiP but Working",
-		releasedate = os.time { year = 2017, month = 12, day = 9, hour = 0, min = 0, sec = 0 },
+		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1515131188,
 		module = [[[Module]
 Name=Moogle TTS
@@ -64,7 +64,7 @@ enabled=1]],
 		version = "1.2.3",
 		category = "Utility",
 		stability = "Working",
-		releasedate = os.time { year = 2017, month = 05, day = 29, hour = 0, min = 0, sec = 0 },
+		releasedate = os.time { year = 2017, month = 05, day = 29 },
 		lastupdate = 1515131103,
 		module = [[[Module]
 Name=Moogle FPS
