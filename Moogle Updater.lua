@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.1.3",
+	Version = "1.1.4",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -11,7 +11,7 @@ MoogleUpdater.Info = {
 		["1.1.0"] = "Updated for MoogleLib",
 		["1.1.1"] = "Tweaks",
 		["1.1.2"] = "Adjusted Layout",
-		["1.1.3"] = "Added Auto Download and Auto Reload",
+		["1.1.4"] = "Added Auto Download and Auto Reload",
 	}
 }
 
@@ -23,7 +23,7 @@ MoogleUpdater.GUI = {
 MoogleUpdater.Settings = {
 	enable = true,
 	AutoUpdate = true, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
-	CheckInterval = 5, -- in the unit of time the user has selected
+	CheckInterval = 30, -- in the unit of time the user has selected
 	CheckUnit = "Seconds",
 	LastCheck = 0,
 
@@ -171,7 +171,25 @@ function MoogleUpdater.Draw()
 									end
 									Space(4)
 									Text(name)
-									Space(width - (Icon + xName + xCategory))
+
+									local Label = ""
+									local LabelSpace = 0
+
+									if table.find(MoogleUpdater.NewLabelScripts,name) then
+										Label = Label.."[New]"
+										LabelSpace = LabelSpace + 4
+										Text("[New]",{"1","0","0","1"},4,true)
+									end
+
+									if table.find(MoogleUpdater.UpdatedScripts,name) then
+										Label = Label.."[Updated]"
+										LabelSpace = LabelSpace + 4
+										Text("[Updated]",{"1","1","0","1"},4,true)
+									end
+
+									local LabelWidth = GUI:CalcTextSize(Label) + LabelSpace
+
+									Space(width - (Icon + xName + LabelWidth + xCategory))
 									Text("Category:") Text(category,{"1","1","0","1"},4,true)
 								-- End Core Module Check --
 							else
@@ -225,10 +243,25 @@ function MoogleUpdater.Draw()
 								end
 
 								-- Begin right side options for non core files --
+
+								local Label = ""
+
+								if table.find(MoogleUpdater.NewLabelScripts,name) then
+									Label = "[New]"
+									Text("[New]",{"1","0","0","1"},4,true)
+								end
+
+								if table.find(MoogleUpdater.UpdatedScripts,name) then
+									Label = "[Updated]"
+									Text("[Updated]",{"1","1","0","1"},4,true)
+								end
+
+								local LabelWidth = GUI:CalcTextSize(Label) + 4
+
 								if Not(tbl,"NotInstalled") or FileExists(MooglePath..filepath) then
-									Space(width - (Icon + xName + xCategory + 4 + xStability + 4 + Icon))
+									Space(width - (Icon + xName + LabelWidth + xCategory + 4 + xStability + 4 + Icon))
 								else
-									Space(width - (Icon + xName + xCategory + 4 + xStability + 4))
+									Space(width - (Icon + xName + LabelWidth + xCategory + 4 + xStability + 4))
 								end
 									Text("Category:")
 									Text(category,{"1","1","0","1"},4,true)
@@ -249,7 +282,7 @@ function MoogleUpdater.Draw()
 									end
 								end
 							end
-							Text("Release Date: "..tostring(os.date ("%x", v.lastupdate)))
+							Text("Release Date: "..tostring(os.date ("%x", v.releasedate)))
 							local LastUpdateVar = os.difftime(os.time(),v.lastupdate)
 							local days = 0
 							local hours = 0
@@ -524,16 +557,23 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 									end
 								end
 							end
-
 							if os.difftime(os.time(),e.releasedate) < 604800 then
 								-- New label scripts, released within 1 week --
 								MoogleUpdater.NewLabelScripts[i] = e.name
 							end
 
+							if table.find(MoogleUpdater.NewLabelScripts,e.name) and os.difftime(os.time(),e.releasedate) > 604800 then
+								MoogleUpdater.NewLabelScripts[table.find(MoogleUpdater.NewLabelScripts,e.name)] = nil
+							end
+
 							if os.difftime(os.time(),e.lastupdate) < 604800 then
 								-- New label scripts, released within 1 week --
 								MoogleUpdater.UpdatedLabelScripts[i] = e.name
-							end				
+							end	
+
+							if table.find(MoogleUpdater.UpdatedLabelScripts,e.name) and os.difftime(os.time(),e.lastupdate) > 604800 then
+								MoogleUpdater.UpdatedLabelScripts[table.find(MoogleUpdater.UpdatedLabelScripts,e.name)] = nil
+							end			
 						end
 
 						if table.deepcompare(MoogleUpdater.MoogleScripts,webpage) == false then
