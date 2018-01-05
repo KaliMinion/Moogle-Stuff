@@ -47,7 +47,7 @@ local tbl =
 		category = "Utility",
 		stability = "WiP but Working",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1515122864,
+		lastupdate = 1515131188,
 		module = [[[Module]
 Name=Moogle TTS
 Dependencies=minionlib
