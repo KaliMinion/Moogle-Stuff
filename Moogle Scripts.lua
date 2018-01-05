@@ -31,11 +31,11 @@ local tbl =
 		filepath = [[MoogleLib.lua]],
 		table = "return MoogleLib",
 		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleLib.lua]],
-		version = "1.1.5",
+		version = "1.1.6",
 		category = "Core",
 		stability = "Core",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1515175561,
+		lastupdate = 1515177422,
 	},
 	[4] = {
 		name = "Moogle Text to Speech",
