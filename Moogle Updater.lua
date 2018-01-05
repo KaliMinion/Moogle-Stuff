@@ -2,14 +2,15 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.1.1",
+	Version = "1.1.2",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
 	ChangeLog = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Updated for MoogleLib",
-		["1.1.1"] = "Tweaks"
+		["1.1.1"] = "Tweaks",
+		["1.1.2"] = "Adjusted Layout"
 	}
 }
 
@@ -47,6 +48,8 @@ end
 MoogleUpdater.TimeUnits = {"Seconds","Minutes","Hours","Days","Weeks","Months"}
 
 local ModuleDownloads = {}
+local PendingDeletion = {}
+local AdjustChildren = {}
 local NeedImages = true
 function MoogleUpdater.Draw()
 	if KaliMainWindow ~= nil then
@@ -120,7 +123,8 @@ function MoogleUpdater.Draw()
 			main.Contents = function()
 				-- Check to see if you have pending Download Checks --
 					if Valid(ModuleDownloads) then
-						Text("You need to",0)
+						Text("You need to")
+						SameLine()
 						
 						local x,y = GUI:CalcTextSize("Reload Lua")
 						local c = GUI:Button("Reload Lua",x+10,y+10)
@@ -133,15 +137,28 @@ function MoogleUpdater.Draw()
 							check = check.."s"
 						end
 						
-						Text("to use your "..Size(ModuleDownloads).." new moogle "..check..".",0,true)
+						Text("to use your "..Size(ModuleDownloads).." new moogle "..check..".",4,true)
 					end
 				-- End Pending Download Checks --
 
 				local scripts = MoogleUpdater.MoogleScripts
 				if Valid(scripts) then
 					for k,v in table.pairsbykeys(scripts) do
-						GUI:BeginChild("##"..v.name:gsub(" ",""),0,50,true)
-							if In(v.name,"Moogle Updater", "Main Window", "MoogleLib") then
+						local yChild = AdjustChildren[k] or 50
+						GUI:BeginChild("##"..v.name:gsub(" ",""),0,yChild,true,GUI.WindowFlags_AlwaysAutoResize)
+							local name = v.name
+							local category = v.category
+							local stability = v.stability
+							local filepath = v.filepath
+							local url = v.url
+
+							local width = GUI:GetContentRegionAvailWidth()
+							local Icon = 23
+							local xName,yName = GUI:CalcTextSize(name)
+							local xCategory,yCategory = GUI:CalcTextSize("Category:"..category) + 4
+							local xStability,yStability = GUI:CalcTextSize("Stability:"..stability) + 4
+
+							if In(name,"Moogle Updater", "Main Window", "MoogleLib") then
 								-- Core Files ignore all checks --
 									if FileExists(ImageFolder..[[CoreModule.png]]) then
 										local c = GUI:Image(ImageFolder..[[CoreModule.png]],19,19)
@@ -149,130 +166,129 @@ function MoogleUpdater.Draw()
 										if GUI:IsItemHovered(c) then
 											Tooltip("Core Moogle Module")
 										end
-										
-										Space(4)
-										Text(v.name.."  v"..v.version)
-									else
-										Space(23) Text(v.name.."  v"..v.version)
 									end
+									Space(4)
+									Text(name)
+									Space(width - (Icon + xName + xCategory))
+									Text("Category:") Text(category,{"1","1","0","1"},4,true)
 								-- End Core Module Check --
 							else
 								local tbl = loadstring(v.table)() or "NotInstalled"
 								if Not(tbl,"NotInstalled") then
-									tbl.Settings.enable = Checkbox(v.name.."  v"..v.version,tbl.Settings.enable,"ScriptEnabled",false,"test")
+									tbl.Settings.enable = Checkbox(name,tbl.Settings.enable,"ScriptEnabled",false,"Enable/Disable Module\n\nNote: Technically the module is still enabled, but this prevents code from running while the table still exists.")
 								else
 									if FileExists(ImageFolder..[[KaliDownload.png]]) then
-										if not FileExists(MooglePath..v.filepath) then
+										if not FileExists(MooglePath..filepath) then
 											local c = GUI:Image(ImageFolder..[[KaliDownload.png]],19,19)
 											if GUI:IsItemHovered(c) then
-												Tooltip("Download and Install Lua")
+												Tooltip("Download and Install "..name)
 												if GUI:IsItemClicked(c) then
-													if not In(v.filepath,""," ",nil) then
-														local lastfolder = string.gsub(MooglePath..v.filepath,"([^\\]+)$","")
+													if not In(filepath,""," ",nil) then
+														local lastfolder = string.gsub(MooglePath..filepath,"([^\\]+)$","")
 														if not FolderExists(lastfolder) then
 															CreateFolder(lastfolder)
 														end
-														Download(v.url,MooglePath..v.filepath)
+														Download(url,MooglePath..filepath)
 													end
 												end
 											end
 											Space(4)
-											Text(v.name.."  v"..v.version)
+											Text(name)
 										else
 											-- File Exists but need to create module.def file --
-											if FileExists(string.gsub(MooglePath..v.filepath,"([^\\]+)$","")..[[module.def]]) then
+											if FileExists(string.gsub(MooglePath..filepath,"([^\\]+)$","")..[[module.def]]) then
 												-- Module.def file exists, now ready for Lua Reload --
-												InsertIfNil(ModuleDownloads,v.name)
+												InsertIfNil(ModuleDownloads,name)
 												if FileExists(ImageFolder..[[KaliDownloaded.png]]) then
 													local c = GUI:Image(ImageFolder..[[KaliDownloaded.png]],19,19)
 													if GUI:IsItemHovered(c) then
-														Tooltip("Finished Downloading, click to reload Lua")
+														Tooltip("Finished Downloading, click again to reload Lua")
 														if GUI:IsItemClicked(c) then
 															Reload()
 														end
 													end
-
-													Space(4)
-													GUI:Text(v.name.."  v"..v.version)
-												else
-													Space(23) Text(v.name.."  v"..v.version)
 												end
+												Space(4)
+												GUI:Text(name)
 											else
 												if NotNil(v.module) then
-													FileWrite(string.gsub(MooglePath..v.filepath,"([^\\]+)$","")..[[module.def]],v.module)
+													FileWrite(string.gsub(MooglePath..filepath,"([^\\]+)$","")..[[module.def]],v.module)
 												end
 											end
 										end
 									else
-										Space(23) Text(v.name.."  v"..v.version)
+										Space(23)
+										Text(name)
 									end
 								end
 
 								-- Begin right side options for non core files --
-								local x = GUI:GetContentRegionAvailWidth()
-								local start,starty = GUI:CalcTextSize(v.name.."  v"..v.version)
-								local labels = " Category:  Stability:  "
-								local category = tostring(v.category)
-								local stability = tostring(v.stability)
-								local x2,y2 = GUI:CalcTextSize(labels)
-								local x3,y3 = GUI:CalcTextSize(category)
-								local x4,y4 = GUI:CalcTextSize(stability)
-								local trashcan = 0
-
-								if Not(tbl,"NotInstalled") or FileExists(MooglePath..v.filepath) then
-									trashcan = 19
+								if Not(tbl,"NotInstalled") or FileExists(MooglePath..filepath) then
+									Space(width - (Icon + xName + xCategory + 4 + xStability + 4 + Icon))
+								else
+									Space(width - (Icon + xName + xCategory + 4 + xStability + 4))
 								end
-								
-								local x5 = x - (start + x2 + x3 + x4 + 19 + trashcan + 3)
-								Space(x5) Text("Category:",true)
+									Text("Category:")
+									Text(category,{"1","1","0","1"},4,true)
+									Text("Stability:",8,true)
+									Text(stability,{"1","1","0","1"},4,true)
 
-								GUI:PushStyleColor(GUI.Col_Text,1,1,0,1)
-									Text(category,true)
-								GUI:PopStyleColor()
-
-								Text(" Stability:",true)
-
-								GUI:PushStyleColor(GUI.Col_Text,1,1,0,1)
-									Text(stability.." ",true)
-								GUI:PopStyleColor()
-
-								if Not(tbl,"NotInstalled") or FileExists(MooglePath..v.filepath) then
-									SameLine()
+								if Not(tbl,"NotInstalled") or FileExists(MooglePath..filepath) then
+									SameLine(4)
 									if FileExists(ImageFolder..[[DeleteModule.png]]) then
-
 										local c = GUI:Image(ImageFolder..[[DeleteModule.png]],19,19)
 										if GUI:IsItemHovered(c) then
 											Tooltip("Permanently Delete Moogle Module")
 
 											if GUI:IsItemClicked(c) then
-												if NotNil(loadstring(v.table)()) then
-													local key = table.find(KaliMainWindow.GUI.NavigationMenu.Menu,loadstring(v.table..[[.GUI.NavName]])())
-													KaliMainWindow.GUI.NavigationMenu.Menu[key] = nil
-												end
-												
-												if DownloadQueue[v.url] ~= nil then DownloadQueue[v.url] = nil end
-												if DownloadQueueBackup[v.url] ~= nil then DownloadQueueBackup[v.url] = nil end
-												if DownloadNextAttempt[v.url] ~= nil then DownloadNextAttempt[v.url] = nil end
-												if FinishedDownloads[v.url] ~= nil then FinishedDownloads[v.url] = nil end
-
-												local tbl = v.table:gsub("return ","")
-												loadstring(tbl.." = nil")()
-												
-												if not In(v.filepath,""," ",nil) then
-													local lastfolder = string.gsub(MooglePath..v.filepath,"([^\\]+)$","")
-													if FolderExists(lastfolder) then
-														io.popen([[rmdir /s /q "]]..lastfolder..[["]])
-													end
-												end
-
-												local key = table.find(ModuleDownloads,v.name)
-												if NotNil(key) then
-													ModuleDownloads[key] = nil
-												end
+												PendingDeletion[k] = name
 											end
 										end
 									end
 								end
+							end
+							Text("Release Date: "..tostring(os.date ("%x", v.lastupdate)))
+							local LastUpdateVar = os.difftime(os.time(),v.lastupdate)
+							local days = 0
+							local hours = 0
+							local minutes = 0
+							local seconds = 0
+
+							if LastUpdateVar > 86400 then
+								local temp = math.floor(LastUpdateVar/86400)
+								days = temp
+								LastUpdateVar = LastUpdateVar - (temp * 86400)
+							end
+							if LastUpdateVar > 3600 then
+								local temp = math.floor(LastUpdateVar/3600)
+								hours = temp
+								LastUpdateVar = LastUpdateVar - (temp * 3600)
+							end
+							if LastUpdateVar > 60 then
+								local temp = math.floor(LastUpdateVar/60)
+								minutes = temp
+								LastUpdateVar = LastUpdateVar - (temp * 60)
+							end
+							if LastUpdateVar < 60 then
+								local temp = LastUpdateVar
+								seconds = temp
+								LastUpdateVar = LastUpdateVar - temp
+							end
+
+							local TimeStr = ""
+
+							if days ~= 0 then TimeStr = TimeStr..days.."d " end
+							if hours ~= 0 or days ~= 0 then TimeStr = TimeStr..string.format("%02d",hours).."h " end
+							if minutes ~= 0 or hours ~= 0 then TimeStr = TimeStr..string.format("%02d",minutes).."m " end
+							if seconds ~= 0 or minutes ~= 0 then TimeStr = TimeStr..string.format("%02d",seconds).."s" end
+
+							Text("Last Update: "..TimeStr)
+
+							local xChildAvail,yChildAvail = GUI:GetContentRegionAvail()
+							if AdjustChildren[k] == nil then
+								AdjustChildren[k] = 50 - yChildAvail
+							else
+								AdjustChildren[k] = AdjustChildren[k] - yChildAvail
 							end
 						GUI:EndChild()
 					end
@@ -306,6 +322,116 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			end
 		end
 	-- End Download Check --
+
+	-- Check for Pending Deletion --
+	if MoogleLib ~= nil and table.valid(PendingDeletion) then
+		-- There are entries in PendingDeletion, so we need to remove all traces --
+		for k,v in pairs(PendingDeletion) do
+			local notchanged = true
+			if MoogleUpdater.MoogleScripts[k] ~= nil then
+				if loadstring(MoogleUpdater.MoogleScripts[k].table.." ~= nil")() then
+					-- First Lets remove the Minion Button entry --
+						local TableName = loadstring(MoogleUpdater.MoogleScripts[k].table..".GUI.name")()
+						local changed = false
+						local changed2 = false
+						for k,v in pairs(ml_gui.ui_mgr.menu.components[2].members) do
+							if changed then
+								ml_gui.ui_mgr.menu.components[2].members[k-1] = table.deepcopy(ml_gui.ui_mgr.menu.components[2].members[k])
+								if ml_gui.ui_mgr.menu.components[2].members[k+1] == nil then
+									ml_gui.ui_mgr.menu.components[2].members[k] = nil
+								end
+							end
+							if v.name == TableName then
+								ml_gui.ui_mgr.menu.components[2].members[k] = nil
+								changed = true
+							end
+							if type(v) == "table" and v.submembers ~= nil then
+								for i,e in pairs(v.submembers) do
+									if changed2 then
+										ml_gui.ui_mgr.menu.components[2].members[k].submembers[i-1] = table.deepcopy(ml_gui.ui_mgr.menu.components[2].members[k].submembers[i])
+										if ml_gui.ui_mgr.menu.components[2].members[k].submembers[i+1] == nil then
+											ml_gui.ui_mgr.menu.components[2].members[k].submembers[i] = nil
+										end
+									end
+									if type(e) == "table" and e.name == TableName then
+										ml_gui.ui_mgr.menu.components[2].members[k].submembers[i] = nil
+										changed2 = true
+									end
+								end
+							end
+						end
+						for k,v in pairs(ml_gui.ui_mgr.menu.components) do
+							if v.header.name == "MoogleStuff" then
+								local changed3 = false
+								for i,e in pairs(v.members) do
+									if changed3 then
+										ml_gui.ui_mgr.menu.components[k].members[i-1] = table.deepcopy(ml_gui.ui_mgr.menu.components[k].members[i])
+										if ml_gui.ui_mgr.menu.components[k].members[i+1] == nil then
+											ml_gui.ui_mgr.menu.components[k].members[i] = nil
+										end
+									end
+									if e.name == TableName then
+										ml_gui.ui_mgr.menu.components[k].members[i] = nil
+										changed3 = true
+									end
+								end
+							end
+						end
+					-- Now lets remove the MiniButton entry --
+						local key = loadstring(MoogleUpdater.MoogleScripts[k].table..[[.GUI.MiniName]])()
+						if key ~= nil then
+							for k,v in pairs(ml_global_information.menu.windows) do
+								if v.name == key then
+									ml_global_information.menu.windows[k] = nil
+								end
+							end
+						end
+					-- Now lets remove the Moogle Manager SideMenu entry --
+						local key = table.find(KaliMainWindow.GUI.NavigationMenu.Menu,loadstring(MoogleUpdater.MoogleScripts[k].table..[[.GUI.NavName]])())
+						if key ~= nil then
+							KaliMainWindow.GUI.NavigationMenu.Menu[key] = nil
+						end
+					-- Now lets remove the Table of the module we're deleting --
+						loadstring(MoogleUpdater.MoogleScripts[k].table:gsub("return ","").." = nil")()
+				end
+				-- Table Cleanup --
+					local url = MoogleUpdater.MoogleScripts[k].url
+					local filepath = MoogleUpdater.MoogleScripts[k].filepath
+					local OS = MoogleLib.Lua.os
+					local Download = OS.Download
+					local DownloadQueue = OS.DownloadQueue
+					local DownloadQueueBackup = OS.DownloadQueueBackup
+					local DownloadNextAttempt = OS.DownloadNextAttempt
+					local FinishedDownloads = OS.FinishedDownloads
+
+					-- Remove Folders and Files --
+						if not In(filepath,""," ",nil) then
+							local lastfolder = string.gsub(MooglePath..filepath,"([^\\]+)$","")
+							if FolderExists(lastfolder) then
+								io.popen([[rmdir /s /q "]]..lastfolder..[["]])
+								notchanged = false
+							end
+						end
+
+					if DownloadQueue[url] ~= nil then DownloadQueue[url] = nil end
+					if DownloadQueueBackup[url] ~= nil then DownloadQueueBackup[url] = nil end
+					if DownloadNextAttempt[url] ~= nil then DownloadNextAttempt[url] = nil end
+					if FinishedDownloads[url] ~= nil then FinishedDownloads[url] = nil end
+					if table.valid(ModuleDownloads) then
+						for i,e in pairs(ModuleDownloads) do
+							if e == v then
+								ModuleDownloads[i] = nil
+								notchanged = false
+							end
+						end
+					end
+			end
+			if notchanged then
+				PendingDeletion[k] = nil
+			end
+		end
+	end
+	-- End Pending Deletion Check --
 
 	local CheckInterval = MoogleUpdater.Settings.CheckInterval
 	local CheckUnit = MoogleUpdater.Settings.CheckUnit
@@ -388,11 +514,13 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 								-- New Script --
 								MoogleUpdater.UpdatedScripts[i] = e.name
 							else
-								local InstalledScriptVersion = (loadstring(e.table..[[.Info.Version]])())
-								if MoogleUpdater.MoogleScripts[i].version ~= InstalledScriptVersion then
-									-- New Script --
-									MoogleUpdater.UpdatedScripts[i] = e.name
-									ml_error(e.name.." - MoogleUpdater.MoogleScripts[i].version: "..tostring(MoogleUpdater.MoogleScripts[i].version).." - InstalledScriptVersion: "..tostring(InstalledScriptVersion))
+								if loadstring(e.table..[[ ~= nil]])() and loadstring(e.table..[[.Info ~= nil]])() then
+									local InstalledScriptVersion = (loadstring(e.table..[[.Info.Version]])())
+									if MoogleUpdater.MoogleScripts[i].version ~= InstalledScriptVersion then
+										-- New Script --
+										MoogleUpdater.UpdatedScripts[i] = e.name
+										-- ml_error(e.name.." - MoogleUpdater.MoogleScripts[i].version: "..tostring(MoogleUpdater.MoogleScripts[i].version).." - InstalledScriptVersion: "..tostring(InstalledScriptVersion))
+									end
 								end
 							end
 
@@ -432,27 +560,6 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			end
 		end
 	end
-	-- if table.valid(MoogleUpdater.NewScripts) or table.valid(MoogleUpdater.UpdatedScripts) then
-	-- 	ml_error("==============================================")
-	-- 	ml_error("==============================================")
-	-- 	ml_error("==============================================")
-	-- end
-	-- if table.valid(MoogleUpdater.NewScripts) then
-	-- 	ml_error("MoogleUpdater.NewScripts:")
-	-- 	table.print(MoogleUpdater.NewScripts)
-	-- end
-	-- if table.valid(MoogleUpdater.UpdatedScripts) then
-	-- 	ml_error("MoogleUpdater.UpdatedScripts:")
-	-- 	table.print(MoogleUpdater.UpdatedScripts)
-	-- end
-		-- if table.valid(MoogleUpdater.NewLabelScripts) then
-		-- 	ml_error("MoogleUpdater.NewLabelScripts:")
-		-- 	table.print(MoogleUpdater.NewLabelScripts)
-		-- end
-		-- if table.valid(MoogleUpdater.UpdatedLabelScripts) then
-		-- 	ml_error("MoogleUpdater.UpdatedLabelScripts:")
-		-- 	table.print(MoogleUpdater.UpdatedLabelScripts)
-		-- end
 end
 
 RegisterEventHandler("Module.Initalize", MoogleUpdater.ModuleInit)
