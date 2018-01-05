@@ -18,11 +18,11 @@ local tbl =
 		filepath = [[Main Window.lua]],
 		table  = "return KaliMainWindow",
 		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/Main Window.lua]],
-		version = "1.2.2",
+		version = "1.2.1",
 		category = "Core",
 		stability = "Core",
 		instver = KaliMainWindow.Info.Version or false,
-		releasedate = os.time { year = 2018, month = 01, day = 3 },
+		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1515129721,
 	},
 	[3] = {
