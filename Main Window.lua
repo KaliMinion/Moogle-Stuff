@@ -2,14 +2,15 @@ KaliMainWindow = {}
 
 KaliMainWindow.Info = {
 	Creator = "Kali",
-	Version = "1.2.1",
+	Version = "1.2.2",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
 	ChangeLog = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Rework for MoogleLib",
-		["1.2.1"] = "Updated to match current Initialize standard."
+		["1.2.1"] = "Updated to match current Initialize standard.",
+		["1.2.2"] = "Main Window open on start fix"
 	}
 }
 
@@ -35,7 +36,7 @@ KaliMainWindow.GUI = {
 	WindowName = "KaliMainWindow##KaliMainWindow",
 	name = "Moogle Script Management",
 	NavName = "Moogle Script Management",
-	open = true,
+	open = false,
 	visible = false,
 	MiniButton = false,
 	OnClick = loadstring("KaliMainWindow.GUI.open = not KaliMainWindow.GUI.open"),
