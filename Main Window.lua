@@ -2,7 +2,7 @@ KaliMainWindow = {}
 
 KaliMainWindow.Info = {
 	Creator = "Kali",
-	Version = "1.2.2",
+	Version = "1.2.3",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
@@ -10,7 +10,8 @@ KaliMainWindow.Info = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Rework for MoogleLib",
 		["1.2.1"] = "Updated to match current Initialize standard.",
-		["1.2.2"] = "Main Window open on start fix"
+		["1.2.2"] = "Main Window open on start fix",
+		["1.2.3"] = "Updated Forum Link URL"
 	}
 }
 
@@ -356,7 +357,7 @@ function KaliMainWindow.Draw()
 						local x,y = GUI:CalcTextSize("Forum Topic")
 						local c = GUI:Button("Forum Topic",x+10,y+10)
 						if GUI:IsItemClicked(c) then
-							io.popen([[cmd /c start http://www.mmominion.com/thread-19009.html]])
+							io.popen([[cmd /c start http://www.mmominion.com/thread-20229.html]])
 						end
 						
 						GUI:SameLine(0,5)
