@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.1.9",
+	Version = "1.2.0",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -15,7 +15,7 @@ MoogleUpdater.Info = {
 		["1.1.6"] = "Download Fixes",
 		["1.1.7"] = "URL Fixes",
 		["1.1.8"] = "Core Category Renamed",
-		["1.1.9"] = "Now outputs Windows and PowerShell version to System Info.txt",
+		["1.2.0"] = "Now outputs Windows and PowerShell version to System Info.txt",
 	}
 }
 
@@ -49,7 +49,7 @@ function MoogleUpdater.ModuleInit()
 	if MoogleLib ~= nil and FileExists(MoogleLib.API.MooglePath..[[Moogle Scripts.lua]]) then
 		MoogleUpdater.MoogleScripts = FileLoad(MoogleLib.API.MooglePath..[[Moogle Scripts.lua]])
 	end
-	io.popen([[powershell -Command "$PSVer = 'PowerShell Version: ' + $PSVersionTable.PSVersion.Major + '.' + $PSVersionTable.PSVersion.Minor; $WinVer = 'Windows Version: ' + (Get-WmiObject -class Win32_OperatingSystem).Caption; ($PSVer, $WinVer) | Out-File -filepath ']]..GetLuaModsPath()..[[MoogleStuff Files\System Info.txt'"]])
+	io.popen([[powershell -Command "$PSVer = '$PSVer = 'PowerShell Version: ' + $PSVersionTable.PSVersion.Major + '.' + $PSVersionTable.PSVersion.Minor; $WinVer = 'Windows Version: ' + (Get-WmiObject -class Win32_OperatingSystem).Caption + ' ' + (Get-CimInstance Win32_OperatingSystem).OSArchitecture; $PackVer = 'Service Pack Version: ' + (Get-CimInstance Win32_OperatingSystem).ServicePackMajorVersion + '.' + (Get-CimInstance Win32_OperatingSystem).ServicePackMinorVersion ; $OSVer = 'OS Version: ' + (Get-CimInstance Win32_OperatingSystem).Version ; ($PSVer, $WinVer, $PackVer, $OSVer) | Out-File -filepath ']]..GetLuaModsPath()..[[MoogleStuff Files\System Info.txt'"]])
 end
 
 MoogleUpdater.TimeUnits = {"Seconds","Minutes","Hours","Days","Weeks","Months"}
