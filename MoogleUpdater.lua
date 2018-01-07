@@ -497,8 +497,8 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 	if docheck then
 		if not FileExists(MooglePath..[[Moogle Scripts.lua]]) or not FileExists(MooglePath..[[Main Window.lua]]) or not FileExists(MooglePath..[[MoogleLib.lua]]) then
 			if not FirstRun then
-				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Scripts.lua',']]..MooglePath..[[Moogle Scripts.lua')]])
-				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/Main%20Window.lua',']]..MooglePath..[[Main Window.lua')]])
+				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua',']]..MooglePath..[[Moogle Scripts.lua')]])
+				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MainWindow.lua',']]..MooglePath..[[Main Window.lua')]])
 				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleLib.lua',']]..MooglePath..[[MoogleLib.lua')]])
 				FirstRun = true
 			end
@@ -531,7 +531,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 					if table.size(webpage) == 0 then
 
 						if NeedWebRequest == true and NeedWebContent == true then
-							Download([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/Moogle%20Scripts.lua]],MooglePath..[[Moogle Scripts.lua]],true)
+							Download([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],MooglePath..[[Moogle Scripts.lua]],true)
 							NeedWebRequest = false
 						elseif NeedWebRequest == false and NeedWebContent == true then
 							local file = io.open(MooglePath..[[Moogle Scripts.lua]],"r")
