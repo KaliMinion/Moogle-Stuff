@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.1.8",
+	Version = "1.1.9",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -24,7 +24,7 @@ MoogleLib.Info = {
 		["1.1.1"] = "Teaks",
 		["1.1.2"] = "Download Overwrite Fix",
 		["1.1.7"] = "Download Overwrite Fix 6...",
-		["1.1.8"] = "File Delete Function",
+		["1.1.9"] = "File Delete Function",
 	}
 }
 
@@ -483,6 +483,7 @@ MoogleLib.Settings = {
 			local Size = General.Size
 			local PowerShell = OS.PowerShell
 			local CreateFolder = OS.CreateFolder
+			local DeleteFile = OS.DeleteFile
 
 			if type(url) == "string" then
 				local bypass = false
@@ -522,7 +523,7 @@ MoogleLib.Settings = {
 					else
 						-- Free to download next file --
 						if FileExists(path) then
-							FileDelete(path)
+							DeleteFile(path)
 						end
 						d("Downloading: "..url.." - "..path)
 						PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
