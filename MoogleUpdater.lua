@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.1.8",
+	Version = "1.1.9",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -15,6 +15,7 @@ MoogleUpdater.Info = {
 		["1.1.6"] = "Download Fixes",
 		["1.1.7"] = "URL Fixes",
 		["1.1.8"] = "Core Category Renamed",
+		["1.1.9"] = "Now outputs Windows and PowerShell version to System Info.txt",
 	}
 }
 
@@ -45,9 +46,10 @@ local NeedWebRequest = true
 local NeedWebContent = true
 
 function MoogleUpdater.ModuleInit()
-	if FileExists(MoogleLib.API.MooglePath..[[Moogle Scripts.lua]]) then
+	if MoogleLib ~= nil and FileExists(MoogleLib.API.MooglePath..[[Moogle Scripts.lua]]) then
 		MoogleUpdater.MoogleScripts = FileLoad(MoogleLib.API.MooglePath..[[Moogle Scripts.lua]])
 	end
+	io.popen([[powershell -Command "$PSVer = 'PowerShell Version: ' + $PSVersionTable.PSVersion.Major + '.' + $PSVersionTable.PSVersion.Minor; $WinVer = 'Windows Version: ' + (Get-WmiObject -class Win32_OperatingSystem).Caption; ($PSVer, $WinVer) | Out-File -filepath ']]..GetLuaModsPath()..[[MoogleStuff Files\System Info.txt'"]])
 end
 
 MoogleUpdater.TimeUnits = {"Seconds","Minutes","Hours","Days","Weeks","Months"}
