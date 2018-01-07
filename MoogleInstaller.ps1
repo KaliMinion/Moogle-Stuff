@@ -12,6 +12,18 @@ If(!(test-path $MoogleStuff'\module.def'))
 {
 (New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleStuffModule.def',$MoogleStuff+'\module.def')
 }
+If(!(test-path $MoogleStuff'\Main Window.lua'))
+{
+(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MainWindow.lua',$MoogleStuff+'\Main Window.lua')
+}
+If(!(test-path $MoogleStuff'\Moogle Scripts.lua'))
+{
+(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua',$MoogleStuff+'\Moogle Scripts.lua')
+}
+If(!(test-path $MoogleStuff'\MoogleLib.lua'))
+{
+(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleLib.lua',$MoogleStuff+'\MoogleLib.lua')
+}
 
 # If running in the console, wait for input before closing.
 if ($Host.Name -eq "ConsoleHost")
