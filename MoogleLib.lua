@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.1.7",
+	Version = "1.1.8",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -24,6 +24,7 @@ MoogleLib.Info = {
 		["1.1.1"] = "Teaks",
 		["1.1.2"] = "Download Overwrite Fix",
 		["1.1.7"] = "Download Overwrite Fix 6...",
+		["1.1.8"] = "File Delete Function",
 	}
 }
 
@@ -457,6 +458,12 @@ MoogleLib.Settings = {
 
 		function OS.CreateFolder(path)
 			io.popen([[MKDIR  "]]..path..[["]])
+		end
+
+		function OS.DeleteFile(path)
+			if FileExists(path) then
+				io.popen([[del /f /q "]]..path..[["]])
+			end
 		end
 
 		OS.Downloading = {}
