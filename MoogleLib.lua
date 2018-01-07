@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.1.9",
+	Version = "1.2.0",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -24,7 +24,7 @@ MoogleLib.Info = {
 		["1.1.1"] = "Teaks",
 		["1.1.2"] = "Download Overwrite Fix",
 		["1.1.7"] = "Download Overwrite Fix 6...",
-		["1.1.9"] = "File Delete Function",
+		["1.2.0"] = "File Delete Function",
 	}
 }
 
@@ -525,7 +525,9 @@ MoogleLib.Settings = {
 						if FileExists(path) then
 							DeleteFile(path)
 						end
-						d("Downloading: "..url.." - "..path)
+						if url ~= [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]] then
+							d("Downloading: "..url.." - "..path)
+						end
 						PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
 						DownloadQueue[url] = nil
 						OverwriteQueue[url] = nil
