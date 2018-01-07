@@ -6,11 +6,11 @@ local tbl =
 		filepath = [[Moogle Updater.lua]],
 		table = "return MoogleUpdater",
 		url = "https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleUpdater.lua",
-		version = "1.1.7",
+		version = "1.1.8",
 		category = "Core Moogle Module",
 		stability = "Core Moogle Module",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1515184106,
+		lastupdate = 1515344058,
 		info = [[Downloads scripts, keeps them updated. :P]],
 	},
 	[2] = {
