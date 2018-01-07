@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.1",
+	Version = "1.2.2",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -16,6 +16,7 @@ MoogleUpdater.Info = {
 		["1.1.7"] = "URL Fixes",
 		["1.1.8"] = "Core Category Renamed",
 		["1.2.1"] = "Now outputs Windows and PowerShell version to System Info.txt",
+		["1.2.2"] = "Removed auto reload when checking for missing core files."
 	}
 }
 
@@ -525,125 +526,110 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 		if timevalue ~= CheckInterval * 2592000 then timevalue = CheckInterval * 2592000 end
 	end
 
-	if docheck then
-		if not FileExists(MooglePath..[[Moogle Scripts.lua]]) or not FileExists(MooglePath..[[Main Window.lua]]) or not FileExists(MooglePath..[[MoogleLib.lua]]) then
-			if not FirstRun then
-				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua',']]..MooglePath..[[Moogle Scripts.lua')]])
-				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MainWindow.lua',']]..MooglePath..[[Main Window.lua')]])
-				io.popen([[powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleLib.lua',']]..MooglePath..[[MoogleLib.lua')]])
-				FirstRun = true
-			end
-		else
-			docheck = false
-		end
-	elseif MoogleUpdater.Settings.AutoUpdate and (MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue) then
-			if FirstRun then
-				Reload()
-			else
-			-- Helper Variables --
-				local MinionPath = MoogleLib.API.MinionPath
-				local LuaPath = MoogleLib.API.LuaPath
-				local MooglePath = MoogleLib.API.MooglePath
-				local ImageFolder = MoogleLib.API.ImageFolder
-				local ScriptsFolder = MoogleLib.API.ScriptsFolder
-				local API = MoogleLib.API
-				local Lua = MoogleLib.Lua
-				local Debug = Lua.debug
-				local General = Lua.general
-				local IO = Lua.io
-				local Math = Lua.math
-				local OS = Lua.os
-				local String = Lua.string
-				local Table = Lua.table
-				local Gui = MoogleLib.Gui
-				local Download = OS.Download
-			-- End Helper Variables --
-				-- Check to see if Moogle Scripts has been updated --
-					if table.size(webpage) == 0 then
+	if MoogleUpdater.Settings.AutoUpdate and (MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue) then
+		-- Helper Variables --
+			local MinionPath = MoogleLib.API.MinionPath
+			local LuaPath = MoogleLib.API.LuaPath
+			local MooglePath = MoogleLib.API.MooglePath
+			local ImageFolder = MoogleLib.API.ImageFolder
+			local ScriptsFolder = MoogleLib.API.ScriptsFolder
+			local API = MoogleLib.API
+			local Lua = MoogleLib.Lua
+			local Debug = Lua.debug
+			local General = Lua.general
+			local IO = Lua.io
+			local Math = Lua.math
+			local OS = Lua.os
+			local String = Lua.string
+			local Table = Lua.table
+			local Gui = MoogleLib.Gui
+			local Download = OS.Download
+		-- End Helper Variables --
+			-- Check to see if Moogle Scripts has been updated --
+				if table.size(webpage) == 0 then
 
-						if NeedWebRequest == true and NeedWebContent == true then
-							Download([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],MooglePath..[[Moogle Scripts.lua]],true)
-							NeedWebRequest = false
-						elseif NeedWebRequest == false and NeedWebContent == true then
-							local file = io.open(MooglePath..[[Moogle Scripts.lua]],"r")
-							local filesize = 0
-							if file ~= nil then
-								filesize = file:seek("end")
-								file:close()
+					if NeedWebRequest == true and NeedWebContent == true then
+						Download([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],MooglePath..[[Moogle Scripts.lua]],true)
+						NeedWebRequest = false
+					elseif NeedWebRequest == false and NeedWebContent == true then
+						local file = io.open(MooglePath..[[Moogle Scripts.lua]],"r")
+						local filesize = 0
+						if file ~= nil then
+							filesize = file:seek("end")
+							file:close()
+						end
+
+						if filesize ~= 0 then
+							webpage = FileLoad(MooglePath..[[Moogle Scripts.lua]])
+							if table.valid(webpage) then 
+								NeedWebContent = false
 							end
-
-							if filesize ~= 0 then
-								webpage = FileLoad(MooglePath..[[Moogle Scripts.lua]])
-								if table.valid(webpage) then 
-									NeedWebContent = false
+						end
+					end
+				elseif table.valid(webpage) and table.size(webpage) ~= 0 then
+					local different = false
+					for i,e in pairs(webpage) do
+						if MoogleUpdater.MoogleScripts[i] == nil then
+							-- New Script --
+							MoogleUpdater.NewScripts[i] = e.name
+						elseif MoogleUpdater.MoogleScripts[i].version ~= e.version then
+							-- New Script --
+							MoogleUpdater.UpdatedScripts[i] = e.name
+						else
+							if loadstring(e.table..[[ ~= nil]])() and loadstring(e.table..[[.Info ~= nil]])() then
+								local InstalledScriptVersion = (loadstring(e.table..[[.Info.Version]])())
+								if MoogleUpdater.MoogleScripts[i].version ~= InstalledScriptVersion then
+									-- New Script --
+									MoogleUpdater.UpdatedScripts[i] = e.name
 								end
 							end
 						end
-					elseif table.valid(webpage) and table.size(webpage) ~= 0 then
-						local different = false
-						for i,e in pairs(webpage) do
-							if MoogleUpdater.MoogleScripts[i] == nil then
-								-- New Script --
-								MoogleUpdater.NewScripts[i] = e.name
-							elseif MoogleUpdater.MoogleScripts[i].version ~= e.version then
-								-- New Script --
-								MoogleUpdater.UpdatedScripts[i] = e.name
-							else
-								if loadstring(e.table..[[ ~= nil]])() and loadstring(e.table..[[.Info ~= nil]])() then
-									local InstalledScriptVersion = (loadstring(e.table..[[.Info.Version]])())
-									if MoogleUpdater.MoogleScripts[i].version ~= InstalledScriptVersion then
-										-- New Script --
-										MoogleUpdater.UpdatedScripts[i] = e.name
-									end
-								end
-							end
-							if os.difftime(os.time(),e.releasedate) < 604800 then
-								-- New label scripts, released within 1 week --
-								MoogleUpdater.NewLabelScripts[i] = e.name
-							end
-
-							if table.find(MoogleUpdater.NewLabelScripts,e.name) and os.difftime(os.time(),e.releasedate) > 604800 then
-								MoogleUpdater.NewLabelScripts[table.find(MoogleUpdater.NewLabelScripts,e.name)] = nil
-							end
-
-							if os.difftime(os.time(),e.lastupdate) < 604800 then
-								-- New label scripts, released within 1 week --
-								MoogleUpdater.UpdatedLabelScripts[i] = e.name
-							end	
-
-							if table.find(MoogleUpdater.UpdatedLabelScripts,e.name) and os.difftime(os.time(),e.lastupdate) > 604800 then
-								MoogleUpdater.UpdatedLabelScripts[table.find(MoogleUpdater.UpdatedLabelScripts,e.name)] = nil
-							end			
+						if os.difftime(os.time(),e.releasedate) < 604800 then
+							-- New label scripts, released within 1 week --
+							MoogleUpdater.NewLabelScripts[i] = e.name
 						end
 
-						if table.deepcompare(MoogleUpdater.MoogleScripts,webpage) == false then
-							MoogleUpdater.MoogleScripts = table.deepcopy(webpage)
+						if table.find(MoogleUpdater.NewLabelScripts,e.name) and os.difftime(os.time(),e.releasedate) > 604800 then
+							MoogleUpdater.NewLabelScripts[table.find(MoogleUpdater.NewLabelScripts,e.name)] = nil
 						end
-						MoogleUpdater.Settings.LastCheck = os.time()
-						table.clear(webpage)
-						NeedWebRequest = true
-						NeedWebContent = true
+
+						if os.difftime(os.time(),e.lastupdate) < 604800 then
+							-- New label scripts, released within 1 week --
+							MoogleUpdater.UpdatedLabelScripts[i] = e.name
+						end	
+
+						if table.find(MoogleUpdater.UpdatedLabelScripts,e.name) and os.difftime(os.time(),e.lastupdate) > 604800 then
+							MoogleUpdater.UpdatedLabelScripts[table.find(MoogleUpdater.UpdatedLabelScripts,e.name)] = nil
+						end			
 					end
 
-					local same = true
-					if MoogleUpdater.Settings.AutoUpdate and table.valid(MoogleUpdater.UpdatedScripts) then
-						for k,v in pairs(MoogleUpdater.UpdatedScripts) do
-							if MoogleUpdater.UpdatedScriptsReady[k] == nil then
-								Download(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath,true)
-								same = false
-							elseif OS.FinishedDownloads[MoogleUpdater.MoogleScripts[k].url] == nil then
-								-- Send Download Command one more time to add to finished downloads --
-								Download(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath,true)
-							else
-								MoogleUpdater.UpdatedScriptsReady[k] = v
-							end
-						end
-						if same and not FFXIV_Common_BotRunning and MoogleUpdater.Settings.AutoReload then
-							Reload()
+					if table.deepcompare(MoogleUpdater.MoogleScripts,webpage) == false then
+						MoogleUpdater.MoogleScripts = table.deepcopy(webpage)
+					end
+					MoogleUpdater.Settings.LastCheck = os.time()
+					table.clear(webpage)
+					NeedWebRequest = true
+					NeedWebContent = true
+				end
+
+				local same = true
+				if MoogleUpdater.Settings.AutoUpdate and table.valid(MoogleUpdater.UpdatedScripts) then
+					for k,v in pairs(MoogleUpdater.UpdatedScripts) do
+						if MoogleUpdater.UpdatedScriptsReady[k] == nil then
+							Download(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath,true)
+							same = false
+						elseif OS.FinishedDownloads[MoogleUpdater.MoogleScripts[k].url] == nil then
+							-- Send Download Command one more time to add to finished downloads --
+							Download(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath,true)
+						else
+							MoogleUpdater.UpdatedScriptsReady[k] = v
 						end
 					end
-				-- End Moogle Scripts Check --
-			end
+					if same and not FFXIV_Common_BotRunning and MoogleUpdater.Settings.AutoReload then
+						Reload()
+					end
+				end
+			-- End Moogle Scripts Check --
 	else
 		if FileExists(MooglePath..[[temp.lua]]) then
 			local TempPath = MooglePath..[[temp.lua]]
