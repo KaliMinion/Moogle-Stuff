@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.1.7",
+	Version = "1.1.8",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -14,6 +14,7 @@ MoogleUpdater.Info = {
 		["1.1.5"] = "Added Auto Download and Auto Reload",
 		["1.1.6"] = "Download Fixes",
 		["1.1.7"] = "URL Fixes",
+		["1.1.8"] = "Core Category Renamed",
 	}
 }
 
@@ -166,7 +167,7 @@ function MoogleUpdater.Draw()
 							local xCategory,yCategory = GUI:CalcTextSize("Category:"..category) + 4
 							local xStability,yStability = GUI:CalcTextSize("Stability:"..stability) + 4
 
-							if In(name,"Moogle Updater", "Main Window", "MoogleLib") then
+							if category == "Core Moogle Module" then
 								-- Core Files ignore all checks --
 									if FileExists(ImageFolder..[[CoreModule.png]]) then
 										local c = GUI:Image(ImageFolder..[[CoreModule.png]],19,19)
