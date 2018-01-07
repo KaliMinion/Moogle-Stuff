@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.1.6",
+	Version = "1.1.7",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -12,7 +12,8 @@ MoogleUpdater.Info = {
 		["1.1.1"] = "Tweaks",
 		["1.1.2"] = "Adjusted Layout",
 		["1.1.5"] = "Added Auto Download and Auto Reload",
-		["1.1.6"] = "Download Fixes"
+		["1.1.6"] = "Download Fixes",
+		["1.1.7"] = "URL Fixes",
 	}
 }
 
@@ -103,7 +104,8 @@ function MoogleUpdater.Draw()
 					["https://i.imgur.com/f94SN16.png"] = "CoreModule.png",
 					["https://i.imgur.com/ySDKO55.png"] = "DeleteModule.png",
 					["https://i.imgur.com/p0r73pU.png"] = "ImGUI.png",
-					["https://i.imgur.com/ZNizSZM.png"] = "Metrics.png"
+					["https://i.imgur.com/ZNizSZM.png"] = "Metrics.png",
+					["https://i.imgur.com/qkw94dD.png"] = "ViewCode.png"
 				}
 				local downloading = false
 				for url,image in pairs(Images) do
@@ -148,7 +150,10 @@ function MoogleUpdater.Draw()
 				if Valid(scripts) then
 					for k,v in table.pairsbykeys(scripts) do
 						local yChild = AdjustChildren[k] or 50
-						GUI:BeginChild("##"..v.name:gsub(" ",""),0,yChild,true,GUI.WindowFlags_AlwaysAutoResize)
+
+						GUI:PushStyleVar(GUI.StyleVar_WindowPadding,5,5)
+						GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
+						GUI:BeginChild("##"..v.name:gsub(" ",""),0,yChild,true)
 							local name = v.name
 							local category = v.category
 							local stability = v.stability
@@ -283,42 +288,64 @@ function MoogleUpdater.Draw()
 									end
 								end
 							end
-							Text("Release Date: "..tostring(os.date ("%x", v.releasedate)))
-							local LastUpdateVar = os.difftime(os.time(),v.lastupdate)
-							local days = 0
-							local hours = 0
-							local minutes = 0
-							local seconds = 0
+							local LeftText = GUI:CalcTextSize("Last Update: 000d 00h 00m 00s")
+							GUI:BeginChild("##LeftInfo"..name, LeftText, GUI:GetItemsLineHeightWithSpacing() * 3)
+								Text("Version: "..v.version)
+								Text("Release Date: "..tostring(os.date ("%x", v.releasedate)))
+								local LastUpdateVar = os.difftime(os.time(),v.lastupdate)
+								local days = 0
+								local hours = 0
+								local minutes = 0
+								local seconds = 0
 
-							if LastUpdateVar > 86400 then
-								local temp = math.floor(LastUpdateVar/86400)
-								days = temp
-								LastUpdateVar = LastUpdateVar - (temp * 86400)
-							end
-							if LastUpdateVar > 3600 then
-								local temp = math.floor(LastUpdateVar/3600)
-								hours = temp
-								LastUpdateVar = LastUpdateVar - (temp * 3600)
-							end
-							if LastUpdateVar > 60 then
-								local temp = math.floor(LastUpdateVar/60)
-								minutes = temp
-								LastUpdateVar = LastUpdateVar - (temp * 60)
-							end
-							if LastUpdateVar < 60 then
-								local temp = LastUpdateVar
-								seconds = temp
-								LastUpdateVar = LastUpdateVar - temp
-							end
+								if LastUpdateVar > 86400 then
+									local temp = math.floor(LastUpdateVar/86400)
+									days = temp
+									LastUpdateVar = LastUpdateVar - (temp * 86400)
+								end
+								if LastUpdateVar > 3600 then
+									local temp = math.floor(LastUpdateVar/3600)
+									hours = temp
+									LastUpdateVar = LastUpdateVar - (temp * 3600)
+								end
+								if LastUpdateVar > 60 then
+									local temp = math.floor(LastUpdateVar/60)
+									minutes = temp
+									LastUpdateVar = LastUpdateVar - (temp * 60)
+								end
+								if LastUpdateVar < 60 then
+									local temp = LastUpdateVar
+									seconds = temp
+									LastUpdateVar = LastUpdateVar - temp
+								end
 
-							local TimeStr = ""
+								local TimeStr = ""
 
-							if days ~= 0 then TimeStr = TimeStr..days.."d " end
-							if hours ~= 0 or days ~= 0 then TimeStr = TimeStr..string.format("%02d",hours).."h " end
-							if minutes ~= 0 or hours ~= 0 then TimeStr = TimeStr..string.format("%02d",minutes).."m " end
-							if seconds ~= 0 or minutes ~= 0 then TimeStr = TimeStr..string.format("%02d",seconds).."s" end
+								if days ~= 0 then TimeStr = TimeStr..days.."d " end
+								if hours ~= 0 or days ~= 0 then TimeStr = TimeStr..string.format("%02d",hours).."h " end
+								if minutes ~= 0 or hours ~= 0 then TimeStr = TimeStr..string.format("%02d",minutes).."m " end
+								if seconds ~= 0 or minutes ~= 0 then TimeStr = TimeStr..string.format("%02d",seconds).."s" end
 
-							Text("Last Update: "..TimeStr)
+								Text("Last Update: "..TimeStr)
+							GUI:EndChild() SameLine(0)
+							GUI:BeginChild("##Description"..name, GUI:GetContentRegionAvail() - 30, GUI:GetItemsLineHeightWithSpacing() * 3,true)
+								GUI:PushTextWrapPos()
+								GUI:Text(v.info)
+							GUI:EndChild() SameLine(0)
+							GUI:BeginChild("##Image"..name, 30, GUI:GetItemsLineHeightWithSpacing() * 3)
+								local x,y = GUI:GetContentRegionMax()
+								GUI:Dummy(0,y-30)
+								GUI:Dummy(3,0) SameLine(0)
+								if FileExists(ImageFolder..[[ViewCode.png]]) then
+									local c = GUI:Image(ImageFolder..[[ViewCode.png]],30,30)
+									if GUI:IsItemHovered(c) then
+										Tooltip("View Code")
+										if GUI:IsItemClicked(c) then
+											io.popen([[cmd /c start ]]..v.url)
+										end
+									end
+								end
+							GUI:EndChild()
 
 							local xChildAvail,yChildAvail = GUI:GetContentRegionAvail()
 							if AdjustChildren[k] == nil then
@@ -327,6 +354,7 @@ function MoogleUpdater.Draw()
 								AdjustChildren[k] = AdjustChildren[k] - yChildAvail
 							end
 						GUI:EndChild()
+						GUI:PopStyleVar(2)
 					end
 				end
 			end
@@ -505,7 +533,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 		else
 			docheck = false
 		end
-	elseif MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue then
+	elseif MoogleUpdater.Settings.AutoUpdate and (MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue) then
 			if FirstRun then
 				Reload()
 			else
