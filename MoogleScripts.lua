@@ -6,11 +6,12 @@ local tbl =
 		filepath = [[Moogle Updater.lua]],
 		table = "return MoogleUpdater",
 		url = "https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleUpdater.lua",
-		version = "1.1.6",
+		version = "1.1.7",
 		category = "Core",
 		stability = "Core",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1515184106,
+		info = [[Downloads scripts, keeps them updated. :P]],
 	},
 	[2] = {
 		name = "Main Window",
@@ -24,6 +25,7 @@ local tbl =
 		instver = KaliMainWindow.Info.Version or false,
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1515262140,
+		info = [[The Main Window that all Moogle Scripts share to display the settings for each module.]],
 	},
 	[3] = {
 		name = "MoogleLib",
@@ -36,6 +38,7 @@ local tbl =
 		stability = "Core",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1515183673,
+		info = [[Where all my Moogle Functions are stored.]],
 	},
 	[4] = {
 		name = "Moogle Text to Speech",
@@ -48,6 +51,7 @@ local tbl =
 		stability = "WiP but Working",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1515131188,
+		info = [[Narrates NPC dialog, as well as some other windows in game.]],
 		module = [[[Module]
 Name=Moogle TTS
 Dependencies=minionlib
@@ -66,6 +70,7 @@ enabled=1]],
 		stability = "Working",
 		releasedate = os.time { year = 2017, month = 05, day = 29 },
 		lastupdate = 1515131103,
+		info = [[An FPS overlay like Fraps or Nvidia's GeForce Experience. For people who have issue using Minion with other overlays.]],
 		module = [[[Module]
 Name=Moogle FPS
 Dependencies=minionlib
