@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.2.0",
+	Version = "1.2.1",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -25,6 +25,7 @@ MoogleLib.Info = {
 		["1.1.2"] = "Download Overwrite Fix",
 		["1.1.7"] = "Download Overwrite Fix 6...",
 		["1.2.0"] = "File Delete Function",
+		["1.2.1"] = "New Functions",
 	}
 }
 
@@ -119,54 +120,101 @@ MoogleLib.Settings = {
 				end
 		end
 
-		function API.SaveVar(varstr,var)
+		function API.Vars(Tbl,load)
 			if In(varstr,"help","Help","?") then
-				d([[SaveVar Function Example: MoogleLib.API.SaveVar("a.b.c[d][test]",tbl)]])
+				d([[Save Function Example: Save({["a.b.c[d][test]"] = "MoogleModule.tbl.var"})]])
 			else
 				local IsNil = General.IsNil
+				local NotNil = General.NotNil
 				local Error = General.Error
+				local Type = General.Type
+				local Valid = Table.Valid
 
-				local t = {};
 				local changed = false
-				for w in varstr:gmatch("[%P/_/:]+") do
-					t[#t+1] = w
-				end
-				local LastTable = Settings
 
-				if table.valid(t) then
-					for k,v in pairs(t) do
-						if k ~= #t then
-							if IsNil(LastTable[v]) then
-								LastTable[v] = {}
-								changed = true
-							elseif type(LastTable[v]) ~= "table" then
-								Error("LastTable[v] is not a table, but is a: "..type(LastTable[v]))
-							end
-							LastTable = LastTable[v]
-						elseif k == #t then
-							if IsNil(LastTable[v]) then
-								LastTable[v] = var
-								changed = true
-							else
-								if type(LastTable[v]) == "table" then
-									if table.deepcompare(LastTable[v],var) == false then
-										LastTable[v] = var
-										changed = true
+				if Type(Tbl,"table") and Valid(Tbl) then
+					for k,v in pairs(Tbl) do
+						local stop = false
+						_G.SaveTable = Settings
+						local savevar = ""
+						_G.ModuleTable = _G
+						local modvar = ""
+						local t = {}
+						local t2 = {}
+						for w in tostring(k):gmatch("[%P/_/:]+") do
+							t[#t+1] = w
+						end
+						for w in tostring(v):gmatch("[%P/_/:]+") do
+							t2[#t2+1] = w
+						end
+
+						if Valid(t,t2) then
+							SaveTable = SaveTable[t2[1]]
+							for i,e in ipairs(t) do
+								if stop == false then
+									if NotNil(tonumber(e)) then
+										e = tonumber(e)
 									end
-								elseif LastTable[v] ~= var then
-									LastTable[v] = var changed = true
+									if i < #t then
+										if load then
+											if IsNil(SaveTable[e]) then
+												stop = true
+											else
+												SaveTable = SaveTable[e]
+											end
+										else
+											-- Create a Table since the table string is not finished --
+											if IsNil(SaveTable[e]) then
+												SaveTable[e] = {}
+												changed = true
+											elseif Type(SaveTable[e],"table") == false then 
+												Error("SaveTable[e] is not a table, but is a: "..type(SaveTable[e]))
+											end
+											SaveTable = SaveTable[e]
+										end
+									else
+										if load then
+											if IsNil(SaveTable[e]) then
+												stop = true
+											else
+												savevar = e
+											end
+										else
+											savevar = e
+										end
+									end
 								end
 							end
+							if stop == false then
+								table.print(t) table.print(t2)
+								for i,e in ipairs(t2) do
+									if NotNil(tonumber(e)) then
+										e = tonumber(e)
+									end
+									if i < #t2 then
+										ModuleTable = ModuleTable[e]
+									else
+										modvar = e
+									end
+								end
+								if load then
+									ModuleTable[modvar] = SaveTable[savevar]
+								else
+									SaveTable[savevar] = ModuleTable[modvar]
+								end
+							end
+						else
+							Error(tostring(k).." is not a valid table string")
 						end
 					end
-				else
-					Error("t is not a valid table.")
 				end
 				if changed then
 					ml_settings_mgr:Save()
 				end
 			end
 		end
+		MoogleSave = API.Vars
+		MoogleLoad = API.Vars
 
 		function API.CurrentTarget(check, useNil)
 			local NotNil = General.NotNil
@@ -248,12 +296,68 @@ MoogleLib.Settings = {
 			end
 		end
 
-		function General.Is(check, compare, altyes, altno)
+		function General.Is(check, ...)
 			local NotNil = General.NotNil
 			local Type = General.Type
+			local Valid = Table.Valid
+
+			local compare = {...}
 			
-			if NotNil(compare) then
-				if check == compare then
+			if Valid(compare) then
+				for i = 1, #compare do
+					if (check == compare[i] or (tonumber(check) ~= nil and tonumber(check) == tonumber(compare[i]))) then
+						return true
+					end
+				end
+
+				return false
+			else
+				if Type(check, "boolean") then
+					return check
+				else
+					return false
+				end
+			end
+		end
+
+		function General.IsAll(check, ...)
+			local NotNil = General.NotNil
+			local Type = General.Type
+			local Valid = Table.Valid
+
+			local compare = {...}
+			
+			if Valid(compare) then
+				local IsAllTrue = true
+				for i = 1, #compare do
+					if IsAllTrue then
+						if (check ~= compare[i] or (tonumber(check) ~= nil and tonumber(check) ~= tonumber(compare[i]))) then
+							IsAllTrue = false
+						end
+					end
+				end
+				
+				if IsAllTrue then
+					return true
+				else
+					return false
+				end
+			else
+				if Type(check, "boolean") then
+					return check
+				else
+					return false
+				end
+			end
+		end
+
+		function General.Is2(check, compare, altyes, altno)
+			local NotNil = General.NotNil
+			local Type = General.Type
+			local Valid = Table.Valid
+			
+			if Valid(compare) then
+				if (check == compare or (tonumber(check) ~= nil and tonumber(check) == tonumber(compare))) then
 					return altyes or true
 				else
 					return altno or false
@@ -267,8 +371,63 @@ MoogleLib.Settings = {
 			end
 		end
 
-		function General.Not(check, compare, altyes, altno)
-			if check ~= compare then
+		function General.Not(check, ...)
+			local NotNil = General.NotNil
+			local Type = General.Type
+			local Valid = Table.Valid
+
+			local compare = {...}
+			
+			if Valid(compare) then
+				for i = 1, #compare do
+					if (check ~= compare[i] or (tonumber(check) ~= nil and tonumber(check) ~= tonumber(compare[i]))) then
+						return true
+					end
+				end
+
+				return false
+			else
+				if Type(check, "boolean") then
+					return not check
+				else
+					return false
+				end
+			end
+		end
+
+		function General.NotAll(check, ...)
+			local NotNil = General.NotNil
+			local Type = General.Type
+			local Valid = Table.Valid
+
+			local compare = {...}
+			
+			if Valid(compare) then
+				local IsAllFalse = true
+				for i = 1, #compare do
+					if IsAllFalse then
+						if (check == compare[i] or (tonumber(check) ~= nil and tonumber(check) == tonumber(compare[i]))) then
+							IsAllFalse = false
+						end
+					end
+				end
+				
+				if IsAllFalse then
+					return true
+				else
+					return false
+				end
+			else
+				if Type(check, "boolean") then
+					return not check
+				else
+					return false
+				end
+			end
+		end
+
+		function General.Not2(check, compare, altyes, altno)
+			if (check ~= compare or (tonumber(check) ~= nil and tonumber(check) ~= tonumber(compare))) then
 				return altyes or true
 			else
 				return altno or false
@@ -279,13 +438,37 @@ MoogleLib.Settings = {
 			local NotNil = General.NotNil
 
 			if NotNil(compare) then
-				if type(var) == compare then
-					return altyes or true
-				else
+				if type(compare) == "table" then
+					for i = 1, #compare do
+						if type(var) == compare[i] then
+							return altyes or true
+						end
+					end
 					return altno or false
+				else
+					if type(var) == compare then
+						return altyes or true
+					else
+						return altno or false
+					end
 				end
 			else
 				return type(var)
+			end
+		end
+
+		function General.NotType(var, compare, altyes, altno)
+			local NotNil = General.NotNil
+			local IsNil = General.IsNil
+
+			if NotNil(compare) then
+				if type(var) == compare then
+					return altno or false
+				else
+					return altyes or true
+				end
+			else
+				return false
 			end
 		end
 
@@ -466,6 +649,125 @@ MoogleLib.Settings = {
 			end
 		end
 
+		local ToggleCMD = false
+		local CMD
+		local oldClip
+		local lastCopy
+		function OS.CMD(cmd, PowerShell, Copy)
+			if oldClip == nil then
+				oldClip = GUI:GetClipboardText() or ""
+				GUI:SetClipboardText("MoogleWait")
+				lastCopy = Copy
+			end
+			local ctype = io.type(CMD)
+			if ctype == "file" then
+				local testclip = GUI:GetClipboardText()
+				if testclip and testclip ~= "MoogleWait" and testclip ~= "" then
+					oldClip = nil
+					lastCopy = nil
+					CMD:close()
+					CMD = nil
+					ToggleCMD = false
+					if Copy then
+						return "CMD output copied to clipboard."
+					else
+						GUI:SetClipboardText(oldClip)
+						return testclip
+					end
+				end
+			else
+				local str
+				if PowerShell then
+					str = [[PowerShell -Command "]]..cmd..[["]]
+				else
+					str = cmd
+				end
+				CMD = io.popen(str..[[ | clip]])
+				ToggleCMD = true
+			end
+		end
+
+		local ToggleVersionCheck = false
+		local result
+		function OS.VersionCheck(url)
+			local Type = General.Type
+			local Valid = Table.Valid
+
+			local ctype = io.type(CMD)
+			if ctype == "file" or result then
+				if result then
+					local str = result:gsub("[^%d\.]","")
+					local tbl = string.totable(str,"%p")
+					local value = (tbl[1] * 1000000) + (tbl[2] * 1000) + tbl[3]
+					result = nil
+					ToggleCMD = false
+					ToggleVersionCheck = false
+					d(str)
+					d("value: "..tostring(value))
+				else
+					result = OS.CMD(nil,nil,lastCopy)
+				end
+			else
+				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[') -split '[\r\n|\r\n]' | Select-String -Pattern '(?<=\tVersion = ").*(?=",)']],true)
+				ToggleVersionCheck = true
+			end
+		end
+
+		local TogglePing = false
+		local result
+		function OS.Ping(count, ...)
+			local Type = General.Type
+			local Valid = Table.Valid
+
+			local ctype = io.type(CMD)
+			if ctype == "file" or result then
+				if result then
+					local tbl = loadstring(result)()
+					if type(tbl) == "table" then
+						table.print(tbl)
+					else
+						d("tbl is not table, but is "..type(tbl))
+					end
+
+					result = nil
+
+					ToggleCMD = false
+					TogglePing = false
+				else
+					result = OS.CMD(nil,nil,lastCopy)
+				end
+			else
+				local t = {}
+				if Type(count,"number") then
+					count = count
+				else
+					t[#t+1] = count
+					count = 4
+				end
+
+				local IP = {...}
+
+				if Valid(IP) then
+					for i=1, #IP do
+						t[#t+1] = IP[i]
+					end
+				end
+
+				local IPstr = ""
+				for i=1, #t do
+					if i == 1 then
+						IPstr = [[']]..t[i]..[[']]
+					else
+						IPstr = IPstr..[[,']]..t[i]..[[']]
+					end
+				end
+
+				OS.CMD([[$lines = 'local tbl = {} '; $CompName = ]]..IPstr..[[; foreach ($comp in $CompName) { $result = (Test-Connection -ComputerName $comp -Count ]]..count..[[ | measure -property ResponseTime -Average).average; $lines += 'tbl[\"' + $comp + '\"] = ' + $result + '; ' } $lines += ' return tbl '; $lines]], true)
+
+				TogglePing = true
+			end
+		end
+
 		OS.Downloading = {}
 		OS.LastAttempt = {}
 		OS.DownloadQueue = {}
@@ -600,16 +902,67 @@ MoogleLib.Settings = {
 	-- End Operating System (OS) Functions --
 
 	-- String Functions --
+		function String.Split(str,length)
+			local InsertIfNil = Table.InsertIfNil
+			length = length or 150
+			local tbl = {}
+			for i = 1, #str, length do
+				tbl[#tbl+1] = str:sub(i, i + length - 1)
+			end
+			return tbl
+		end
 	-- End String Functions --
 
 	-- Table Functions --
-		function Table.Valid(tbl) -- Short version of table.valid
+		function Table.Valid(tbl,...) -- Short version of table.valid, expanded to check multiple tables at once
 			local Type = General.Type
+			local NotType = General.NotType
+			local Not = General.Not
 
-			if Type(tbl, "table") then
-				return table.valid(tbl)
+			local tbls = {...}
+
+			if Type(tbl, "table") and table.valid(tbl) then
+				local IsItValid = true
+				for i = 1, #tbls do
+					if Not(IsItValid,false) then
+						if NotType(tbls[i], "table") and not table.valid(tbls[i]) then
+							IsItValid = false
+						end
+					end
+				end
+				if IsItValid then
+					return true
+				else
+					return false
+				end
 			else
 				return false
+			end
+		end
+
+		function Table.NotValid(tbl,...)
+			local Type = General.Type
+			local NotType = General.NotType
+			local Not = General.Not
+
+			local tbls = {...}
+
+			if Type(tbl, "table") and table.valid(tbl) then
+				local IsItNotValid = true
+				for i = 1, #tbls do
+					if Not(IsItNotValid,false) then
+						if Type(tbls[i], "table") and table.valid(tbls[i]) then
+							IsItNotValid = false
+						end
+					end
+				end
+				if IsItNotValid then
+					return true
+				else
+					return false
+				end
+			else
+				return true
 			end
 		end
 
@@ -639,17 +992,263 @@ MoogleLib.Settings = {
 			end
 		end
 
-		function Table.RemoveIfNil(check, tbl, key)
+		function Table.RemoveIfNil(tbl,CrossCheck)
 			local IsNil = General.IsNil
 
-			if IsNil(check) then
-				tbl[key] = nil
+			if table.valid(tbl) then
+				for k,v in pairs(tbl) do
+					if IsNil(CrossCheck(k)) then
+						tbl[k] = nil
+					end
+				end
+			else
+				tbl = nil
 			end
 		end
 
 		function Table.UpdateIfChanged(tbl, key, value)
-			if tbl[key] ~= value then tbl[key] = value end
+			-- works for both tables and variables --
+			local IsNil = General.IsNil
+
+			if value then
+				if tbl[key] ~= value then tbl[key] = value end
+			else
+				if tbl ~= key then tbl = key end
+			end
 		end
+
+		function Table.RemoveExpired(table1,table2)
+			-- Removes entries from Table 1 if they don't exist in Table 2 --
+			local IsNil = General.IsNil
+			local Valid = Table.Valid
+			local NotValid = Table.NotValid
+
+			if Valid(table1) and Valid(table2) then
+
+			else
+				-- one of the tables isn't valid --
+				if NotValid(table1) then
+					-- Table 1 is not valid --
+				else
+					-- Table 2 is not valid --
+				end
+			end
+		end
+
+		function Table.Unpack(method,...)
+			local Is = General.Is
+			local NotAll = General.NotAll
+
+			if NotAll(method,"print","d","return") then
+				Table.Unpack("return",...)
+			end
+			local arg = {...}
+			for i = 1, #arg do
+				if Is(method,"print","d") then
+					if type(arg[i]) == "table" then
+						for k,v in table.pairsbykeys(arg[i]) do
+							if type(v) ~= "table" then
+								d(tostring(v))
+							else
+								Table.Unpack("print",v)
+							end
+						end
+					else
+						d(arg[i])
+					end
+				elseif method == "return" then
+					if type(arg[i]) == "table" then
+						for k,v in table.pairsbykeys(arg[i]) do
+							if type(v) ~= "table" then
+								return v
+							else
+								Table.Unpack("return",v)
+							end
+						end
+					else
+						return arg[i]
+					end
+				end
+			end
+		end
+
+		Table.BannedKeys = {}
+		local TempFunctionStrings = {}
+		local PrintRunning = false
+		local PrintTime = 0
+		local PrintLastTbl
+		local PrintLastName
+		local PrintLastSearch
+		local PrintLastDepth
+		local PrintLastHistory
+		local Printfilelocation
+		local lasthistory
+		local lastlasthistory
+		local ResumePrinting = true
+		local PrintToFile = false
+		local PrintToFileTable = {}
+		local PrintTables = {}
+		function Table.Print(tbl,name,search,filelocation,depth,history)
+			local Is = General.Is
+			local Type = General.Type
+			local Not = General.Not
+			local IsNil = General.IsNil
+			local NotNil = General.NotNil
+			local NotAll = General.NotAll
+			local Print = Table.Print
+			local Valid = Table.Valid
+			local InsertIfNil = Table.InsertIfNil
+			local max = 50
+			if IsNil(name) then
+				if Type(tbl,"string") then
+					local t = {};
+					for w in tbl:gmatch("[%P/_/:]+") do
+						t[#t+1] = w
+					end
+					name = ""
+					tbl = _G
+					for k,v in pairs(t) do
+						tbl = tbl[v]
+						if t[k-1] then name = name.." [" end
+						name = name..v
+						if t[k+1] then name = name.."]" end
+					end
+				else
+					name = name or ""
+				end
+			end
+			search = search or ""
+			depth = tonumber(depth) or 0
+			history = history or ""
+			if filelocation ~= nil then
+				PrintToFile = true
+				if filelocation == true then
+					filelocation = MooglePath..[[output.lua]]
+				end
+			end
+
+			if PrintRunning == false  then
+				if NotAll(name,""," ",nil) then
+					d(string.rep(" ",500))
+					local str = ""
+					if NotNil(name) then
+						str = str.."Searching Table: ["..name.."]"
+					end
+					if NotNil(search) then
+						str = str..", and searching for the string: ["..search.."]"
+					end
+					d(str)
+					d(string.rep(" ",500))
+				end
+				PrintLastTbl = tbl
+				PrintLastName = name
+				PrintLastSearch = search
+				PrintLastDepth = depth
+				PrintLastHistory = history
+				Printfilelocation = filelocation
+				PrintRunning = true
+			end
+
+			for k,v in table.pairsbykeys(tbl) do
+				local function d3(string)
+					local allowed = true
+					if search then
+						allowed = false
+						if NotAll(nil,k,v,search) then
+							local search = search:lower()
+							if tostring(k):lower():match(search) then
+								allowed = true
+							elseif type(v) ~= "table" and tostring(v):lower():match(search) then
+								allowed = true
+							end
+						end
+					end
+					if allowed and ResumePrinting then
+						if PrintToFile then
+							PrintToFileTable[#PrintToFileTable + 1] = string
+						else
+							d(string)
+						end
+					end
+				end
+				PrintTime = Now()
+				lasthistory = "["..name.."]"..history.." "..tostring(k)
+				if Is(k,"_G","__index","BannedKeys","parent") then
+					d3(string.rep("   ",depth).."["..name.."]"..history.." "..tostring(k).." is blocked table and will be skipped over.")
+				else
+					if type(v) == "table" then
+						if depth < max then
+							d3(string.rep("   ",depth).."["..name.."]"..history.." "..tostring(k).." = \{")
+							Table.Print(v,name,search,filelocation,depth+1,history.." ["..k.."]")
+							d3(string.rep("   ",depth).."["..name.."]"..history.." \}")
+						else
+							d3(string.rep("   ",depth).."["..name.."]"..history.." "..tostring(k).." has reached its limit at a depth of "..max.." and will not continue to print deeper.")
+						end
+					else
+						local str
+						if Type(v,"nil") then
+							str = "nil"
+						elseif Type(v,"string") then
+							str = "'"..v.."'"
+						elseif Type(v,"boolean") then
+							str = tostring(v):upper()
+						elseif Type(v,"function") then
+							if Table.BannedKeys[lasthistory] then
+								InsertIfNil(TempFunctionStrings,tostring(v),true)
+								if lasthistory == lastlasthistory then
+									ResumePrinting = true
+								end
+								str = tostring(v).. " (unable to dump function)"
+							else
+								local FunctionString = tostring(v)
+								if TempFunctionStrings[FunctionString] then
+									str = FunctionString.. " (unable to dump function)"
+									Table.BannedKeys[lasthistory] = true
+								else
+									str = FunctionString.." : "..string.dump(v):gsub("[^ !#-~]", "."):gsub("(\n|\r)",""):gsub("[@|%%|%`|%$|%'|%?]",""):gsub("[.][,|!|@|#|$|^|&|*|(|)|_|=|>|<|%:|%;|~|`|\"|/|[| |a-z|A-Z|0-9|%]|%-|%+|%\|%/|?|%>|%<|%{|%}][.]",""):gsub("[.][A-Z]+[.]",""):gsub("[.][.]*[.]","..."):gsub("\.LuaQ\.\.\.","")
+								end
+							end
+						else
+							str = tostring(v)
+						end
+
+						if PrintToFile or str:len() < 150 then
+							d3(string.rep("   ",depth).."["..name.."]"..history.." "..tostring(k).." = "..str)
+						else
+							str = string.rep("   ",depth).."["..name.."]"..history.." "..tostring(k).." = "..str
+							local tbl = String.Split(str)
+							if Valid(tbl) then
+								local startlength = string.len(string.rep("   ",depth).."["..name.."]"..history.." "..tostring(k).." = ")
+								for i,e in pairs(tbl) do
+									if i == 1 then
+										d3(e)
+									else
+										d3(string.rep(" ",startlength)..e)
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+
+			if depth == 0 then
+				PrintRunning = false
+				ResumePrinting = true
+				if PrintToFile then
+					local file = io.open(filelocation,"w")
+					for k,v in table.pairsbykeys(PrintToFileTable) do
+						file:write(v.."\r\n")
+					end
+					file:close()
+					
+					PrintToFile = false
+					table.clear(PrintToFileTable)
+				end
+			end
+		end
+		MoogleSearch = Table.Print
+		MooglePrint = Table.Print
 	-- End Table Functions --
 
 	-- GUI Functions --
@@ -1094,5 +1693,500 @@ MoogleLib.Settings = {
 				return GUI:GetContentRegionAvail()
 			end
 		end
+
+		Gui.VirtualKeys = {
+			[0] = [[None]],
+			[1] = [[Left Mouse Button]],
+			[2] = [[Right Mouse Button]],
+			[3] = [[Middle Mouse Button]],
+			[8] = [[Backspace]],
+			[9] = [[Tab]],
+			[12] = [[Numpad 5 w/o Num Lock]],
+			[13] = [[Enter]],
+			[16] = [[Shift]],
+			[17] = [[Control]],
+			--[18] = [[Alt]],
+			[19] = [[Break/Pause]],
+			[20] = [[Caps Lock]],
+			--[21] = [[IME Kana/Hanguel/Hangul]],
+			--[23] = [[IME Junja]],
+			--[24] = [[IME Final]],
+			--[25] = [[IME Hanja/Kanji]],
+			[27] = [[Escape (Esc)]],
+			[32] = [[Spacebar]],
+			[33] = [[Page Up]],
+			[34] = [[Page Down]],
+			[35] = [[End]],
+			[36] = [[Home]],
+			[37] = [[Left Arrow]],
+			[38] = [[Up Arrow]],
+			[39] = [[Right Arrow]],
+			[40] = [[Down Arrow]],
+			--[44] = [[Print Screen]],
+			[45] = [[Insert]],
+			[46] = [[Delete]],
+			[48] = [[0 )]],
+			[49] = [[1 !]],
+			[50] = [[2 @]],
+			[51] = [[3 #]],
+			[52] = [[4 $]],
+			[53] = [[5 %]],
+			[54] = [[6 ^]],
+			[55] = [[7 &]],
+			[56] = [[8 *]],
+			[57] = [[9 (]],
+			[65] = [[a A]],
+			[66] = [[b B]],
+			[67] = [[c C]],
+			[68] = [[d D]],
+			[69] = [[e E]],
+			[70] = [[f F]],
+			[71] = [[g G]],
+			[72] = [[h H]],
+			[73] = [[i I]],
+			[74] = [[j J]],
+			[75] = [[k K]],
+			[76] = [[l L]],
+			[77] = [[m M]],
+			[78] = [[n N]],
+			[79] = [[o O]],
+			[80] = [[p P]],
+			[81] = [[q Q]],
+			[82] = [[r R]],
+			[83] = [[s S]],
+			[84] = [[t T]],
+			[85] = [[u U]],
+			[86] = [[v V]],
+			[87] = [[w W]],
+			[88] = [[x X]],
+			[89] = [[y Y]],
+			[90] = [[z Z]],
+			[91] = [[Left Windows Key]],
+			[92] = [[Right Windows Key]],
+			[93] = [[Applications/Menu Key]],
+			[96] = [[Numpad 0]],
+			[97] = [[Numpad 1]],
+			[98] = [[Numpad 2]],
+			[99] = [[Numpad 3]],
+			[100] = [[Numpad 4]],
+			[101] = [[Numpad 5]],
+			[102] = [[Numpad 6]],
+			[103] = [[Numpad 7]],
+			[104] = [[Numpad 8]],
+			[105] = [[Numpad 9]],
+			[106] = [[Numpad Multiply]],
+			[107] = [[Numpad Add]],
+			--[108] = [[Separator]],
+			[109] = [[Numpad Subtract]],
+			[110] = [[Numpad Decimal]],
+			[111] = [[Numpad Devide]],
+			[112] = [[F1]],
+			[113] = [[F2]],
+			[114] = [[F3]],
+			[115] = [[F4]],
+			[116] = [[F5]],
+			[117] = [[F6]],
+			[118] = [[F7]],
+			[119] = [[F8]],
+			[120] = [[F9]],
+			--[121] = [[F10]],
+			[122] = [[F11]],
+			[123] = [[F12]],
+			[144] = [[Num Lock]],
+			[145] = [[Scroll Lock]],
+			[166] = [[Browser Back Key]],
+			[167] = [[Browser Forward Key]],
+			[168] = [[Browser Refresh Key]],
+			[169] = [[Browser Stop Key]],
+			[170] = [[Browser Search Key]],
+			[171] = [[Browser Favorites Key]],
+			[172] = [[Browser Start Key]],
+			[173] = [[Volume Mute Key]],
+			[174] = [[Volume Down Key]],
+			[175] = [[Volume Up Key]],
+			[176] = [[Next Track Key]],
+			[177] = [[Previous Track Key]],
+			[178] = [[Stop Media Key]],
+			[179] = [[Play/Pause Media Key]],
+			[180] = [[Start Mail Key]],
+			[181] = [[Select Media Key]],
+			[182] = [[Start Application 1 Key]],
+			[183] = [[Start Application 2 Key]],
+			[186] = [[; :]],
+			[187] = [[= +]],
+			[188] = [[, <]],
+			[189] = [[- _]],
+			[190] = [[. >]],
+			[191] = [[/ ?]],
+			[192] = [[` ~]],
+			[219] = [[[ {]],
+			[220] = [[\ |]],
+			[221] = [[] }]],
+			[222] = [[" ']]
+		}
+		MoogleHotkeys = Gui.VirtualKeys
+		Gui.OrderedKeys = {}
+		Gui.IndexToDecimal = {}
+		function Gui.HotKey(tbl)
+			local tbl = tbl or {}
+			if not table.valid(Gui.OrderedKeys) then
+				for k,v in table.pairsbykeys(MoogleHotkeys) do
+					Gui.OrderedKeys[#Gui.OrderedKeys+1] = v
+					Gui.IndexToDecimal[#Gui.IndexToDecimal+1] = k
+				end
+			end
+			for i = 1,(#tbl+1) do
+				GUI:PushItemWidth(125)
+				local index = tbl[i] or 1
+				index,changed = GUI:Combo("##Key"..tostring(i),index,Gui.OrderedKeys,10)
+				if changed then
+					tbl[i] = index
+					MoogleSave("tbl")
+				end
+				GUI:PopItemWidth()
+				if i ~= (#tbl + 1) then
+					GUI:SameLine(0,5)
+				end
+			end
+			local changed = false
+			if table.valid(tbl) then
+				for k,v in table.pairsbykeys(tbl) do
+					if changed or v == 1 then
+						tbl[k] = nil
+						changed = true
+					end
+				end
+			end
+			return tbl
+		end
 	-- End GUI Functions --
 -- End Core Functions & Helper Functions --
+
+function MoogleLib.Init()
+	if FileExists(MooglePath..[[BannedKeys.lua]]) then
+		Table.BannedKeys = FileLoad(MooglePath..[[BannedKeys.lua]])
+	end
+end
+
+-- MoogleLib.API.ToggleGUI = false
+-- function MoogleLib.Draw()
+-- 	if GUI:IsKeyDown(17) then -- CTRL
+-- 		if GUI:IsKeyReleased(192) then -- `
+-- 			MoogleLib.API.ToggleGUI = not MoogleLib.API.ToggleGUI
+-- 		end
+-- 	end
+
+-- 	if MoogleLib.API.ToggleGUI then
+-- 		GUI:Begin("##MoogleGUIToggle",true)
+-- 			GUI:BeginChild("##MoogleGUIToggle",0,0,GUI.WindowFlags_NoScrollbar)
+-- 			GUI:EndChild()
+-- 		GUI:End()
+-- 		d("KaliMainWindow.GUI.open: "..tostring(KaliMainWindow.GUI.open))
+-- 		d("KaliMainWindow.GUI.visible: "..tostring(KaliMainWindow.GUI.open))
+-- 	end
+-- end
+
+
+local MarkerTable = {
+	attack = {
+		[1] = "empty",
+		[2] = "empty",
+		[3] = "empty",
+		[4] = "empty",
+		[5] = "empty"
+	},
+	bind = {
+		[1] = "empty",
+		[2] = "empty",
+		[3] = "empty"
+	},
+	ignore = {
+		[1] = "empty",
+		[2] = "empty"
+	},
+	circle = "empty",
+	cross = "empty",
+	square = "empty",
+	triangle = "empty"
+}
+local MarkerLogicDebug = false
+local MarkerDelay = 0.5 -- Marker Delay in seconds, 0 = instant, 1 = 1 second, etc
+local MarkerDelayLast = 0
+local MarkerLastMark = 0
+local EntitiesNeedMarked = {}
+local EntitiesNeedRemoved = {}
+local EntitiesHistory = {}
+local EntitiesMarked = {}
+local PreviousTarget = 0
+local lastcheck = 0
+local function MarkerLogic(MarkerType,filters,AddPlayer,buffids,time,ownerid,MissingBuffs) -- MissingBuffs is boolean (true/false), if false then HasBuffs
+	if TimeSince(lastcheck) > 100 then
+		lastcheck = Now()
+		local el = EntityList(filters..[[,maxdistance=55]])
+		if AddPlayer then
+			table.insert(el, Player)
+		end
+		if table.valid(el) then
+			for id,entity in pairs(el) do
+				local pass = false
+				if buffids then
+					if MissingBuffs then
+						if MissingBuffs(entity,buffids,time,ownerid) then
+							pass = true
+						end
+					else
+						if HasBuffs(entity,buffids,time,ownerid) then
+							pass = true
+						end
+					end
+				else
+					pass = true
+				end
+				if pass then
+					if EntitiesMarked[entity.id] == nil and EntitiesNeedMarked[entity.id] == nil then
+						local NeedMarker = true
+						if type(MarkerTable[MarkerType]) == "table" then
+							for i,m in ipairs(MarkerTable[MarkerType]) do
+								if NeedMarker and m == "empty" then
+									MarkerTable[MarkerType][i] = entity.id
+									EntitiesNeedMarked[entity.id] = MarkerType..tostring(i)
+									NeedMarker = false
+								end
+							end
+						else
+							if MarkerTable[MarkerType] == "empty" then
+								MarkerTable[MarkerType] = entity.id
+								EntitiesNeedMarked[entity.id] = MarkerType
+								NeedMarker = false
+							end
+						end
+					end
+					if EntitiesHistory[entity.id] == nil then
+						EntitiesHistory[entity.id] = {}
+						EntitiesHistory[entity.id]["MarkerType"] = MarkerType
+						EntitiesHistory[entity.id]["buffids"] = buffids
+						EntitiesHistory[entity.id]["time"] = time
+						EntitiesHistory[entity.id]["ownerid"] = ownerid
+						EntitiesHistory[entity.id]["MissingBuffs"] = Missingbuffs
+					end
+				else
+					if EntitiesHistory[entity.id] then
+						local pass = false
+						if EntitiesHistory[entity.id]["MissingBuffs"] then
+							if MissingBuffs(entity,EntitiesHistory[entity.id]["buffids"],EntitiesHistory[entity.id]["time"],EntitiesHistory[entity.id]["ownerid"]) then
+								pass = true
+							end
+						else
+							if HasBuffs(entity,EntitiesHistory[entity.id]["buffids"],EntitiesHistory[entity.id]["time"],EntitiesHistory[entity.id]["ownerid"]) then
+								pass = true
+							end
+						end
+						if not pass then
+							if type(MarkerTable[EntitiesHistory[entity.id]["MarkerType"]]) == "table" then
+								for k,v in pairs(MarkerTable[EntitiesHistory[entity.id]["MarkerType"]]) do
+									if v == entity.id then
+										EntitiesNeedRemoved[entity.id] = true
+										EntitiesNeedMarked[entity.id] = nil
+										EntitiesMarked[entity.id] = nil
+										MarkerTable[EntitiesHistory[entity.id]["MarkerType"]][k] = nil
+										EntitiesHistory[entity.id] = nil
+									end
+								end
+							else
+								EntitiesNeedRemoved[entity.id] = true
+								EntitiesNeedMarked[entity.id] = nil
+								EntitiesMarked[entity.id] = nil
+								MarkerTable[EntitiesHistory[entity.id]["MarkerType"]][k] = nil
+								EntitiesHistory[entity.id] = nil
+							end
+						end
+					end
+				end
+			end
+		end
+		if table.valid(MarkerTable) then
+			-- Check if you need to remove old entries --
+			for k,v in pairs(MarkerTable) do
+				if type(v) == "table" then
+					for i,e in pairs(v) do
+						if e ~= "empty" then
+							if not EntityList:Get(e) then
+								EntitiesNeedMarked[e] = nil
+								EntitiesMarked[e] = nil
+								MarkerTable[k][i] = "empty"
+							end
+						end
+					end
+				else
+					if v ~= "empty" then
+						if not EntityList:Get(v) then
+							EntitiesNeedMarked[v] = nil
+							EntitiesMarked[v] = nil
+							MarkerTable[k] = "empty"
+						end
+					end
+				end
+			end
+		end
+		if table.valid(EntitiesNeedMarked) then
+			for k,v in pairs(EntitiesNeedMarked) do
+				local PlayerTarget = Player:GetTarget()
+				if PreviousTarget == 0 then
+					local entity = EntityList:Get(k)
+					if entity then
+						if PlayerTarget then
+							PreviousTarget = PlayerTarget.id
+						else
+							PreviousTarget = Player.id
+						end
+						Player:SetTarget(k)
+					end
+				end
+				if PreviousTarget ~= 0 then -- purposely ended w/o else to continue flow
+					local PlayerTarget = Player:GetTarget()
+					if PlayerTarget then
+						if PlayerTarget.id == k then
+							if EntitiesMarked[k] == nil then
+								if MarkerDelayLast == 0 then
+									MarkerDelayLast = k
+								elseif MarkerDelayLast == k and TimeSince(MarkerLastMark) > (MarkerDelay * 1000) then
+									SendTextCommand([[/marking ]]..v..[[ <t>]])
+									EntitiesMarked[k] = v
+									EntitiesNeedMarked[k] = nil
+									MarkerLastMark = Now()
+									MarkerDelayLast = 0
+								end
+							end
+						else
+							if MarkerDelayLast == 0 then
+								local entity = EntityList:Get(k)
+								if entity then
+									Player:SetTarget(k)
+								end
+							end
+						end
+					else
+						local entity = EntityList:Get(k)
+						if entity then
+							Player:SetTarget(k)
+						end
+					end
+				end
+			end
+		else
+			-- EntitiesNeedMarked is done, time to reset target back to original --
+			if PreviousTarget ~= 0 then
+				local CheckTarget = EntityList:Get(PreviousTarget)
+				if CheckTarget and CheckTarget.targetable then
+					-- Entity still exists, just need to set target again --
+					Player:SetTarget(PreviousTarget)
+				else
+					-- Previous Target is not valid, time to improvise --
+					if Player.role == 4 then
+						-- You're a healer, so lets set your current target to lowest HP% party member --
+						local el = EntityList:Get([[myparty,targetable,alive]])
+						if table.valid(el) then
+							local lowesthp = 0
+							local hpp = 100
+							for id, party in pairs(el) do
+								if party.hp.percent < hpp then
+									lowesthp = party.id
+									hpp = party.hp.percent
+								end
+							end
+							if lowesthp ~= 0 then
+								Player:SetTarget(lowesthp)
+							end
+						end
+					else
+						-- You're either a DPS or a tank, so setting your target to nearest entity --
+						local el = EntityList([[type=2,targetable,attackable,alive,nearest]])
+						if table.valid(el) then
+							for id,entity in pairs(el) do
+								Player:SetTarget(entity.id)
+							end
+						end
+					end
+				end
+				PreviousTarget = 0
+			end
+		end
+		if table.valid(EntitiesNeedRemoved) and not table.valid(EntitiesNeedMarked) then
+			for k,v in pairs(EntitiesNeedRemoved) do
+				local PlayerTarget = Player:GetTarget()
+				if PreviousTarget == 0 then
+					local entity = EntityList:Get(k)
+					if entity then
+						if PlayerTarget then
+							PreviousTarget = PlayerTarget.id
+						else
+							PreviousTarget = Player.id
+						end
+						Player:SetTarget(k)
+					end
+				end
+				if PreviousTarget ~= 0 then -- purposely ended w/o else to continue flow
+					local PlayerTarget = Player:GetTarget()
+					if PlayerTarget then
+						if PlayerTarget.id == k then
+							if MarkerDelayLast == 0 then
+								MarkerDelayLast = k
+							elseif MarkerDelayLast == k and TimeSince(MarkerLastMark) > (MarkerDelay * 1000) then
+								SendTextCommand([[/marking clear <t>]])
+								EntitiesNeedRemoved[k] = nil
+								MarkerLastMark = Now()
+								MarkerDelayLast = 0
+							end
+						else
+							if MarkerDelayLast == 0 then
+								local entity = EntityList:Get(k)
+								if entity then
+									Player:SetTarget(k)
+								end
+							end
+						end
+					else
+						local entity = EntityList:Get(k)
+						if entity then
+							Player:SetTarget(k)
+						end
+					end
+				end
+			end
+		end
+		if MarkerLogicDebug then
+			ml_gui.showconsole = true
+			d("filters: "..tostring(filters))
+			d("MarkerTable:")
+			table.print(MarkerTable)
+			d("EntitiesNeedMarked:")
+			table.print(EntitiesNeedMarked)
+			d("EntitiesMarked:")
+			table.print(EntitiesMarked)
+			d("PreviousTarget: "..tostring(PreviousTarget))
+		end
+	end
+end
+function MoogleLib.OnUpdate()
+	-- While executing Table.Print, if you hit a function you can't dump, it skips trying to --
+	if PrintRunning then
+		if TimeSince(PrintTime) > 100 then
+			ResumePrinting = false
+			PrintTime = Now()
+			lastlasthistory = lasthistory
+			Table.BannedKeys[lasthistory] = true
+			Table.Print(PrintLastTbl,PrintLastName,PrintLastSearch,PrintLastDepth,PrintLastHistory,Printfilelocation)
+		end
+	end
+	if ToggleCMD and not TogglePing and not ToggleVersionCheck then
+		local str = OS.CMD(nil,nil,lastCopy)
+		if str then d(str) end
+	end
+	if TogglePing then OS.Ping() end
+	if ToggleVersionCheck then OS.VersionCheck() end
+	-- MarkerLogic("attack",[[type=1,targetable]],true,"48")
+end
+
+RegisterEventHandler("Module.Initalize", MoogleLib.Init)
+-- RegisterEventHandler("Gameloop.Draw", MoogleLib.Draw)
+RegisterEventHandler("Gameloop.Update", MoogleLib.OnUpdate)
