@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.2",
+	Version = "1.2.3",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -157,6 +157,7 @@ function MoogleUpdater.Draw()
 
 						GUI:PushStyleVar(GUI.StyleVar_WindowPadding,5,5)
 						GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
+						GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing,0,0)
 						GUI:BeginChild("##"..v.name:gsub(" ",""),0,yChild,true)
 							local name = v.name
 							local category = v.category
@@ -358,7 +359,8 @@ function MoogleUpdater.Draw()
 								AdjustChildren[k] = AdjustChildren[k] - yChildAvail
 							end
 						GUI:EndChild()
-						GUI:PopStyleVar(2)
+						GUI:PopStyleVar(3)
+						GUI:Dummy(0,1)
 					end
 				end
 			end
