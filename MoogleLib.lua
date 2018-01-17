@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.2.1",
+	Version = "1.2.2",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -25,7 +25,7 @@ MoogleLib.Info = {
 		["1.1.2"] = "Download Overwrite Fix",
 		["1.1.7"] = "Download Overwrite Fix 6...",
 		["1.2.0"] = "File Delete Function",
-		["1.2.1"] = "New Functions",
+		["1.2.2"] = "New Functions",
 	}
 }
 
@@ -62,6 +62,15 @@ MoogleLib.Settings = {
 
 	API.ScriptsFolder = MooglePath..[[Moogle Scripts\]]
 	local ScriptsFolder = API.ScriptsFolder
+
+	API.ACRFolder = LuaPath..[[ACR\CombatRoutines\]]
+	local ACRFolder = API.ACRFolder
+
+	API.SenseProfiles = LuaPath..[[Sense\profiles\]]
+	local SenseProfiles = API.SenseProfiles
+
+	API.SenseTriggers = LuaPath..[[Sense\triggers\]]
+	local SenseTriggers = API.SenseTriggers
 -- End Helper Variables --
 
 -- Core Functions & Helper Functions --
@@ -313,7 +322,11 @@ MoogleLib.Settings = {
 				return false
 			else
 				if Type(check, "boolean") then
-					return check
+					if check == true then
+						return true
+					else
+						return false
+					end
 				else
 					return false
 				end
@@ -332,7 +345,7 @@ MoogleLib.Settings = {
 				for i = 1, #compare do
 					if IsAllTrue then
 						if (check ~= compare[i] or (tonumber(check) ~= nil and tonumber(check) ~= tonumber(compare[i]))) then
-							IsAllTrue = false
+							return false
 						end
 					end
 				end
@@ -344,7 +357,11 @@ MoogleLib.Settings = {
 				end
 			else
 				if Type(check, "boolean") then
-					return check
+					if check == true then
+						return true
+					else
+						return false
+					end
 				else
 					return false
 				end
@@ -388,7 +405,11 @@ MoogleLib.Settings = {
 				return false
 			else
 				if Type(check, "boolean") then
-					return not check
+					if check == false then
+						return true
+					else
+						return false
+					end
 				else
 					return false
 				end
@@ -404,10 +425,22 @@ MoogleLib.Settings = {
 			
 			if Valid(compare) then
 				local IsAllFalse = true
-				for i = 1, #compare do
-					if IsAllFalse then
-						if (check == compare[i] or (tonumber(check) ~= nil and tonumber(check) == tonumber(compare[i]))) then
-							IsAllFalse = false
+				if Type(check, "boolean") then
+					if check == false then
+						for i=1,#compare do
+							if compare[i] then
+								return false
+							end
+						end
+					else
+						return false
+					end
+				else
+					for i = 1, #compare do
+						if IsAllFalse then
+							if (check == compare[i] or (tonumber(check) ~= nil and tonumber(check) == tonumber(compare[i]))) then
+								return false
+							end
 						end
 					end
 				end
@@ -419,7 +452,11 @@ MoogleLib.Settings = {
 				end
 			else
 				if Type(check, "boolean") then
-					return not check
+					if check == false then
+						return true
+					else
+						return false
+					end
 				else
 					return false
 				end
@@ -622,16 +659,16 @@ MoogleLib.Settings = {
 	-- End Input and Output (IO) Functions --
 
 	-- Math Functions --
-	function Math.Sign(value)
-		return (value >= 0 and 1) or - 1
-	end
+		function Math.Sign(value)
+			return (value >= 0 and 1) or - 1
+		end
 
-	function Math.Round(value, bracket)
-		bracket = bracket or 1
-		local floor = math.floor
-		local sign = Math.Sign
-		return floor(value / bracket + sign(value) * 0.5) * bracket
-	end
+		function Math.Round(value, bracket)
+			bracket = bracket or 1
+			local floor = math.floor
+			local sign = Math.Sign
+			return floor(value / bracket + sign(value) * 0.5) * bracket
+		end
 	-- End Math Functions --
 
 	-- Operating System (OS) Functions --
@@ -649,10 +686,7 @@ MoogleLib.Settings = {
 			end
 		end
 
-		local ToggleCMD = false
-		local CMD
-		local oldClip
-		local lastCopy
+		local ToggleCMD,CMD,oldClip,lastCopy = false
 		function OS.CMD(cmd, PowerShell, Copy)
 			if oldClip == nil then
 				oldClip = GUI:GetClipboardText() or ""
@@ -687,12 +721,142 @@ MoogleLib.Settings = {
 			end
 		end
 
-		local ToggleVersionCheck = false
-		local result
-		function OS.VersionCheck(url)
+		local ToggleDownloadString,queue,lastpath,result = false,{}
+		function OS.DownloadString(url, path)
+			local NotValid = Table.NotValid
+			if path then
+				lastpath = path
+			else
+				path = lastpath
+			end
+			if url then
+				if queue[url] ~= path then queue[url] = path end
+			else
+				url,path = next(queue)
+			end
+			local ctype = io.type(CMD)
+			if ctype == "file" or result then
+				if result then
+					if path then
+						local file = io.open(path,"w")
+							file:write(result)
+							file:close()
+						queue[url] = nil
+						if NotValid(queue) then
+							ToggleDownloadString = false
+						end
+						lastpath = nil
+						result = nil
+					else
+						queue[url] = nil
+						if NotValid(queue) then
+							ToggleDownloadString = false
+						end
+						lastpath = nil
+						result = nil
+						return result
+					end
+				else
+					result = OS.CMD(nil,nil,lastCopy)
+				end
+			else
+				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true)
+				ToggleDownloadString = true
+			end
+		end
+
+		local ToggleDownloadTable,queue,lasttbl,result = false,{}
+		function OS.DownloadTable(url, TableName)
 			local Type = General.Type
 			local Valid = Table.Valid
+			local NotValid = Table.NotValid
 
+			if url then
+				if queue[url] ~= TableName then queue[url] = TableName end
+			else
+				url, TableName = next(queue)
+			end
+
+			if lasttbl then TableName = lasttbl else lasttbl = TableName end
+
+			if type(TableName) ~= "string" then
+				ml_error("TableName is not a string but a "..type(TableName))
+				return nil
+			end
+			local ctype = io.type(CMD)
+			if ctype == "file" or result then
+				if result then
+					local tbl = loadstring(result)()
+					if type(tbl) == "table" then
+						local t = {};
+						for w in TableName:gmatch("[%P/_/:]+") do
+							t[#t+1] = w
+						end
+						local lastkey
+						local Table = _G
+						for k,v in pairs(t) do
+							if k == #t then
+								lastkey = v
+							else
+								Table = Table[v]
+							end
+						end
+						Table[lastkey] = tbl
+
+						queue[url] = nil
+						if NotValid(queue) then
+							ToggleDownloadTable = false
+						end
+						lasttbl = nil
+						result = nil
+					else
+						ml_debug("'Table' is actually a : "..type(tbl).." URL: "..url, "gLogCNE", 1)
+					end
+				else
+					result = OS.CMD(nil,nil,lastCopy)
+				end
+			else
+				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]], true)
+				ToggleDownloadTable = true
+			end
+		end
+
+		local ToggleDownloadFile,queue,result = false,{}
+		function OS.DownloadFile(url, path)
+			local Valid = Table.Valid
+			local NotValid = Table.NotValid
+
+			if url then
+				if queue[url] ~= path then queue[url] = path end
+			else
+				url, path = next(queue)
+			end
+
+			local ctype = io.type(CMD)
+			if ctype == "file" or result then
+				if result then
+					queue[url] = nil
+					if NotValid(queue) then
+						ToggleDownloadFile = false
+					end
+					result = nil
+				else
+					result = OS.CMD(nil,nil,lastCopy)
+				end
+			else
+				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true)
+				ToggleDownloadFile = true
+			end
+		end
+
+		local ToggleVersionCheck,queue,result = false,{}
+		function OS.VersionCheck(url)
+			local NotValid = Table.NotValid
+			if url then
+				if queue[url] ~= true then queue[url] = true end
+			else
+				url = next(queue)
+			end
 			local ctype = io.type(CMD)
 			if ctype == "file" or result then
 				if result then
@@ -701,9 +865,11 @@ MoogleLib.Settings = {
 					local value = (tbl[1] * 1000000) + (tbl[2] * 1000) + tbl[3]
 					result = nil
 					ToggleCMD = false
-					ToggleVersionCheck = false
-					d(str)
-					d("value: "..tostring(value))
+					queue[url] = nil
+					if NotValid(queue) then
+						ToggleVersionCheck = false
+					end
+					return str,value
 				else
 					result = OS.CMD(nil,nil,lastCopy)
 				end
@@ -713,8 +879,7 @@ MoogleLib.Settings = {
 			end
 		end
 
-		local TogglePing = false
-		local result
+		local TogglePing,result = false
 		function OS.Ping(count, ...)
 			local Type = General.Type
 			local Valid = Table.Valid
@@ -742,7 +907,7 @@ MoogleLib.Settings = {
 					count = count
 				else
 					t[#t+1] = count
-					count = 4
+					count = 1
 				end
 
 				local IP = {...}
@@ -768,137 +933,137 @@ MoogleLib.Settings = {
 			end
 		end
 
-		OS.Downloading = {}
-		OS.LastAttempt = {}
-		OS.DownloadQueue = {}
-		OS.OverwriteQueue = {}
-		OS.FinishedDownloads = {}
-		function OS.Download(url,path,overwrite)
-			local Downloading = OS.Downloading
-			local LastAttempt = OS.LastAttempt
-			local DownloadQueue = OS.DownloadQueue
-			local OverwriteQueue = OS.OverwriteQueue
-			local FinishedDownloads = OS.FinishedDownloads
-			local NotNil = General.NotNil
-			local IsNil = General.IsNil
-			local InsertIfNil = Table.InsertIfNil
-			local Size = General.Size
-			local PowerShell = OS.PowerShell
-			local CreateFolder = OS.CreateFolder
-			local DeleteFile = OS.DeleteFile
+		-- OS.Downloading = {}
+		-- OS.LastAttempt = {}
+		-- OS.DownloadQueue = {}
+		-- OS.OverwriteQueue = {}
+		-- OS.FinishedDownloads = {}
+		-- function OS.Download(url,path,overwrite)
+		-- 	local Downloading = OS.Downloading
+		-- 	local LastAttempt = OS.LastAttempt
+		-- 	local DownloadQueue = OS.DownloadQueue
+		-- 	local OverwriteQueue = OS.OverwriteQueue
+		-- 	local FinishedDownloads = OS.FinishedDownloads
+		-- 	local NotNil = General.NotNil
+		-- 	local IsNil = General.IsNil
+		-- 	local InsertIfNil = Table.InsertIfNil
+		-- 	local Size = General.Size
+		-- 	local PowerShell = OS.PowerShell
+		-- 	local CreateFolder = OS.CreateFolder
+		-- 	local DeleteFile = OS.DeleteFile
 
-			if type(url) == "string" then
-				local bypass = false
-				if overwrite or NotNil(OverwriteQueue[url]) then
-					bypass = true
-				end
-				if not FileExists(path) or bypass then
-					if bypass then
-						FinishedDownloads[url] = nil
-						InsertIfNil(OverwriteQueue,url,path)
-					end
-					-- File does not exist or overwriting file --
-					local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
-					if not FolderExists(FolderPath) then
-						CreateFolder(FolderPath)
-					end
-					if table.valid(Downloading) then
-						-- Currently Downloading, check if entry needs removed --
-						if NotNil(Downloading[url]) then
-							if FileExists(path) then
-								-- File Exists, remove entry --
-								Downloading[url] = nil
-								LastAttempt[url] = nil
-								DownloadQueue[url] = nil
-								OverwriteQueue[url] = nil
-								InsertIfNil(FinishedDownloads,url,path)
-							elseif TimeSince(LastAttempt[url]) > 3000 then
-								d("Downloading Again: "..url.." - "..path)
-								PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
-								LastAttempt[url] = Now()
-							end
-						else
-							-- URL does not exist in Downloading table, add to Queue --
-							InsertIfNil(DownloadQueue,url,path)
-						end
-						return true
-					else
-						-- Free to download next file --
-						if FileExists(path) then
-							DeleteFile(path)
-						end
-						if url ~= [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]] then
-							d("Downloading: "..url.." - "..path)
-						end
-						PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
-						DownloadQueue[url] = nil
-						OverwriteQueue[url] = nil
-						InsertIfNil(Downloading,url,path)
-						InsertIfNil(LastAttempt,url,Now())
-						return true
-					end
-				else
-					-- File Exists --
-					Downloading[url] = nil
-					LastAttempt[url] = nil
-					DownloadQueue[url] = nil
-					OverwriteQueue[url] = nil
-					InsertIfNil(FinishedDownloads,url,path)
-					if table.valid(Downloading) then
-						return true
-					else
-						return false
-					end
-				end
-			end
-
-
+		-- 	if type(url) == "string" then
+		-- 		local bypass = false
+		-- 		if overwrite or NotNil(OverwriteQueue[url]) then
+		-- 			bypass = true
+		-- 		end
+		-- 		if not FileExists(path) or bypass then
+		-- 			if bypass then
+		-- 				FinishedDownloads[url] = nil
+		-- 				InsertIfNil(OverwriteQueue,url,path)
+		-- 			end
+		-- 			-- File does not exist or overwriting file --
+		-- 			local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
+		-- 			if not FolderExists(FolderPath) then
+		-- 				CreateFolder(FolderPath)
+		-- 			end
+		-- 			if table.valid(Downloading) then
+		-- 				-- Currently Downloading, check if entry needs removed --
+		-- 				if NotNil(Downloading[url]) then
+		-- 					if FileExists(path) then
+		-- 						-- File Exists, remove entry --
+		-- 						Downloading[url] = nil
+		-- 						LastAttempt[url] = nil
+		-- 						DownloadQueue[url] = nil
+		-- 						OverwriteQueue[url] = nil
+		-- 						InsertIfNil(FinishedDownloads,url,path)
+		-- 					elseif TimeSince(LastAttempt[url]) > 3000 then
+		-- 						d("Downloading Again: "..url.." - "..path)
+		-- 						PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+		-- 						LastAttempt[url] = Now()
+		-- 					end
+		-- 				else
+		-- 					-- URL does not exist in Downloading table, add to Queue --
+		-- 					InsertIfNil(DownloadQueue,url,path)
+		-- 				end
+		-- 				return true
+		-- 			else
+		-- 				-- Free to download next file --
+		-- 				if FileExists(path) then
+		-- 					DeleteFile(path)
+		-- 				end
+		-- 				if url ~= [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]] then
+		-- 					d("Downloading: "..url.." - "..path)
+		-- 				end
+		-- 				PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+		-- 				DownloadQueue[url] = nil
+		-- 				OverwriteQueue[url] = nil
+		-- 				InsertIfNil(Downloading,url,path)
+		-- 				InsertIfNil(LastAttempt,url,Now())
+		-- 				return true
+		-- 			end
+		-- 		else
+		-- 			-- File Exists --
+		-- 			Downloading[url] = nil
+		-- 			LastAttempt[url] = nil
+		-- 			DownloadQueue[url] = nil
+		-- 			OverwriteQueue[url] = nil
+		-- 			InsertIfNil(FinishedDownloads,url,path)
+		-- 			if table.valid(Downloading) then
+		-- 				return true
+		-- 			else
+		-- 				return false
+		-- 			end
+		-- 		end
+		-- 	end
 
 
 
 
 
-			-- 	if OS.Downloading and not table.valid(OverwriteQueue) and not table.valid(OverwriteQueue) then
-			-- 		OS.Downloading = false
-			-- 	end
-			-- 	if not FileExists(path) and (overwrite or NotNil(OverwriteQueue[url]) or ()) then
-			-- 		if overwrite and IsNil(OverwriteQueue[url]) then
-			-- 			FinishedDownloads[url] = nil
-			-- 			OverwriteQueue[url] = path
-			-- 		end
-			-- 		if OS.Downloading == false then
-			-- 			-- File does not exist, check to make sure the parent folder exists --
-			-- 			local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
-			-- 			if not FolderExists(FolderPath) then
-			-- 				CreateFolder(FolderPath)
-			-- 			end
-			-- 			d("Downloading: "..url.." - "..path)
-			-- 			PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
-			-- 			DownloadQueue[url] = nil
-			-- 			OverwriteQueue[url] = nil
-			-- 			OS.Downloading = true
-			-- 			InsertIfNil(FinishedDownloads,url,path)
-			-- 			return true
-			-- 		else
-			-- 			d("test2")
-			-- 			InsertIfNil(DownloadQueue,url,path)
-			-- 			return false
-			-- 		end
-			-- 	else
-			-- 		d("test")
-			-- 		-- File now exists, time for cleanup --
-			-- 		if NotNil(DownloadQueue[url]) then
-			-- 			DownloadQueue[url] = nil
-			-- 			OS.Downloading = false
-			-- 		end
-			-- 		if NotNil(OverwriteQueue[url]) then
-			-- 			OverwriteQueue[url] = nil
-			-- 			OS.Downloading = false
-			-- 		end
-			-- 		return false
-			-- 	end
-			-- end
-		end
+
+
+		-- 	-- 	if OS.Downloading and not table.valid(OverwriteQueue) and not table.valid(OverwriteQueue) then
+		-- 	-- 		OS.Downloading = false
+		-- 	-- 	end
+		-- 	-- 	if not FileExists(path) and (overwrite or NotNil(OverwriteQueue[url]) or ()) then
+		-- 	-- 		if overwrite and IsNil(OverwriteQueue[url]) then
+		-- 	-- 			FinishedDownloads[url] = nil
+		-- 	-- 			OverwriteQueue[url] = path
+		-- 	-- 		end
+		-- 	-- 		if OS.Downloading == false then
+		-- 	-- 			-- File does not exist, check to make sure the parent folder exists --
+		-- 	-- 			local FolderPath = (path:match("(.*"..[[\]]..")")):sub(1,-2)
+		-- 	-- 			if not FolderExists(FolderPath) then
+		-- 	-- 				CreateFolder(FolderPath)
+		-- 	-- 			end
+		-- 	-- 			d("Downloading: "..url.." - "..path)
+		-- 	-- 			PowerShell([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[[')]])
+		-- 	-- 			DownloadQueue[url] = nil
+		-- 	-- 			OverwriteQueue[url] = nil
+		-- 	-- 			OS.Downloading = true
+		-- 	-- 			InsertIfNil(FinishedDownloads,url,path)
+		-- 	-- 			return true
+		-- 	-- 		else
+		-- 	-- 			d("test2")
+		-- 	-- 			InsertIfNil(DownloadQueue,url,path)
+		-- 	-- 			return false
+		-- 	-- 		end
+		-- 	-- 	else
+		-- 	-- 		d("test")
+		-- 	-- 		-- File now exists, time for cleanup --
+		-- 	-- 		if NotNil(DownloadQueue[url]) then
+		-- 	-- 			DownloadQueue[url] = nil
+		-- 	-- 			OS.Downloading = false
+		-- 	-- 		end
+		-- 	-- 		if NotNil(OverwriteQueue[url]) then
+		-- 	-- 			OverwriteQueue[url] = nil
+		-- 	-- 			OS.Downloading = false
+		-- 	-- 		end
+		-- 	-- 		return false
+		-- 	-- 	end
+		-- 	-- end
+		-- end
 	-- End Operating System (OS) Functions --
 
 	-- String Functions --
@@ -921,19 +1086,23 @@ MoogleLib.Settings = {
 
 			local tbls = {...}
 
-			if Type(tbl, "table") and table.valid(tbl) then
+			if table.valid(tbl) then
 				local IsItValid = true
-				for i = 1, #tbls do
-					if Not(IsItValid,false) then
-						if NotType(tbls[i], "table") and not table.valid(tbls[i]) then
-							IsItValid = false
+				if table.valid(tbls) then
+					for i = 1, #tbls do
+						if Not(IsItValid,false) then
+							if NotType(tbls[i], "table") and not table.valid(tbls[i]) then
+								IsItValid = false
+							end
 						end
 					end
-				end
-				if IsItValid then
-					return true
+					if IsItValid then
+						return true
+					else
+						return false
+					end
 				else
-					return false
+					return true
 				end
 			else
 				return false
@@ -947,22 +1116,26 @@ MoogleLib.Settings = {
 
 			local tbls = {...}
 
-			if Type(tbl, "table") and table.valid(tbl) then
+			if table.valid(tbl) then
+				return false
+			else
 				local IsItNotValid = true
-				for i = 1, #tbls do
-					if Not(IsItNotValid,false) then
-						if Type(tbls[i], "table") and table.valid(tbls[i]) then
-							IsItNotValid = false
+				if table.valid(tbls) then
+					for i = 1, #tbls do
+						if Not(IsItNotValid,false) then
+							if Type(tbls[i], "table") and table.valid(tbls[i]) then
+								IsItNotValid = false
+							end
 						end
 					end
-				end
-				if IsItNotValid then
-					return true
+					if IsItNotValid then
+						return true
+					else
+						return false
+					end
 				else
-					return false
+					return true
 				end
-			else
-				return true
 			end
 		end
 
@@ -2168,6 +2341,7 @@ local function MarkerLogic(MarkerType,filters,AddPlayer,buffids,time,ownerid,Mis
 	end
 end
 function MoogleLib.OnUpdate()
+	local NotAll = General.NotAll
 	-- While executing Table.Print, if you hit a function you can't dump, it skips trying to --
 	if PrintRunning then
 		if TimeSince(PrintTime) > 100 then
@@ -2178,12 +2352,15 @@ function MoogleLib.OnUpdate()
 			Table.Print(PrintLastTbl,PrintLastName,PrintLastSearch,PrintLastDepth,PrintLastHistory,Printfilelocation)
 		end
 	end
-	if ToggleCMD and not TogglePing and not ToggleVersionCheck then
+	if ToggleCMD and NotAll(TogglePing,ToggleVersionCheck,ToggleDownloadString,ToggleDownloadTable,ToggleDownloadFile) then
 		local str = OS.CMD(nil,nil,lastCopy)
 		if str then d(str) end
 	end
 	if TogglePing then OS.Ping() end
+	if ToggleDownloadFile then OS.DownloadFile() end
+	if ToggleDownloadTable then OS.DownloadTable() end
 	if ToggleVersionCheck then OS.VersionCheck() end
+	if ToggleDownloadString then OS.DownloadString() end
 	-- MarkerLogic("attack",[[type=1,targetable]],true,"48")
 end
 
