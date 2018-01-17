@@ -2,7 +2,7 @@ MoogleFPS = {}
 
 MoogleFPS.Info = {
 	Creator = "Kali",
-	Version = "1.2.3",
+	Version = "1.2.4",
 	StartDate = "05/26/17",
 	ReleaseDate = "05/29/17",
 	LastUpdate = "01/03/18",
@@ -12,7 +12,8 @@ MoogleFPS.Info = {
 		["1.1.1"] = "Fixed Debug window styling.",
 		["1.1.2"] = "Forgot to include BannedKeys for Debug.",
 		["1.2.0"] = "Rework for new Moolge Script Manager.",
-		["1.2.3"] = "Tweaks and MiniButton support"
+		["1.2.3"] = "Tweaks and MiniButton support",
+		["1.2.4"] = "Pushed Locals"
 	}
 }
 
@@ -75,29 +76,31 @@ MoogleFPS.Data = {
 	}
 }
 
+local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, Sign, Round, PowerShell, CreateFolder, DeleteFile, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, OrderedKeys, IndexToDecimal, HotKey
+
+local function UpdateLocals1()
+	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split Valid = Table.Valid NotValid = Table.NotValid InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent
+end
+
+local function UpdateLocals2()
+	Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey
+end
+
 function MoogleFPS.ModuleInit()
-	MoogleLib.API.Initialize(MoogleFPS.GUI)
-	MoogleLib.Lua.os.Download([[https://i.imgur.com/cdbXSLt.png]],MoogleLib.API.ImageFolder..MoogleFPS.GUI.name..".png")
+	if MoogleLib ~= nil then
+		UpdateLocals1() UpdateLocals2()
+		Initialize(MoogleFPS.GUI)
+		if not FileExists(ImageFolder..MoogleFPS.GUI.name..".png") then
+			DownloadFile([[https://i.imgur.com/cdbXSLt.png]],ImageFolder..MoogleFPS.GUI.name..".png")
+		end
+	end
 end
 
 function MoogleFPS.Draw()
-	if MoogleLib ~= nil and MoogleFPS.Settings.enable then
+	if MoogleLib ~= nil then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleFPS.Settings
-		local General = MoogleLib.Lua.general
-		local Math = MoogleLib.Lua.math
-		local Gui = MoogleLib.Gui
-		local Is = General.Is
-		local NotNil = General.NotNil
-		local Indent = Gui.Indent
-		local Unindent = Gui.Unindent
-		local Text = Gui.Text
-		local Tooltip = Gui.Tooltip
-		local SameLine = Gui.SameLine
-		local Space = Gui.Space
-		local Round = Math.Round
-		local Checkbox = Gui.Checkbox
 
 		if nav.selected == MoogleFPS.GUI.NavName then
 			main.Contents = function()
@@ -228,7 +231,7 @@ function MoogleFPS.Draw()
 			end
 		end
 
-		if (MoogleFPS.MiniGUI.open) then
+		if MoogleFPS.Settings.enable and (MoogleFPS.MiniGUI.open) then
 			MoogleFPS.MiniGUI.WindowData.xScreen,MoogleFPS.MiniGUI.WindowData.yScreen = GUI:GetScreenSize()
 			local xSize = MoogleFPS.MiniGUI.WindowData.xSize
 			local ySize = MoogleFPS.MiniGUI.WindowData.ySize
