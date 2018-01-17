@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.4",
+	Version = "1.2.5",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -17,7 +17,7 @@ MoogleUpdater.Info = {
 		["1.1.8"] = "Core Category Renamed",
 		["1.2.1"] = "Now outputs Windows and PowerShell version to System Info.txt",
 		["1.2.2"] = "Removed auto reload when checking for missing core files.",
-		["1.2.4"] = "Pushed Locals"
+		["1.2.5"] = "Download Fixes..."
 	}
 }
 
@@ -29,7 +29,7 @@ MoogleUpdater.GUI = {
 MoogleUpdater.Settings = {
 	enable = true,
 	AutoUpdate = true, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
-	CheckInterval = 30, -- in the unit of time the user has selected
+	CheckInterval = 5, -- in the unit of time the user has selected
 	CheckUnit = "Seconds",
 	LastCheck = 0,
 
@@ -478,41 +478,23 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 		if timevalue ~= CheckInterval * 2592000 then timevalue = CheckInterval * 2592000 end
 	end
 
-	if MoogleUpdater.Settings.AutoUpdate and (MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue) then
-			-- Check to see if Moogle Scripts has been updated --
-				if table.size(webpage) == 0 then
-
-					if NeedWebRequest == true and NeedWebContent == true then
-						DownloadTable([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],"MoogleUpdater.MoogleScripts")
-						NeedWebRequest = false
-					elseif NeedWebRequest == false and NeedWebContent == true then
-						local file = io.open(MooglePath..[[Moogle Scripts.lua]],"r")
-						local filesize = 0
-						if file ~= nil then
-							filesize = file:seek("end")
-							file:close()
-						end
-
-						if filesize ~= 0 then
-							webpage = FileLoad(MooglePath..[[Moogle Scripts.lua]])
-							if table.valid(webpage) then 
-								NeedWebContent = false
-							end
-						end
-					end
-				elseif table.valid(webpage) and table.size(webpage) ~= 0 then
-					local different = false
+	if MoogleUpdater.Settings.AutoUpdate then
+		-- Check to see if Moogle Scripts has been updated --
+			if os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue then
+				local scripts = MoogleUpdater.MoogleScripts
+				
+				local tbl = DownloadString([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]])
+				if tbl then webpage = loadstring(tbl)() end
+				if table.valid(webpage) then
 					for i,e in pairs(webpage) do
-						if MoogleUpdater.MoogleScripts[i] == nil then
-							-- New Script --
+						if scripts[i] == nil then -- New Script
 							MoogleUpdater.NewScripts[i] = e.name
-						elseif MoogleUpdater.MoogleScripts[i].version ~= e.version then
-							-- New Script --
+						elseif scripts[i].version ~= e.version then -- Updated Script
 							MoogleUpdater.UpdatedScripts[i] = e.name
 						else
 							if loadstring(e.table..[[ ~= nil]])() and loadstring(e.table..[[.Info ~= nil]])() then
 								local InstalledScriptVersion = (loadstring(e.table..[[.Info.Version]])())
-								if MoogleUpdater.MoogleScripts[i].version ~= InstalledScriptVersion then
+								if scripts[i].version ~= InstalledScriptVersion then
 									-- New Script --
 									MoogleUpdater.UpdatedScripts[i] = e.name
 								end
@@ -536,21 +518,16 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 							MoogleUpdater.UpdatedLabelScripts[table.find(MoogleUpdater.UpdatedLabelScripts,e.name)] = nil
 						end			
 					end
-
-					if table.deepcompare(MoogleUpdater.MoogleScripts,webpage) == false then
-						MoogleUpdater.MoogleScripts = table.deepcopy(webpage)
-					end
+					MoogleUpdater.MoogleScripts = webpage
+					webpage = {}
 					MoogleUpdater.Settings.LastCheck = os.time()
-					table.clear(webpage)
-					NeedWebRequest = true
-					NeedWebContent = true
 				end
 
 				local same = true
 				if MoogleUpdater.Settings.AutoUpdate and table.valid(MoogleUpdater.UpdatedScripts) then
 					for k,v in pairs(MoogleUpdater.UpdatedScripts) do
 						if MoogleUpdater.UpdatedScriptsReady[k] == nil then
-							DownloadFile(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath)
+							DownloadFile(scripts[k].url,MooglePath..scripts[k].filepath)
 							same = false
 						else
 							MoogleUpdater.UpdatedScriptsReady[k] = v
@@ -560,21 +537,8 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 						Reload()
 					end
 				end
-			-- End Moogle Scripts Check --
-	else
-		if FileExists(MooglePath..[[temp.lua]]) then
-			local TempPath = MooglePath..[[temp.lua]]
-			local file = io.open(TempPath,"r")
-			local filesize = 0
-			if file ~= nil then
-				filesize = file:seek("end")
-				file:close()
 			end
-
-			if filesize ~= 0 then
-				FileDelete(MooglePath..[[temp.lua]])
-			end
-		end
+		-- End Moogle Scripts Check --
 	end
 end
 
