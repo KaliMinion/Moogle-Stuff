@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.3",
+	Version = "1.2.4",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -16,7 +16,8 @@ MoogleUpdater.Info = {
 		["1.1.7"] = "URL Fixes",
 		["1.1.8"] = "Core Category Renamed",
 		["1.2.1"] = "Now outputs Windows and PowerShell version to System Info.txt",
-		["1.2.2"] = "Removed auto reload when checking for missing core files."
+		["1.2.2"] = "Removed auto reload when checking for missing core files.",
+		["1.2.4"] = "Pushed Locals"
 	}
 }
 
@@ -46,11 +47,22 @@ MoogleUpdater.UpdatedLabelScripts = {}
 local NeedWebRequest = true
 local NeedWebContent = true
 
+local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, Sign, Round, PowerShell, CreateFolder, DeleteFile, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, OrderedKeys, IndexToDecimal, HotKey
+
+local function UpdateLocals1()
+	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split Valid = Table.Valid NotValid = Table.NotValid InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent
+end
+
+local function UpdateLocals2()
+	Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey
+end
+
 function MoogleUpdater.ModuleInit()
-	if MoogleLib ~= nil and FileExists(MoogleLib.API.MooglePath..[[Moogle Scripts.lua]]) then
-		MoogleUpdater.MoogleScripts = FileLoad(MoogleLib.API.MooglePath..[[Moogle Scripts.lua]])
+	if MoogleLib ~= nil then
+		UpdateLocals1() UpdateLocals2()
+		DownloadTable([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],"MoogleUpdater.MoogleScripts")
 	end
-	io.popen([[powershell -Command "$PSVer = 'PowerShell Version: ' + $PSVersionTable.PSVersion.Major + '.' + $PSVersionTable.PSVersion.Minor; $WinVer = 'Windows Version: ' + (Get-WmiObject -class Win32_OperatingSystem).Caption + ' ' + (Get-CimInstance Win32_OperatingSystem).OSArchitecture; $PackVer = 'Service Pack Version: ' + (Get-CimInstance Win32_OperatingSystem).ServicePackMajorVersion + '.' + (Get-CimInstance Win32_OperatingSystem).ServicePackMinorVersion ; $OSVer = 'OS Version: ' + (Get-CimInstance Win32_OperatingSystem).Version ; ($PSVer, $WinVer, $PackVer, $OSVer) | Out-File -filepath ']]..GetLuaModsPath()..[[MoogleStuff Files\System Info.txt'"]])
+	io.popen([[powershell -Command "$PSVer = 'PowerShell Version: ' + $PSVersionTable.PSVersion.Major + '.' + $PSVersionTable.PSVersion.Minor; $WinVer = 'Windows Version: ' + (Get-WmiObject -class Win32_OperatingSystem).Caption + ' ' + (Get-CimInstance Win32_OperatingSystem).OSArchitecture; $PackVer = 'Service Pack Version: ' + (Get-CimInstance Win32_OperatingSystem).ServicePackMajorVersion + '.' + (Get-CimInstance Win32_OperatingSystem).ServicePackMinorVersion ; $OSVer = 'OS Version: ' + (Get-CimInstance Win32_OperatingSystem).Version ; ($PSVer, $WinVer, $PackVer, $OSVer) | Out-File -filepath ']]..LuaPath..[[MoogleStuff Files\System Info.txt'"]])
 end
 
 MoogleUpdater.TimeUnits = {"Seconds","Minutes","Hours","Days","Weeks","Months"}
@@ -64,39 +76,6 @@ function MoogleUpdater.Draw()
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleUpdater.Settings
-		-- Helper Variables --
-			local MinionPath = MoogleLib.API.MinionPath
-			local LuaPath = MoogleLib.API.LuaPath
-			local MooglePath = MoogleLib.API.MooglePath
-			local ImageFolder = MoogleLib.API.ImageFolder
-			local ScriptsFolder = MoogleLib.API.ScriptsFolder
-			local API = MoogleLib.API
-			local Lua = MoogleLib.Lua
-			local Debug = Lua.debug
-			local General = Lua.general
-			local IO = Lua.io
-			local Math = Lua.math
-			local OS = Lua.os
-			local String = Lua.string
-			local Table = Lua.table
-			local Gui = MoogleLib.Gui
-		-- End Helper Variables --
-		local Download = OS.Download
-		local InsertIfNil = Table.InsertIfNil
-		local Text = Gui.Text
-		local Valid = Table.Valid
-		local Space = Gui.Space
-		local SameLine = Gui.SameLine
-		local Tooltip = Gui.Tooltip
-		local Checkbox = Gui.Checkbox
-		local Not = General.Not
-		local NotNil = General.NotNil
-		local CreateFolder = OS.CreateFolder
-		local Size = General.Size
-		local DownloadQueue = OS.DownloadQueue
-		local DownloadQueueBackup = OS.DownloadQueueBackup
-		local DownloadNextAttempt = OS.DownloadNextAttempt
-		local FinishedDownloads = OS.FinishedDownloads
 
 		-- Download Images needed for Draw process --
 			if NeedImages then
@@ -111,14 +90,14 @@ function MoogleUpdater.Draw()
 					["https://i.imgur.com/ZNizSZM.png"] = "Metrics.png",
 					["https://i.imgur.com/qkw94dD.png"] = "ViewCode.png"
 				}
-				local downloading = false
+				local finished = true
 				for url,image in pairs(Images) do
-					if not downloading then
-						-- Need to download --
-						downloading = Download(url,ImageFolder..image)
+					if not FileExists(ImageFolder..image) then
+						DownloadFile(url,ImageFolder..image)
+						finished = false
 					end
 				end
-				if not downloading then
+				if finished then
 					NeedImages = false
 				end
 			end
@@ -219,7 +198,7 @@ function MoogleUpdater.Draw()
 														if not FolderExists(lastfolder) then
 															CreateFolder(lastfolder)
 														end
-														Download(url,MooglePath..filepath,true)
+														DownloadFile(url,MooglePath..filepath)
 													end
 												end
 											end
@@ -381,27 +360,6 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 		if not FolderExists(MooglePath..[[Moogle Scripts]]) then
 			FolderCreate(MooglePath..[[Moogle Scripts]])
 		end
-	-- Check to see if you have backed up downloads --
-		if MoogleLib ~= nil then
-			local OS = MoogleLib.Lua.os
-			local Download = OS.Download
-			if table.valid(OS.Downloading) then
-				for k,v in pairs(OS.Downloading) do
-					Download(k,v,true)
-				end
-			end
-			if table.valid(OS.DownloadQueue) then
-				for k,v in pairs(OS.DownloadQueue) do
-					Download(k,v)
-				end
-			end
-			if table.valid(OS.OverwriteQueue) then
-				for k,v in pairs(OS.OverwriteQueue) do
-					Download(k,v,true)
-				end
-			end
-		end
-	-- End Download Check --
 
 	-- Check for Pending Deletion --
 	if MoogleLib ~= nil and table.valid(PendingDeletion) then
@@ -477,11 +435,6 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 				-- Table Cleanup --
 					local url = MoogleUpdater.MoogleScripts[k].url
 					local filepath = MoogleUpdater.MoogleScripts[k].filepath
-					local OS = MoogleLib.Lua.os
-					local Download = OS.Download
-					local DownloadQueue = OS.DownloadQueue
-					local OverwriteQueue = OS.OverwriteQueue
-					local FinishedDownloads = OS.FinishedDownloads
 
 					-- Remove Folders and Files --
 						if not In(filepath,""," ",nil) then
@@ -492,9 +445,6 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 							end
 						end
 
-					if DownloadQueue[url] ~= nil then DownloadQueue[url] = nil end
-					if OverwriteQueue[url] ~= nil then OverwriteQueue[url] = nil end
-					if FinishedDownloads[url] ~= nil then FinishedDownloads[url] = nil end
 					if table.valid(ModuleDownloads) then
 						for i,e in pairs(ModuleDownloads) do
 							if e == v then
@@ -529,29 +479,11 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 	end
 
 	if MoogleUpdater.Settings.AutoUpdate and (MoogleUpdater.Settings.LastCheck == 0 or os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue) then
-		-- Helper Variables --
-			local MinionPath = MoogleLib.API.MinionPath
-			local LuaPath = MoogleLib.API.LuaPath
-			local MooglePath = MoogleLib.API.MooglePath
-			local ImageFolder = MoogleLib.API.ImageFolder
-			local ScriptsFolder = MoogleLib.API.ScriptsFolder
-			local API = MoogleLib.API
-			local Lua = MoogleLib.Lua
-			local Debug = Lua.debug
-			local General = Lua.general
-			local IO = Lua.io
-			local Math = Lua.math
-			local OS = Lua.os
-			local String = Lua.string
-			local Table = Lua.table
-			local Gui = MoogleLib.Gui
-			local Download = OS.Download
-		-- End Helper Variables --
 			-- Check to see if Moogle Scripts has been updated --
 				if table.size(webpage) == 0 then
 
 					if NeedWebRequest == true and NeedWebContent == true then
-						Download([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],MooglePath..[[Moogle Scripts.lua]],true)
+						DownloadTable([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],"MoogleUpdater.MoogleScripts")
 						NeedWebRequest = false
 					elseif NeedWebRequest == false and NeedWebContent == true then
 						local file = io.open(MooglePath..[[Moogle Scripts.lua]],"r")
@@ -618,11 +550,8 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 				if MoogleUpdater.Settings.AutoUpdate and table.valid(MoogleUpdater.UpdatedScripts) then
 					for k,v in pairs(MoogleUpdater.UpdatedScripts) do
 						if MoogleUpdater.UpdatedScriptsReady[k] == nil then
-							Download(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath,true)
+							DownloadFile(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath)
 							same = false
-						elseif OS.FinishedDownloads[MoogleUpdater.MoogleScripts[k].url] == nil then
-							-- Send Download Command one more time to add to finished downloads --
-							Download(MoogleUpdater.MoogleScripts[k].url,MooglePath..MoogleUpdater.MoogleScripts[k].filepath,true)
 						else
 							MoogleUpdater.UpdatedScriptsReady[k] = v
 						end
