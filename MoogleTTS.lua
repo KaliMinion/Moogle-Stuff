@@ -2,7 +2,7 @@ MoogleTTS = {}
 
 MoogleTTS.Info = {
 	Creator = "Kali",
-	Version = "1.1.2",
+	Version = "1.1.3",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
@@ -10,7 +10,8 @@ MoogleTTS.Info = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Updated for MoogleLib",
 		["1.1.1"] = "Updated Initialize Function",
-		["1.1.2"] = "Tweaks and MiniButton support"
+		["1.1.2"] = "Tweaks and MiniButton support",
+		["1.1.3"] = "Pushed Locals"
 	}
 }
 
@@ -30,6 +31,7 @@ MoogleTTS.GUI = {
 MoogleTTS.Settings = {
 	enable = true,
 	ReadToggle = true,
+	ReadHotkey = {},
 	ReadToggleLast = 0,
 	LastTalkSpeaker = "",
 	LastBattleTalkSpeaker = "",
@@ -86,25 +88,32 @@ for each arg in args
 	end if
 next]]
 
+local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, Sign, Round, PowerShell, CreateFolder, DeleteFile, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, OrderedKeys, IndexToDecimal, HotKey
+
+local function UpdateLocals1()
+	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split Valid = Table.Valid NotValid = Table.NotValid InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent
+end
+
+local function UpdateLocals2()
+	Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey
+end
+
 function MoogleTTS.ModuleInit()
-	MoogleLib.API.Initialize(MoogleTTS.GUI)
-	if not FileExists(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]]) then
-		FileWrite(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]],MoogleTTS.VBS)
+	if MoogleLib ~= nil then
+		UpdateLocals1() UpdateLocals2()
+		Initialize(MoogleTTS.GUI)
+		MoogleLoad("MoogleTTS.Settings.ReadHotkey",true)
 	end
-	if not FileExists(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) then
-		FileWrite(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]],"")
+	if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]]) then
+		FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]],MoogleTTS.VBS)
+	end
+	if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) then
+		FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]],"")
 	end
 end
 
 function MoogleTTS.Draw()
-	local General = MoogleLib.Lua.general
-	local Gui = MoogleLib.Gui
-	local NotNil = General.NotNil
-	local Indent = Gui.Indent
-	local Unindent = Gui.Unindent
-	local Text = Gui.Text
-
-	if NotNil(MoogleTTS) and MoogleTTS.Settings.enable then
+	if NotNil(MoogleTTS) then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleTTS.Settings
@@ -147,15 +156,21 @@ function MoogleTTS.Draw()
 				else
 					MoogleTTS.Settings.ReadSize = Ytrack
 				end
+				GUI:Text("TTL HotKey Toggle: ") GUI:SameLine(0,0)
+				local ReadHotkey = MoogleTTS.Settings.ReadHotkey
+				local ReturnedTable = ReadHotkey
+				ReturnedTable = HotKey(ReturnedTable)
+				if table.deepcompare(ReadHotkey,ReturnedTable) == false then
+					MoogleTTS.Settings.ReadHotkey = table.deepcopy(ReturnedTable)
+					MoogleSave("_G.MoogleTTS[Settings][ReadHotkey]")
+				end
 			end
 		end
 	end
 end
 
+local toggled = false
 function MoogleTTS.OnUpdate( event, tickcount )
-	local General = MoogleLib.Lua.general
-	local NotNil = General.NotNil
-
 	if NotNil(MoogleTTS) and MoogleTTS.Settings.enable then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
@@ -163,6 +178,24 @@ function MoogleTTS.OnUpdate( event, tickcount )
 
 		if table.find(nav.Menu,MoogleTTS.GUI.NavName) == nil then
 			table.insert(nav.Menu,MoogleTTS.GUI.NavName)
+		end
+		local ReadHotkey = MoogleTTS.Settings.ReadHotkey
+		if table.valid(ReadHotkey) then
+			local keyspressed = true
+			for k,v in pairs(ReadHotkey) do
+				v = IndexToDecimal[v]
+				if keyspressed then
+					if not GUI:IsKeyDown(v) then keyspressed = false end
+				end
+			end
+			if keyspressed then
+				if toggled ~= true then toggled = true end
+			else
+				if toggled then
+					settings.NPCTTS = not settings.NPCTTS
+					if toggled ~= false then toggled = false end
+				end
+			end
 		end
 
 		if settings.NPCTTS then
@@ -228,7 +261,6 @@ function MoogleTTS.OnUpdate( event, tickcount )
 							text = string.gsub( text, "%\r", " ")
 							text = string.gsub( text, "%<", " - ")
 							text = string.gsub( text, "%>", " - ")
-							text = string.gsub( text, "Kalila", "kahleela")
 							-- text = string.gsub( text, "%c", "")
 
 							if speaker ~= "" then
@@ -248,7 +280,7 @@ function MoogleTTS.OnUpdate( event, tickcount )
 		if table.valid(settings.ReadTable) then
 			-- We have lines in our table, first let's find out if we need to remove one --
 			local lasttext = ""
-			for line in io.lines(GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) do 
+			for line in io.lines(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) do 
 				lasttext = tonumber(line)
 			end
 			if settings.ReadTable[lasttext] ~= nil then
@@ -259,7 +291,7 @@ function MoogleTTS.OnUpdate( event, tickcount )
 			if not Reading and table.valid(settings.ReadTable) then
 				local lowk = 9999999999
 				for k,v in pairs(settings.ReadTable) do if k < lowk then lowk = k end end
-				CurrentRead = io.popen([[cscript /nologo "]]..GetLuaModsPath()..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\tts.vbs" -timestamp ]]..lowk..[[ "]]..settings.ReadTable[lowk]..[["]])
+				CurrentRead = io.popen([[cscript /nologo "]]..LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\tts.vbs" -timestamp ]]..lowk..[[ "]]..settings.ReadTable[lowk]..[["]])
 				Reading = true
 			end
 		end
