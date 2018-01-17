@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.2.2",
+	Version = "1.2.3",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -26,6 +26,7 @@ MoogleLib.Info = {
 		["1.1.7"] = "Download Overwrite Fix 6...",
 		["1.2.0"] = "File Delete Function",
 		["1.2.2"] = "New Functions",
+		["1.2.3"] = "Download Fixes...again"
 	}
 }
 
@@ -265,6 +266,10 @@ MoogleLib.Settings = {
 					return false
 				end
 			end
+		end
+
+		function MoogleTime()
+			GUI:SetClipboardText(os.time())
 		end
 	-- End API Functions --
 
@@ -686,30 +691,32 @@ MoogleLib.Settings = {
 			end
 		end
 
-		local ToggleCMD,CMD,oldClip,lastCopy = false
+		local ToggleCMD,CMD,currentcmd,oldClip,lastCopy = false
 		function OS.CMD(cmd, PowerShell, Copy)
 			if oldClip == nil then
-				oldClip = GUI:GetClipboardText() or ""
+				oldClip = GUI:GetClipboardText()
 				GUI:SetClipboardText("MoogleWait")
 				lastCopy = Copy
 			end
 			local ctype = io.type(CMD)
-			if ctype == "file" then
+
+			if ctype == "file" and cmd == currentcmd then
 				local testclip = GUI:GetClipboardText()
-				if testclip and testclip ~= "MoogleWait" and testclip ~= "" then
-					oldClip = nil
+				if testclip and testclip ~= "MoogleWait" then
+					currentcmd = nil
 					lastCopy = nil
 					CMD:close()
-					CMD = nil
 					ToggleCMD = false
+					GUI:SetClipboardText(oldClip)
 					if Copy then
+						oldClip = nil
 						return "CMD output copied to clipboard."
 					else
-						GUI:SetClipboardText(oldClip)
+						oldClip = nil
 						return testclip
 					end
 				end
-			else
+			elseif currentcmd == nil then
 				local str
 				if PowerShell then
 					str = [[PowerShell -Command "]]..cmd..[["]]
@@ -717,6 +724,7 @@ MoogleLib.Settings = {
 					str = cmd
 				end
 				CMD = io.popen(str..[[ | clip]])
+				currentcmd = cmd
 				ToggleCMD = true
 			end
 		end
@@ -734,6 +742,7 @@ MoogleLib.Settings = {
 			else
 				url,path = next(queue)
 			end
+			if table.valid(queue) then table.print(queue) end
 			local ctype = io.type(CMD)
 			if ctype == "file" or result then
 				if result then
@@ -753,11 +762,12 @@ MoogleLib.Settings = {
 							ToggleDownloadString = false
 						end
 						lastpath = nil
+						local temp = result
 						result = nil
-						return result
+						return temp
 					end
 				else
-					result = OS.CMD(nil,nil,lastCopy)
+					result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true)
 				end
 			else
 				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true)
@@ -788,6 +798,7 @@ MoogleLib.Settings = {
 				if result then
 					local tbl = loadstring(result)()
 					if type(tbl) == "table" then
+						ml_error("tbl is a table")
 						local t = {};
 						for w in TableName:gmatch("[%P/_/:]+") do
 							t[#t+1] = w
@@ -2352,15 +2363,15 @@ function MoogleLib.OnUpdate()
 			Table.Print(PrintLastTbl,PrintLastName,PrintLastSearch,PrintLastDepth,PrintLastHistory,Printfilelocation)
 		end
 	end
-	if ToggleCMD and NotAll(TogglePing,ToggleVersionCheck,ToggleDownloadString,ToggleDownloadTable,ToggleDownloadFile) then
-		local str = OS.CMD(nil,nil,lastCopy)
-		if str then d(str) end
-	end
-	if TogglePing then OS.Ping() end
-	if ToggleDownloadFile then OS.DownloadFile() end
-	if ToggleDownloadTable then OS.DownloadTable() end
-	if ToggleVersionCheck then OS.VersionCheck() end
-	if ToggleDownloadString then OS.DownloadString() end
+	-- if ToggleCMD and NotAll(TogglePing,ToggleVersionCheck,ToggleDownloadString,ToggleDownloadTable,ToggleDownloadFile) then
+	-- 	local str = OS.CMD(nil,nil,lastCopy)
+	-- 	if str then d(str) end
+	-- end
+	-- if TogglePing then OS.Ping() end
+	-- if ToggleDownloadFile then OS.DownloadFile() end
+	-- if ToggleDownloadTable then OS.DownloadTable() end
+	-- if ToggleVersionCheck then OS.VersionCheck() end
+	-- if ToggleDownloadString then OS.DownloadString() end
 	-- MarkerLogic("attack",[[type=1,targetable]],true,"48")
 end
 
