@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.5",
+	Version = "1.2.6",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -29,7 +29,7 @@ MoogleUpdater.GUI = {
 MoogleUpdater.Settings = {
 	enable = true,
 	AutoUpdate = true, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
-	CheckInterval = 30, -- in the unit of time the user has selected
+	CheckInterval = 5, -- in the unit of time the user has selected
 	CheckUnit = "Seconds",
 	LastCheck = 0,
 
@@ -47,14 +47,14 @@ MoogleUpdater.UpdatedLabelScripts = {}
 local NeedWebRequest = true
 local NeedWebContent = true
 
-local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, Sign, Round, PowerShell, CreateFolder, DeleteFile, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, OrderedKeys, IndexToDecimal, HotKey
+local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, Sign, Round, PowerShell, CreateFolder, DeleteFile, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, OrderedKeys, IndexToDecimal, HotKey, pairs, DrawTables
 
 local function UpdateLocals1()
 	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split Valid = Table.Valid NotValid = Table.NotValid InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent
 end
 
 local function UpdateLocals2()
-	Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey
+	Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey pairs = Table.pairs DrawTables = Gui.DrawTables
 end
 
 function MoogleUpdater.ModuleInit()
@@ -342,6 +342,11 @@ function MoogleUpdater.Draw()
 						GUI:Dummy(0,1)
 					end
 				end
+				if GUI:CollapsingHeader("Debug Info") then
+					if GUI:SmallButton("MoogleTime") then MoogleTime() end
+					DrawTables(MoogleUpdater)
+					DrawTables(MoogleDebug)
+				end
 			end
 		end
 	end
@@ -486,6 +491,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 				local tbl = DownloadString([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]])
 				if tbl then webpage = loadstring(tbl)() end
 				if table.valid(webpage) then
+					MoogleDebug.LastSuccessfulUpdate = Now()
 					for i,e in pairs(webpage) do
 						if scripts[i] == nil then -- New Script
 							MoogleUpdater.NewScripts[i] = e.name
