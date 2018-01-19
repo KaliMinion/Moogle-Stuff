@@ -1,3 +1,4 @@
+-- MOOGLE SCRIPTS START --
 local tbl = 
 {
 	[1] = {
@@ -80,3 +81,4 @@ enabled=1]]
 	},
 }
 return tbl
+-- MOOGLE SCRIPTS END --
