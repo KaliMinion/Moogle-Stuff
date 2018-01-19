@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.2.3",
+	Version = "1.2.4",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -26,7 +26,8 @@ MoogleLib.Info = {
 		["1.1.7"] = "Download Overwrite Fix 6...",
 		["1.2.0"] = "File Delete Function",
 		["1.2.2"] = "New Functions",
-		["1.2.3"] = "Download Fixes...again"
+		["1.2.3"] = "Download Fixes...again",
+		["1.2.4"] = "Download Tweaks and new Functions"
 	}
 }
 
@@ -35,6 +36,8 @@ MoogleLib.Settings = {
 	MainMenuType = 2,
 	MainMenuEntryCreated = false
 }
+
+MoogleDebug = {}
 
 -- Helper Variables --
 
@@ -498,6 +501,7 @@ MoogleLib.Settings = {
 				return type(var)
 			end
 		end
+		local Type = General.Type
 
 		function General.NotType(var, compare, altyes, altno)
 			local NotNil = General.NotNil
@@ -691,32 +695,58 @@ MoogleLib.Settings = {
 			end
 		end
 
-		local ToggleCMD,CMD,currentcmd,oldClip,lastCopy = false
+		local ToggleCMD,CommandSent,CMD,filetimestart,oldClip,lastCopy = false,false
 		function OS.CMD(cmd, PowerShell, Copy)
+			MoogleDebug.LastCMDUse = Now()
+			MoogleDebug.cmd = cmd
 			if oldClip == nil then
 				oldClip = GUI:GetClipboardText()
-				GUI:SetClipboardText("MoogleWait")
+				local start = [[-- MOOGLE SCRIPTS START --]]
+				if string.sub(oldClip,1,string.len(start)) == start then
+					ml_error("Clipboard Matches Moogle Scripts")
+					GUI:SetClipboardText(" ")
+					oldClip = GUI:GetClipboardText()
+				end
 				lastCopy = Copy
 			end
 			local ctype = io.type(CMD)
-
-			if ctype == "file" and cmd == currentcmd then
+			MoogleDebug.ctype = io.type(CMD)
+			if CommandSent and ctype == "file" then
+				if filetimestart == nil then
+					filetimestart = Now()
+				end
 				local testclip = GUI:GetClipboardText()
-				if testclip and testclip ~= "MoogleWait" then
-					currentcmd = nil
-					lastCopy = nil
-					CMD:close()
-					ToggleCMD = false
-					GUI:SetClipboardText(oldClip)
-					if Copy then
+					MoogleDebug.testclip = string.len(tostring(testclip))
+				if testclip then
+					if testclip ~= oldClip then
+						lastCopy = nil
+						CMD:close()
+							MoogleDebug.ctype = io.type(CMD)
+						ToggleCMD = false
+						GUI:SetClipboardText(oldClip)
 						oldClip = nil
-						return "CMD output copied to clipboard."
-					else
-						oldClip = nil
-						return testclip
+						filetimestart = nil
+						CommandSent = false
+						if Copy then
+							return "CMD output copied to clipboard."
+						else
+							return testclip
+						end
+					elseif TimeSince(filetimestart) > 5000 then
+						filetimestart = Now()
+						GUI:SetClipboardText(" ")
+						oldClip = GUI:GetClipboardText()
+						local str
+						if PowerShell then
+							str = [[PowerShell -Command "]]..cmd..[["]]
+						else
+							str = cmd
+						end
+						CMD = io.popen(str..[[ | clip]])
 					end
 				end
-			elseif currentcmd == nil then
+			elseif not CommandSent then
+				CommandSent = true
 				local str
 				if PowerShell then
 					str = [[PowerShell -Command "]]..cmd..[["]]
@@ -724,7 +754,6 @@ MoogleLib.Settings = {
 					str = cmd
 				end
 				CMD = io.popen(str..[[ | clip]])
-				currentcmd = cmd
 				ToggleCMD = true
 			end
 		end
@@ -737,41 +766,51 @@ MoogleLib.Settings = {
 			else
 				path = lastpath
 			end
+				MoogleDebug.lastpath = lastpath
 			if url then
 				if queue[url] ~= path then queue[url] = path end
 			else
 				url,path = next(queue)
 			end
+				MoogleDebug.DownloadStringqueue = queue
 			if table.valid(queue) then table.print(queue) end
 			local ctype = io.type(CMD)
 			if ctype == "file" or result then
 				if result then
+					MoogleDebug.result = result
 					if path then
 						local file = io.open(path,"w")
 							file:write(result)
 							file:close()
 						queue[url] = nil
+							MoogleDebug.DownloadStringqueue = queue
 						if NotValid(queue) then
 							ToggleDownloadString = false
+								MoogleDebug.ToggleDownloadString = ToggleDownloadString
 						end
 						lastpath = nil
+							MoogleDebug.lastpath = lastpath
 						result = nil
 					else
 						queue[url] = nil
+							MoogleDebug.DownloadStringqueue = queue
 						if NotValid(queue) then
 							ToggleDownloadString = false
+								MoogleDebug.ToggleDownloadString = ToggleDownloadString
 						end
 						lastpath = nil
 						local temp = result
 						result = nil
+							MoogleDebug.result = result
 						return temp
 					end
-				else
+				elseif url ~= nil then
 					result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true)
 				end
-			else
+			elseif url ~= nil then
 				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true)
 				ToggleDownloadString = true
+					MoogleDebug.ToggleDownloadString = ToggleDownloadString
 			end
 		end
 
@@ -861,12 +900,12 @@ MoogleLib.Settings = {
 		end
 
 		local ToggleVersionCheck,queue,result = false,{}
-		function OS.VersionCheck(url)
+		function OS.VersionCheck(url,TableName)
 			local NotValid = Table.NotValid
 			if url then
-				if queue[url] ~= true then queue[url] = true end
+				if queue[url] ~= TableName then queue[url] = TableName end
 			else
-				url = next(queue)
+				url,TableName = next(queue)
 			end
 			local ctype = io.type(CMD)
 			if ctype == "file" or result then
@@ -880,9 +919,27 @@ MoogleLib.Settings = {
 					if NotValid(queue) then
 						ToggleVersionCheck = false
 					end
-					return str,value
+					if TableName then
+						local t = {};
+						for w in TableName:gmatch("[%P/_/:]+") do
+							t[#t+1] = w
+						end
+						local lastkey
+						local Table = _G
+						for k,v in pairs(t) do
+							if k == #t then
+								lastkey = v
+							else
+								Table = Table[v]
+							end
+						end
+						Table[lastkey].Info.CurrentVersion = str
+						Table[lastkey].Info.CurrentVersionValue = value
+					else
+						return str,value
+					end
 				else
-					result = OS.CMD(nil,nil,lastCopy)
+					result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[') -split '[\r\n|\r\n]' | Select-String -Pattern '(?<=\tVersion = ").*(?=",)']],true)
 				end
 			else
 				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[') -split '[\r\n|\r\n]' | Select-String -Pattern '(?<=\tVersion = ").*(?=",)']],true)
@@ -1087,6 +1144,14 @@ MoogleLib.Settings = {
 			end
 			return tbl
 		end
+
+		function String.starts(str, Start)
+			return string.sub(str,1,string.len(Start))==Start
+		end
+
+		function String.ends(str, End)
+			return End=='' or string.sub(str,-string.len(End))==End
+		end
 	-- End String Functions --
 
 	-- Table Functions --
@@ -1147,6 +1212,19 @@ MoogleLib.Settings = {
 				else
 					return true
 				end
+			end
+		end
+
+		function Table.pairs(t, ...)
+			local i, a, k, v = 1, {...}
+			return function()
+				repeat
+					k, v = next(t, k)
+					if k == nil then
+						i, t = i + 1, a[i]
+					end
+				until k ~= nil or not t
+				return k, v
 			end
 		end
 
@@ -1689,6 +1767,7 @@ MoogleLib.Settings = {
 				GUI:SameLine(0, posX)
 			end
 		end
+		local SameLine = Gui.SameLine
 
 		function Gui.Indent(spacing)
 			local Type = General.Type
@@ -1700,6 +1779,7 @@ MoogleLib.Settings = {
 				GUI:Indent()
 			end
 		end
+		local Indent = Gui.Indent
 
 		function Gui.Unindent(spacing)
 			local Type = General.Type
@@ -1711,11 +1791,13 @@ MoogleLib.Settings = {
 				GUI:Unindent()
 			end
 		end
+		local Unindent = Gui.Unindent
 
 		function Gui.Space(spacing)
 			spacing = spacing or 5
 			GUI:SameLine(0, spacing)
 		end
+		local Space = Gui.Space
 
 		function Gui.Text(string, RGB, SameLineSpacing, beforetext)
 			local NotNil = General.NotNil
@@ -1727,8 +1809,9 @@ MoogleLib.Settings = {
 			local beforetext = beforetext
 
 			if type(RGB) ~= "table" then
-				SameLineSpacing = RGB
 				beforetext = SameLineSpacing
+				SameLineSpacing = RGB
+				RGB = nil
 			else
 				ColorText = true
 			end
@@ -1771,6 +1854,7 @@ MoogleLib.Settings = {
 				end
 			end
 		end
+		local Text = Gui.Text
 
 		function Gui.Checkbox(string, varname, varstring, reverse, tooltip)
 			local NotNil = General.NotNil
@@ -1802,6 +1886,7 @@ MoogleLib.Settings = {
 			end
 			return varname
 		end
+		local Checkbox = Gui.Checkbox
 
 		-- function Gui.SliderInt(string, varname, varstring, min, max, width, reverse, tooltip)
 		-- 	if reverse then
@@ -1865,6 +1950,7 @@ MoogleLib.Settings = {
 			GUI:PopTextWrapPos()
 			GUI:EndTooltip()
 		end
+		local Tooltip = Gui.Tooltip
 
 		function Gui.GetRemaining(which)
 			local NotNil = General.NotNil
@@ -1877,6 +1963,7 @@ MoogleLib.Settings = {
 				return GUI:GetContentRegionAvail()
 			end
 		end
+		local GetRemaining = Gui.GetRemaining
 
 		Gui.VirtualKeys = {
 			[0] = [[None]],
@@ -2043,6 +2130,45 @@ MoogleLib.Settings = {
 			end
 			return tbl
 		end
+		local HotKey = Gui.HotKey
+
+		function Gui.DrawTables(tbl, depth)
+
+			local depth = depth or 0
+			if table.valid(tbl) then
+				for k,v in table.pairsbykeys(tbl) do
+					Indent(25*depth)
+					if Type(v,"table") then
+						if GUI:TreeNode(tostring(k)) then
+							Gui.DrawTables(v,depth + 1)
+						end
+					else
+						if tonumber(k) ~= nil then
+							Text("["..tostring(k).."] (",4)
+						else
+							Text(tostring(k).." (",4)
+						end
+						if Type(v,"nil") then
+							Text(type(v),{"0","0.933","0","1"},4) Text(") = ",4) Text("nil",{"0","0.933","0","1"},4,true)
+						elseif Type(v,"string") then
+							Text(type(v),{"0","0.6","0.341","1"},4) Text(") = ",4) Text("\""..v.."\"",{"0","0.6","0.341","1"},4,true)
+						elseif Type(v,"number") then
+							Text(type(v),{"0","0.769","0.11","1"},4) Text(") = ",4) Text(tostring(v),{"0","0.769","0.11","1"},4,true)
+						elseif Type(v,"boolean") then
+							Text(type(v),{"0.933","0.4","0","1"},4) Text(") = ",4) Text(string.upper(tostring(v)),{"0.933","0.4","0","1"},4,true)
+						elseif Type(v,"function") then
+							Text(type(v),{"0.322","0.718","0.953","1"},4) Text(") = ",4) Text(tostring(v),{"0.322","0.718","0.953","1"},4,true)
+						elseif Type(v,"userdata") then
+							Text(type(v),{"0.463","0.463","0.463","1"},4) Text(") = ",4) Text(tostring(v),{"0.463","0.463","0.463","1"},4,true)
+						else
+							Text(type(v),{"0.169","0.286","1","1"},4) Text(") = ",4) Text(tostring(v),{"0.169","0.286","1","1"},4,true)
+						end
+					end
+					Unindent(4*depth)
+				end
+			end
+		end
+		local DrawTables = Gui.DrawTables
 	-- End GUI Functions --
 -- End Core Functions & Helper Functions --
 
@@ -2373,6 +2499,23 @@ function MoogleLib.OnUpdate()
 	-- if ToggleVersionCheck then OS.VersionCheck() end
 	-- if ToggleDownloadString then OS.DownloadString() end
 	-- MarkerLogic("attack",[[type=1,targetable]],true,"48")
+	MoogleDebug.ToggleCMD = ToggleCMD
+	MoogleDebug.lastCopy = lastCopy
+	MoogleDebug.CMD = CMD
+	if oldClip then
+		MoogleDebug.oldClip = string.len(oldClip)
+	end
+	MoogleDebug.CommandSent = CommandSent
+	if filetimestart then
+		MoogleDebug.FileTimeStart = filetimestart
+		MoogleDebug.TimeSinceFileTimeStart = TimeSince(MoogleDebug.FileTimeStart)
+	end
+	if MoogleDebug.LastSuccessfulUpdate then
+		MoogleDebug.TimeSinceLastUpdate = TimeSince(MoogleDebug.LastSuccessfulUpdate)
+	end
+	if MoogleDebug.LastCMDUse then
+		MoogleDebug.TimeSinceLastCMDUse = TimeSince(MoogleDebug.LastCMDUse)
+	end
 end
 
 RegisterEventHandler("Module.Initalize", MoogleLib.Init)
