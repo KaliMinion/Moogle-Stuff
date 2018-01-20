@@ -2,7 +2,7 @@ KaliMainWindow = {}
 
 KaliMainWindow.Info = {
 	Creator = "Kali",
-	Version = "1.2.6",
+	Version = "1.2.7",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
@@ -222,7 +222,7 @@ function KaliMainWindow.Draw()
 				GUI:PushStyleVar(GUI.StyleVar_WindowPadding,0,0)
 				GUI:PushStyleVar(GUI.StyleVar_WindowMinSize,1,1)
 				GUI:PushStyleColor(GUI.Col_WindowBg, 0.0174509803921569, 0, 0.0270588235294118, 0.95)
-				KaliMainWindow.GUI.NavigationMenu.visible, KaliMainWindow.GUI.NavigationMenu.open = GUI:Begin(KaliMainWindow.GUI.NavigationMenu.name, KaliMainWindow.GUI.NavigationMenu.open,GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoMove + GUI.WindowFlags_NoCollapse)
+				KaliMainWindow.GUI.NavigationMenu.visible, KaliMainWindow.GUI.NavigationMenu.open = GUI:Begin(KaliMainWindow.GUI.NavigationMenu.name, KaliMainWindow.GUI.NavigationMenu.open,GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoMove + GUI.WindowFlags_NoCollapse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoScrollWithMouse)
 				if KaliMainWindow.GUI.NavigationMenu.visible then
 					-- Start Navigation Menu Animation --
 
