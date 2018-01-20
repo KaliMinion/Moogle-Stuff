@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.2.4",
+	Version = "1.2.5",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -229,7 +229,29 @@ MoogleDebug = {}
 		MoogleSave = API.Vars
 		MoogleLoad = API.Vars
 
-		function API.CurrentTarget(check, useNil)
+		function API.Distance2D(table1,table2)
+			if table2 == nil then
+				table2 = table1
+				table1 = Player
+			end
+			if table.valid(table1) and table.valid(table2) then
+				return (math.sqrt(math.pow((table2.pos.x - table1.pos.x),2)+math.pow((table2.pos.z - table1.pos.z),2))) - (table1.hitradius + table2.hitradius)
+			end
+		end
+		local Distance2D = API.Distance2D
+
+		function API.Distance3D(table1,table2)
+			if table2 == nil then
+				table2 = table1
+				table1 = Player
+			end
+			if table.valid(table1) and table.valid(table2) then
+				return (math.sqrt(math.pow((table2.pos.x - table1.pos.x),2)+math.pow((table2.pos.z - table1.pos.z),2)+math.pow((table2.pos.y - table1.pos.y),2))) - (table1.hitradius + table2.hitradius)
+			end
+		end
+		local Distance3D = API.Distance3D
+
+		function API.CurrentTarget(check)
 			local NotNil = General.NotNil
 			local IsNil = General.IsNil
 			local Type = General.Type
@@ -263,11 +285,7 @@ MoogleDebug = {}
 					end
 				end
 			else
-				if useNil then
-					return nil
-				else
-					return false
-				end
+				return false
 			end
 		end
 
@@ -2137,10 +2155,22 @@ MoogleDebug = {}
 			local depth = depth or 0
 			if table.valid(tbl) then
 				for k,v in table.pairsbykeys(tbl) do
-					Indent(25*depth)
+					local depthtemp = 0
+					if depth > 1 then depthtemp = 1 else depthtemp = depth end
+					Indent(25*depthtemp)
 					if Type(v,"table") then
-						if GUI:TreeNode(tostring(k)) then
-							Gui.DrawTables(v,depth + 1)
+						if table.valid(v) then
+							if GUI:TreeNode(tostring(k)) then
+								Gui.DrawTables(v,depth + 1)
+								GUI:TreePop()
+							end
+						else
+							if tonumber(k) ~= nil then
+								Text("["..tostring(k).."] (",4)
+							else
+								Text(tostring(k).." (",4)
+							end
+							Text(type(v),{"0.169","0.286","1","1"},4) Text(") = ",4) Text("Empty Table",{"0.169","0.286","1","1"},4,true)
 						end
 					else
 						if tonumber(k) ~= nil then
@@ -2164,7 +2194,9 @@ MoogleDebug = {}
 							Text(type(v),{"0.169","0.286","1","1"},4) Text(") = ",4) Text(tostring(v),{"0.169","0.286","1","1"},4,true)
 						end
 					end
-					Unindent(4*depth)
+					local depthtemp = 0
+					if depth > 1 then depthtemp = 1 else depthtemp = depth end
+					Unindent(25*depthtemp)
 				end
 			end
 		end
