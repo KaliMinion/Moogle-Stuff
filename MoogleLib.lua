@@ -2153,11 +2153,12 @@ MoogleDebug = {}
 		end
 		local HotKey = Gui.HotKey
 
+		local FunctionsRevealed = {}
 		function Gui.DrawTables(tbl, depth)
-
 			local depth = depth or 0
 			if table.valid(tbl) then
 				for k,v in table.pairsbykeys(tbl) do
+					local c
 					local depthtemp = 0
 					if depth > 1 then depthtemp = 1 else depthtemp = depth end
 					Indent(25*depthtemp)
@@ -2190,7 +2191,16 @@ MoogleDebug = {}
 						elseif Type(v,"boolean") then
 							Text(type(v),{"0.933","0.4","0","1"},4) Text(") = ",4) Text(string.upper(tostring(v)),{"0.933","0.4","0","1"},4,true)
 						elseif Type(v,"function") then
-							Text(type(v),{"0.322","0.718","0.953","1"},4) Text(") = ",4) Text(tostring(v),{"0.322","0.718","0.953","1"},4,true)
+							local key = tostring(tbl)..tostring(depth)..tostring(k)..tostring(v)
+							c = Text(type(v),{"0.322","0.718","0.953","1"},4) c = Text(") = ",4) c = Text(tostring(v),{"0.322","0.718","0.953","1"},4,true)
+							if GUI:IsItemClicked(c) or FunctionsRevealed[key] then
+								Text("Result: "..tostring(v()),{"1","1","0","1"},4,true)
+								if FunctionsRevealed[key] then
+									FunctionsRevealed[key] = not FunctionsRevealed[key]
+								else
+									FunctionsRevealed[key] = true
+								end
+							end
 						elseif Type(v,"userdata") then
 							Text(type(v),{"0.463","0.463","0.463","1"},4) Text(") = ",4) Text(tostring(v),{"0.463","0.463","0.463","1"},4,true)
 						else
