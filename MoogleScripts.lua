@@ -34,11 +34,11 @@ local tbl =
 		filepath = [[MoogleLib.lua]],
 		table = "return MoogleLib",
 		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleLib.lua]],
-		version = "1.2.5",
+		version = "1.2.6",
 		category = "Core Moogle Module",
 		stability = "Core Moogle Module",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1516468202,
+		lastupdate = 1516472163,
 		info = [[Where all my Moogle Functions are stored.]],
 	},
 	[4] = {
