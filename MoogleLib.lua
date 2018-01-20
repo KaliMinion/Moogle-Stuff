@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.2.5",
+	Version = "1.2.6",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -288,6 +288,7 @@ MoogleDebug = {}
 				return false
 			end
 		end
+		local CurrentTarget = API.CurrentTarget
 
 		function MoogleTime()
 			GUI:SetClipboardText(os.time())
@@ -720,10 +721,12 @@ MoogleDebug = {}
 			if oldClip == nil then
 				oldClip = GUI:GetClipboardText()
 				local start = [[-- MOOGLE SCRIPTS START --]]
-				if string.sub(oldClip,1,string.len(start)) == start then
-					ml_error("Clipboard Matches Moogle Scripts")
-					GUI:SetClipboardText(" ")
-					oldClip = GUI:GetClipboardText()
+				if type(oldClip) == "string" then
+					if string.sub(oldClip,1,string.len(start)) == start then
+						ml_debug("Clipboard Matches Moogle Scripts", "gLogCNE", 1)
+						GUI:SetClipboardText(" ")
+						oldClip = GUI:GetClipboardText()
+					end
 				end
 				lastCopy = Copy
 			end
