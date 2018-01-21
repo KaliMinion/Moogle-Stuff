@@ -28,7 +28,7 @@ MoogleUpdater.GUI = {
 
 MoogleUpdater.Settings = {
 	enable = true,
-	AutoUpdate = false, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
+	AutoUpdate = true, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
 	CheckInterval = 30, -- in the unit of time the user has selected
 	CheckUnit = "Seconds",
 	LastCheck = 0,
