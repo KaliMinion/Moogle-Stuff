@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.7",
+	Version = "1.2.8",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -71,6 +71,7 @@ local DownloadOneTimers = {}
 local PendingDeletion = {}
 local AdjustChildren = {}
 local NeedImages = true
+local FinishedUpdating = true
 function MoogleUpdater.Draw()
 	if MoogleLib and KaliMainWindow ~= nil then
 		local main = KaliMainWindow.GUI
@@ -514,13 +515,21 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 						if scripts[i] == nil then -- New Script
 							MoogleUpdater.NewScripts[i] = e.name
 						elseif scripts[i].version ~= e.version then -- Updated Script
-							MoogleUpdater.UpdatedScripts[i] = e.name
+							if MoogleUpdater.UpdatedScripts[i] == nil then
+								FinishedUpdating = false
+								DownloadFile(e.url,MooglePath..e.filepath)
+								MoogleUpdater.UpdatedScripts[i] = e.name
+							end
 						else
 							if loadstring(e.table..[[ ~= nil]])() and loadstring(e.table..[[.Info ~= nil]])() then
 								local InstalledScriptVersion = (loadstring(e.table..[[.Info.Version]])())
 								if scripts[i].version ~= InstalledScriptVersion then
 									-- New Script --
-									MoogleUpdater.UpdatedScripts[i] = e.name
+									if MoogleUpdater.UpdatedScripts[i] == nil then
+										FinishedUpdating = false
+										DownloadFile(e.url,MooglePath..e.filepath)
+										MoogleUpdater.UpdatedScripts[i] = e.name
+									end
 								end
 							end
 						end
@@ -544,21 +553,37 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 					end
 					MoogleUpdater.MoogleScripts = webpage
 					webpage = {}
-					MoogleUpdater.Settings.LastCheck = os.time()
+					if not table.valid(MoogleUpdater.UpdatedScripts) then
+						MoogleUpdater.Settings.LastCheck = os.time()
+					else
+						if FinishedUpdating then
+							MoogleUpdater.Settings.LastCheck = os.time()
+						else
+							MoogleUpdater.Settings.LastCheck = MoogleUpdater.Settings.LastCheck + 5
+						end
+					end
 				end
 
 				local same = true
 				if MoogleUpdater.Settings.AutoUpdate and table.valid(MoogleUpdater.UpdatedScripts) then
 					for k,v in pairs(MoogleUpdater.UpdatedScripts) do
 						if MoogleUpdater.UpdatedScriptsReady[k] == nil then
+							MoogleUpdater.UpdatedScriptsReady[k] = false
 							DownloadFile(scripts[k].url,MooglePath..scripts[k].filepath)
 							same = false
-						else
+							FinishedUpdating = false
+						elseif MoogleUpdater.UpdatedScriptsReady[k] ~= v then
+							DownloadFile(scripts[k].url,MooglePath..scripts[k].filepath)
 							MoogleUpdater.UpdatedScriptsReady[k] = v
 						end
 					end
-					if same and not FFXIV_Common_BotRunning and MoogleUpdater.Settings.AutoReload then
-						Reload()
+					if same then
+						if FinishedUpdating == false then
+							FinishedUpdating = true
+						end
+						if not FFXIV_Common_BotRunning and MoogleUpdater.Settings.AutoReload then
+							Reload()
+						end
 					end
 				end
 			end
