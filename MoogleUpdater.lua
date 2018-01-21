@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.6",
+	Version = "1.2.7",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -28,7 +28,7 @@ MoogleUpdater.GUI = {
 
 MoogleUpdater.Settings = {
 	enable = true,
-	AutoUpdate = true, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
+	AutoUpdate = false, -- if False, then notifies the user when an update is available, otherwise notifies the user that it updated a script
 	CheckInterval = 30, -- in the unit of time the user has selected
 	CheckUnit = "Seconds",
 	LastCheck = 0,
@@ -47,32 +47,32 @@ MoogleUpdater.UpdatedLabelScripts = {}
 local NeedWebRequest = true
 local NeedWebContent = true
 
-local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, Sign, Round, PowerShell, CreateFolder, DeleteFile, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, OrderedKeys, IndexToDecimal, HotKey, pairs, DrawTables
+local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, PowerShell, CreateFolder, DeleteFile, MoogleCMDQueue, MoogleDownloadBuffer, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, Valid, NotValid, pairs, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, HotKey, DrawTables
 
 local function UpdateLocals1()
-	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split Valid = Table.Valid NotValid = Table.NotValid InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent
+	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars Distance2D = API.Distance2D Distance3D = API.Distance3D CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 DrawDebugInfo = Debug.DrawDebugInfo Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile MoogleCMDQueue = OS.MoogleCMDQueue MoogleDownloadBuffer = OS.MoogleDownloadBuffer CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split starts = String.starts ends = String.ends Valid = Table.Valid NotValid = Table.NotValid pairs = Table.pairs InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired
 end
 
 local function UpdateLocals2()
-	Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey pairs = Table.pairs DrawTables = Gui.DrawTables
+	Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining HotKey = Gui.HotKey DrawTables = Gui.DrawTables
 end
 
 function MoogleUpdater.ModuleInit()
-	if MoogleLib ~= nil then
-		UpdateLocals1() UpdateLocals2()
-		DownloadTable([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],"MoogleUpdater.MoogleScripts")
-	end
+	if MoogleLib then UpdateLocals1() UpdateLocals2()
+		-- DownloadTable([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],"MoogleUpdater.MoogleScripts")
 	io.popen([[powershell -Command "$PSVer = 'PowerShell Version: ' + $PSVersionTable.PSVersion.Major + '.' + $PSVersionTable.PSVersion.Minor; $WinVer = 'Windows Version: ' + (Get-WmiObject -class Win32_OperatingSystem).Caption + ' ' + (Get-CimInstance Win32_OperatingSystem).OSArchitecture; $PackVer = 'Service Pack Version: ' + (Get-CimInstance Win32_OperatingSystem).ServicePackMajorVersion + '.' + (Get-CimInstance Win32_OperatingSystem).ServicePackMinorVersion ; $OSVer = 'OS Version: ' + (Get-CimInstance Win32_OperatingSystem).Version ; ($PSVer, $WinVer, $PackVer, $OSVer) | Out-File -filepath ']]..LuaPath..[[MoogleStuff Files\System Info.txt'"]])
+	end
 end
 
 MoogleUpdater.TimeUnits = {"Seconds","Minutes","Hours","Days","Weeks","Months"}
 
 local ModuleDownloads = {}
+local DownloadOneTimers = {}
 local PendingDeletion = {}
 local AdjustChildren = {}
 local NeedImages = true
 function MoogleUpdater.Draw()
-	if KaliMainWindow ~= nil then
+	if MoogleLib and KaliMainWindow ~= nil then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleUpdater.Settings
@@ -91,16 +91,20 @@ function MoogleUpdater.Draw()
 					["https://i.imgur.com/qkw94dD.png"] = "ViewCode.png"
 				}
 				local finished = true
-				for url,image in pairs(Images) do
+				for url,image in table.pairsbykeys(Images) do
 					if not FileExists(ImageFolder..image) then
-						DownloadFile(url,ImageFolder..image)
-						finished = false
+						if IsNil(MoogleDownloadBuffer[url]) then
+							MoogleDebug.NeedImagesURL = url
+							DownloadFile(url,ImageFolder..image)
+							finished = false
+						end
 					end
 				end
 				if finished then
 					NeedImages = false
 				end
 			end
+			MoogleDebug.NeedImages = NeedImages
 		-- End Image Downloading --
 
 		-- Add entry to sidewindow navigation list --
@@ -199,6 +203,7 @@ function MoogleUpdater.Draw()
 															CreateFolder(lastfolder)
 														end
 														DownloadFile(url,MooglePath..filepath)
+														DownloadOneTimers[url] = MooglePath..filepath
 													end
 												end
 											end
@@ -342,11 +347,11 @@ function MoogleUpdater.Draw()
 						GUI:Dummy(0,1)
 					end
 				end
-				if GUI:CollapsingHeader("Debug Info") then
-					if GUI:SmallButton("MoogleTime") then MoogleTime() end
-					DrawTables(MoogleUpdater)
-					DrawTables(MoogleDebug)
-				end
+				DrawDebugInfo("Moogle Updater",DownloadOneTimers,MoogleCMDQueue,MoogleDownloadBuffer,OS.CMDTable)
+				--OS.CMDTable
+				--MoogleCMDQueue
+				--MoogleUpdater
+				--MoogleDebug
 			end
 		end
 	end
@@ -357,6 +362,7 @@ local timevalue = 0
 local FirstRun = false
 local docheck = true
 function MoogleUpdater.OnUpdate(event, tickcount)
+	if MoogleLib then
 	-- Check if all the folders are created --
 		local MooglePath = GetLuaModsPath()..[[MoogleStuff Files\]]
 		if not FolderExists(MooglePath..[[Moogle Images]]) then
@@ -365,6 +371,18 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 		if not FolderExists(MooglePath..[[Moogle Scripts]]) then
 			FolderCreate(MooglePath..[[Moogle Scripts]])
 		end
+
+	-- Check for OneTime Downloads that need to be executed once more --
+	if MoogleLib and table.valid(DownloadOneTimers) then
+		for url,filepath in pairs(DownloadOneTimers) do
+			if IsNil(OS.MoogleDownloadBuffer[url]) and MoogleCMDQueue[url] then
+				DownloadFile(url,filepath)
+			else
+				DownloadOneTimers[url] = nil
+				OS.MoogleDownloadBuffer[url] = nil
+			end
+		end
+	end
 
 	-- Check for Pending Deletion --
 	if MoogleLib ~= nil and table.valid(PendingDeletion) then
@@ -483,13 +501,13 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 		if timevalue ~= CheckInterval * 2592000 then timevalue = CheckInterval * 2592000 end
 	end
 
-	if MoogleUpdater.Settings.AutoUpdate then
+	if MoogleUpdater.Settings.AutoUpdate or not table.valid(MoogleUpdater.MoogleScripts) then
 		-- Check to see if Moogle Scripts has been updated --
 			if os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue then
 				local scripts = MoogleUpdater.MoogleScripts
 				
 				local tbl = DownloadString([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]])
-				if tbl then webpage = loadstring(tbl)() end
+				if NotNil(tbl) and type(tbl) == "string" then webpage = loadstring(tbl)() end
 				if table.valid(webpage) then
 					MoogleDebug.LastSuccessfulUpdate = Now()
 					for i,e in pairs(webpage) do
@@ -545,7 +563,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 				end
 			end
 		-- End Moogle Scripts Check --
-	end
+	end end
 end
 
 RegisterEventHandler("Module.Initalize", MoogleUpdater.ModuleInit)
