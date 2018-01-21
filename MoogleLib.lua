@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.2.7",
+	Version = "1.2.8",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -27,17 +27,40 @@ MoogleLib.Info = {
 		["1.2.0"] = "File Delete Function",
 		["1.2.2"] = "New Functions",
 		["1.2.3"] = "Download Fixes...again",
-		["1.2.4"] = "Download Tweaks and new Functions"
+		["1.2.4"] = "Download Tweaks and new Functions",
+		["1.3.0"] = "Huge rework to fix locals and downloading"
 	}
 }
 
 MoogleLib.Settings = {
+	loaded = false,
 	enable = true,
 	MainMenuType = 2,
-	MainMenuEntryCreated = false
+	MainMenuEntryCreated = false,
+	DownloadThreads = 3
 }
+local loaded = MoogleLib.Settings.loaded
 
 MoogleDebug = {}
+
+local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, PowerShell, CreateFolder, DeleteFile, MoogleCMDQueue, MoogleDownloadBuffer, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, Valid, NotValid, pairs, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, HotKey, DrawTables
+
+local function UpdateLocals1()
+	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars Distance2D = API.Distance2D Distance3D = API.Distance3D CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 DrawDebugInfo = Debug.DrawDebugInfo Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile MoogleCMDQueue = OS.MoogleCMDQueue MoogleDownloadBuffer = OS.MoogleDownloadBuffer CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split starts = String.starts ends = String.ends Valid = Table.Valid NotValid = Table.NotValid pairs = Table.pairs InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired
+end
+
+local function UpdateLocals2()
+	Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining HotKey = Gui.HotKey DrawTables = Gui.DrawTables
+end
+
+function MoogleLib.Init()
+	UpdateLocals1() UpdateLocals2()
+	MoogleLib.Settings.loaded = true loaded = true
+	-- if FileExists(MooglePath..[[BannedKeys.lua]]) then
+	-- 	Table.BannedKeys = FileLoad(MooglePath..[[BannedKeys.lua]])
+	-- end
+end
+RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 
 -- Helper Variables --
 
@@ -53,8 +76,6 @@ MoogleDebug = {}
 	local Gui = MoogleLib.Gui
 
 	API.MinionPath = GetStartupPath()
-	local MinionPath = API.MinionPath
-
 	API.LuaPath = GetLuaModsPath()
 	local LuaPath = API.LuaPath
 
@@ -62,27 +83,19 @@ MoogleDebug = {}
 	local MooglePath = API.MooglePath
 
 	API.ImageFolder = MooglePath..[[Moogle Images\]]
-	local ImageFolder = API.ImageFolder
-
 	API.ScriptsFolder = MooglePath..[[Moogle Scripts\]]
-	local ScriptsFolder = API.ScriptsFolder
-
 	API.ACRFolder = LuaPath..[[ACR\CombatRoutines\]]
-	local ACRFolder = API.ACRFolder
-
 	API.SenseProfiles = LuaPath..[[Sense\profiles\]]
-	local SenseProfiles = API.SenseProfiles
-
 	API.SenseTriggers = LuaPath..[[Sense\triggers\]]
-	local SenseTriggers = API.SenseTriggers
+
 -- End Helper Variables --
 
 -- Core Functions & Helper Functions --
 	-- API Functions --
 		function API.Initialize(ModuleTable)
 			local MenuType = MoogleLib.Settings.MainMenuType
-			local MainIcon = ImageFolder..[[MoogleStuff.png]]
-			local ModuleIcon = ImageFolder..ModuleTable.name..[[.png]]
+			local MainIcon = MoogleLib.API.ImageFolder..[[MoogleStuff.png]]
+			local ModuleIcon = MoogleLib.API.ImageFolder..ModuleTable.name..[[.png]]
 			local created = MoogleLib.Settings.MainMenuEntryCreated
 
 			-- Create the Main Menu entry if it hasn't been created yet --
@@ -137,14 +150,9 @@ MoogleDebug = {}
 			if In(varstr,"help","Help","?") then
 				d([[Save Function Example: Save({["a.b.c[d][test]"] = "MoogleModule.tbl.var"})]])
 			else
-				local IsNil = General.IsNil
-				local NotNil = General.NotNil
-				local Error = General.Error
-				local Type = General.Type
-				local Valid = Table.Valid
 
 				local changed = false
-
+				local Type = General.Type
 				if Type(Tbl,"table") and Valid(Tbl) then
 					for k,v in pairs(Tbl) do
 						local stop = false
@@ -238,7 +246,6 @@ MoogleDebug = {}
 				return (math.sqrt(math.pow((table2.pos.x - table1.pos.x),2)+math.pow((table2.pos.z - table1.pos.z),2))) - (table1.hitradius + table2.hitradius)
 			end
 		end
-		local Distance2D = API.Distance2D
 
 		function API.Distance3D(table1,table2)
 			if table2 == nil then
@@ -249,12 +256,8 @@ MoogleDebug = {}
 				return (math.sqrt(math.pow((table2.pos.x - table1.pos.x),2)+math.pow((table2.pos.z - table1.pos.z),2)+math.pow((table2.pos.y - table1.pos.y),2))) - (table1.hitradius + table2.hitradius)
 			end
 		end
-		local Distance3D = API.Distance3D
 
 		function API.CurrentTarget(check)
-			local NotNil = General.NotNil
-			local IsNil = General.IsNil
-			local Type = General.Type
 
 			local target = Player:GetTarget()
 			if NotNil(target) then
@@ -288,7 +291,6 @@ MoogleDebug = {}
 				return false
 			end
 		end
-		local CurrentTarget = API.CurrentTarget
 
 		function MoogleTime()
 			GUI:SetClipboardText(os.time())
@@ -333,9 +335,6 @@ MoogleDebug = {}
 		end
 
 		function General.Is(check, ...)
-			local NotNil = General.NotNil
-			local Type = General.Type
-			local Valid = Table.Valid
 
 			local compare = {...}
 			
@@ -361,9 +360,6 @@ MoogleDebug = {}
 		end
 
 		function General.IsAll(check, ...)
-			local NotNil = General.NotNil
-			local Type = General.Type
-			local Valid = Table.Valid
 
 			local compare = {...}
 			
@@ -396,9 +392,6 @@ MoogleDebug = {}
 		end
 
 		function General.Is2(check, compare, altyes, altno)
-			local NotNil = General.NotNil
-			local Type = General.Type
-			local Valid = Table.Valid
 			
 			if Valid(compare) then
 				if (check == compare or (tonumber(check) ~= nil and tonumber(check) == tonumber(compare))) then
@@ -416,9 +409,6 @@ MoogleDebug = {}
 		end
 
 		function General.Not(check, ...)
-			local NotNil = General.NotNil
-			local Type = General.Type
-			local Valid = Table.Valid
 
 			local compare = {...}
 			
@@ -444,9 +434,6 @@ MoogleDebug = {}
 		end
 
 		function General.NotAll(check, ...)
-			local NotNil = General.NotNil
-			local Type = General.Type
-			local Valid = Table.Valid
 
 			local compare = {...}
 			
@@ -500,7 +487,6 @@ MoogleDebug = {}
 
 		function General.Type(var, compare, altyes, altno)
 			local NotNil = General.NotNil
-
 			if NotNil(compare) then
 				if type(compare) == "table" then
 					for i = 1, #compare do
@@ -520,11 +506,8 @@ MoogleDebug = {}
 				return type(var)
 			end
 		end
-		local Type = General.Type
 
 		function General.NotType(var, compare, altyes, altno)
-			local NotNil = General.NotNil
-			local IsNil = General.IsNil
 
 			if NotNil(compare) then
 				if type(var) == compare then
@@ -538,8 +521,6 @@ MoogleDebug = {}
 		end
 
 		function General.Size(check, sign, value) -- Short version of table.size, but adds in the option to return only if it meets the requirements
-			local Type = General.Type
-			local Error = General.Error
 			
 			if sign == nil then
 				local t = Type(check)
@@ -620,7 +601,6 @@ MoogleDebug = {}
 		end
 
 		function General.Empty(check)
-			local Size = General.Size
 			
 			if Size(check) == 0 then
 				return true
@@ -630,7 +610,6 @@ MoogleDebug = {}
 		end
 
 		function General.NotEmpty(check)
-			local Size = General.Size
 			
 			if Size(check) == 0 then
 				return false
@@ -651,7 +630,6 @@ MoogleDebug = {}
 				d([[Variable = true]])
 				d([[ [MoogleLib.lua][MoogleLib.API.Lua.debug.d2][Help Response] ]])
 			else
-				local IsNil = General.IsNil
 
 				-- d2 outputs to the Minion console, while opening the console if closed --
 				local var = var or ""
@@ -681,6 +659,24 @@ MoogleDebug = {}
 				end
 			end
 		end
+
+		function Debug.DrawDebugInfo(ModuleName, ...)
+
+			local tables = {...}
+
+			if Valid(tables) then
+				if GUI:CollapsingHeader(ModuleName.." Debug Info") then
+					if GUI:SmallButton("MoogleTime") then MoogleTime() end
+					for i = 1, #tables do
+						if Type(tables[i],"table") then
+							GUI:Separator()
+							DrawTables(tables[i])
+						end
+						GUI:Separator()
+					end
+				end
+			end
+		end
 	-- End Debug Functions --
 
 	-- Input and Output (IO) Functions --
@@ -694,8 +690,7 @@ MoogleDebug = {}
 		function Math.Round(value, bracket)
 			bracket = bracket or 1
 			local floor = math.floor
-			local sign = Math.Sign
-			return floor(value / bracket + sign(value) * 0.5) * bracket
+			return floor(value / bracket + Sign(value) * 0.5) * bracket
 		end
 	-- End Math Functions --
 
@@ -714,74 +709,156 @@ MoogleDebug = {}
 			end
 		end
 
-		local ToggleCMD,CommandSent,CMD,filetimestart,oldClip,lastCopy = false,false
-		function OS.CMD(cmd, PowerShell, Copy)
-			MoogleDebug.LastCMDUse = Now()
-			MoogleDebug.cmd = cmd
-			if oldClip == nil then
-				oldClip = GUI:GetClipboardText()
-				local start = [[-- MOOGLE SCRIPTS START --]]
-				if type(oldClip) == "string" then
-					if string.sub(oldClip,1,string.len(start)) == start then
-						ml_debug("Clipboard Matches Moogle Scripts", "gLogCNE", 1)
-						GUI:SetClipboardText(" ")
-						oldClip = GUI:GetClipboardText()
-					end
+		OS.MoogleCMDQueue = {} OS.MoogleDownloadBuffer = {} OS.CMDTable = {}
+		function OS.CMD(cmd, PowerShell, url)
+			local pass = true
+			url = url or cmd
+			if OS.MoogleDownloadBuffer[url] then
+				if TimeSince(MoogleDownloadBuffer[url]) < 5000 then
+					pass = false
 				end
-				lastCopy = Copy
 			end
-			local ctype = io.type(CMD)
-			MoogleDebug.ctype = io.type(CMD)
-			if CommandSent and ctype == "file" then
-				if filetimestart == nil then
-					filetimestart = Now()
-				end
-				local testclip = GUI:GetClipboardText()
-					MoogleDebug.testclip = string.len(tostring(testclip))
-				if testclip then
-					if testclip ~= oldClip then
-						lastCopy = nil
-						CMD:close()
-							MoogleDebug.ctype = io.type(CMD)
-						ToggleCMD = false
-						GUI:SetClipboardText(oldClip)
-						oldClip = nil
-						filetimestart = nil
-						CommandSent = false
-						if Copy then
-							return "CMD output copied to clipboard."
-						else
-							return testclip
+			if loaded and pass then
+				local DownloadThreads = MoogleLib.Settings.DownloadThreads
+				local freetable = 0
+				if table.size(OS.CMDTable) > DownloadThreads then
+					-- Too many tables --
+					for k,v in ipairs(OS.CMDTable) do
+						if k > DownloadThreads then
+							if io.type(OS.CMDTable[k].CMD) ~= "file" then
+								OS.CMDTable[k] = nil
+							end
 						end
-					elseif TimeSince(filetimestart) > 5000 then
-						filetimestart = Now()
-						GUI:SetClipboardText(" ")
-						oldClip = GUI:GetClipboardText()
-						local str
-						if PowerShell then
-							str = [[PowerShell -Command "]]..cmd..[["]]
-						else
-							str = cmd
-						end
-						CMD = io.popen(str..[[ | clip]])
 					end
 				end
-			elseif not CommandSent then
-				CommandSent = true
-				local str
-				if PowerShell then
-					str = [[PowerShell -Command "]]..cmd..[["]]
-				else
-					str = cmd
+				
+				-- Create tables that are missing --
+				if table.size(OS.CMDTable) < DownloadThreads then
+					for i = 1, DownloadThreads do
+						if OS.CMDTable[i] == nil then
+							OS.CMDTable[i] = {}
+						end
+					end
 				end
-				CMD = io.popen(str..[[ | clip]])
-				ToggleCMD = true
+
+				for i=1, #OS.CMDTable do
+					if freetable == 0 then
+						if IsNil(OS.CMDTable[i].CMD) or io.type(OS.CMDTable[i].CMD) ~= "file" then
+							freetable = i
+						end
+					end
+				end
+
+				MoogleDebug.cmd = cmd
+				url = url or cmd
+				if NotNil(MoogleCMDQueue[url]) then -- Already in the queue, find which one
+					local tblnumber
+					for i=1, #OS.CMDTable do
+						if OS.CMDTable[i].lasturl == url then
+							tblnumber = i
+						end
+					end
+					if tblnumber then
+						local i = tblnumber
+						local CMDtbl = OS.CMDTable[i]
+						local lasturl = OS.CMDTable[i].lasturl
+						local CMD = OS.CMDTable[i].CMD
+						local ctype = io.type(OS.CMDTable[i].CMD)
+						local outputfile = OS.CMDTable[i].outputfile
+						local CommandSent = OS.CMDTable[i].CommandSent
+						local filetimestart = OS.CMDTable[i].filetimestart
+
+						if Is(ctype,"file") then -- File is open, check to see if CommandSent is true --
+							if CommandSent then -- it better..
+								if filetimestart == nil then
+									CMDtbl.filetimestart = Now()
+								end
+								if FileExists(MooglePath.."output"..tostring(i)..".lua") then
+									CMDtbl.outputfile = io.open(MooglePath.."output"..tostring(i)..".lua","r")
+									local text = CMDtbl.outputfile:read("*a")
+									if #text > 0 then
+										CMDtbl.outputfile:close()
+										CMDtbl.filetimestart = nil
+										CMDtbl.CommandSent = false
+										CMDtbl.CMD:close()
+										MoogleCMDQueue[url] = nil
+										CMDtbl.lasturl = nil
+										MoogleDownloadBuffer[url] = Now()
+										OS.CMDTable[i] = {}
+										return text
+									end
+								end
+							else
+								ml_error("wtf, lasturl + cmd the same, file is open, but CommandSent is false?")
+							end
+						end
+					end
+				elseif freetable ~= 0 then -- Spots available to add additional downloads
+					local i = freetable
+					local CMDtbl = OS.CMDTable[i]
+					local lasturl = OS.CMDTable[i].lasturl
+					local CMD = OS.CMDTable[i].CMD
+					local ctype = io.type(OS.CMDTable[i].CMD)
+					local outputfile = OS.CMDTable[i].outputfile
+					local CommandSent = OS.CMDTable[i].CommandSent
+					local filetimestart = OS.CMDTable[i].filetimestart
+
+					-- if lasturl then -- CMD is back for follow-up to retrieve results
+					-- 	if lasturl == url then -- same CMD as before
+					-- 		if Is(ctype,"file") then -- File is open, check to see if CommandSent is true --
+					-- 			if CommandSent then -- it better..
+					-- 				if filetimestart == nil then
+					-- 					CMDtbl.filetimestart = Now()
+					-- 				end
+					-- 				if FileExists(MooglePath.."output.lua") then
+					-- 					CMDtbl.outputfile = io.open(MooglePath.."output.lua","r") MoogleDebug.OutputType[i] = io.type(CMDtbl.outputfile)
+					-- 					local text = CMDtbl.outputfile:read("*a")
+					-- 					if #text > 0 then
+					-- 						outputfile:close() MoogleDebug.OutputType[i] = io.type(CMDtbl.outputfile)
+					-- 						CMDtbl.filetimestart = nil
+					-- 						CMDtbl.CommandSent = false
+					-- 						CMDtbl.CMD:close() MoogleDebug.CMDtype[i] = io.type(CMDtbl.CMD)
+					-- 						MoogleCMDQueue[url] = nil
+					-- 						CMDtbl.lasturl = nil
+					-- 						MoogleDownloadBuffer[url] = Now()
+					-- 					end
+					-- 				end
+					-- 			else
+					-- 				ml_error("wtf, lasturl + cmd the same, file is open, but CommandSent is false?")
+					-- 			end
+					-- 		end
+					-- 	else
+					-- 	end -- Different CMD, ignore and wait for the previous CMD to return
+					-- else
+						if not CommandSent then -- LastURL and CommandSent are nil/false, which means a new command
+							if Not(ctype,"file") then
+								local erase = io.open(MooglePath.."output"..tostring(i)..".lua","w+")
+								if io.type(erase) == "file" then
+									erase:close()
+									local str
+									if PowerShell then
+										str = [[PowerShell -Command "]]..cmd..[["]]
+									else
+										str = cmd
+									end
+									OS.CMDTable[i].CMD = io.popen(str..[[ > "]]..MooglePath..[[output]]..tostring(i)..[[.lua"]])
+									OS.CMDTable[i]["CommandSent"] = true
+									OS.CMDTable[i]["lasturl"] = url
+									InsertIfNil(MoogleCMDQueue,url,PowerShell)
+								end
+							else
+								ml_error("LastURL & CommandSent are both nil, but CMD is open")
+							end
+						else -- shouldn't ever happen
+							ml_error("LastURL = nil but CommandSent = true")
+						end
+					-- end
+				end
 			end
 		end
 
 		local ToggleDownloadString,queue,lastpath,result = false,{}
 		function OS.DownloadString(url, path)
-			local NotValid = Table.NotValid
 			if path then
 				lastpath = path
 			else
@@ -826,10 +903,10 @@ MoogleDebug = {}
 						return temp
 					end
 				elseif url ~= nil then
-					result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true)
+					result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true,url)
 				end
 			elseif url ~= nil then
-				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true)
+				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true,url)
 				ToggleDownloadString = true
 					MoogleDebug.ToggleDownloadString = ToggleDownloadString
 			end
@@ -837,10 +914,6 @@ MoogleDebug = {}
 
 		local ToggleDownloadTable,queue,lasttbl,result = false,{}
 		function OS.DownloadTable(url, TableName)
-			local Type = General.Type
-			local Valid = Table.Valid
-			local NotValid = Table.NotValid
-
 			if url then
 				if queue[url] ~= TableName then queue[url] = TableName end
 			else
@@ -884,45 +957,34 @@ MoogleDebug = {}
 						ml_debug("'Table' is actually a : "..type(tbl).." URL: "..url, "gLogCNE", 1)
 					end
 				else
-					result = OS.CMD(nil,nil,lastCopy)
+					result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true,url)
 				end
 			else
-				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]], true)
+				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true,url)
 				ToggleDownloadTable = true
 			end
 		end
 
 		local ToggleDownloadFile,queue,result = false,{}
 		function OS.DownloadFile(url, path)
-			local Valid = Table.Valid
-			local NotValid = Table.NotValid
-
-			if url then
-				if queue[url] ~= path then queue[url] = path end
-			else
-				url, path = next(queue)
-			end
-
-			local ctype = io.type(CMD)
-			if ctype == "file" or result then
-				if result then
-					queue[url] = nil
-					if NotValid(queue) then
-						ToggleDownloadFile = false
-					end
-					result = nil
-				else
-					result = OS.CMD(nil,nil,lastCopy)
-				end
-			else
-				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true)
-				ToggleDownloadFile = true
-			end
+			-- if result then
+			-- 	if result then
+			-- 		queue[url] = nil
+			-- 		if NotValid(queue) then
+			-- 			ToggleDownloadFile = false
+			-- 		end
+			-- 		result = nil
+			-- 	else
+			-- 		result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true,url)
+			-- 	end
+			-- else
+				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true,url)
+			-- 	ToggleDownloadFile = true
+			-- end
 		end
 
 		local ToggleVersionCheck,queue,result = false,{}
 		function OS.VersionCheck(url,TableName)
-			local NotValid = Table.NotValid
 			if url then
 				if queue[url] ~= TableName then queue[url] = TableName end
 			else
@@ -935,7 +997,6 @@ MoogleDebug = {}
 					local tbl = string.totable(str,"%p")
 					local value = (tbl[1] * 1000000) + (tbl[2] * 1000) + tbl[3]
 					result = nil
-					ToggleCMD = false
 					queue[url] = nil
 					if NotValid(queue) then
 						ToggleVersionCheck = false
@@ -970,8 +1031,6 @@ MoogleDebug = {}
 
 		local TogglePing,result = false
 		function OS.Ping(count, ...)
-			local Type = General.Type
-			local Valid = Table.Valid
 
 			local ctype = io.type(CMD)
 			if ctype == "file" or result then
@@ -985,7 +1044,6 @@ MoogleDebug = {}
 
 					result = nil
 
-					ToggleCMD = false
 					TogglePing = false
 				else
 					result = OS.CMD(nil,nil,lastCopy)
@@ -1157,7 +1215,6 @@ MoogleDebug = {}
 
 	-- String Functions --
 		function String.Split(str,length)
-			local InsertIfNil = Table.InsertIfNil
 			length = length or 150
 			local tbl = {}
 			for i = 1, #str, length do
@@ -1177,14 +1234,10 @@ MoogleDebug = {}
 
 	-- Table Functions --
 		function Table.Valid(tbl,...) -- Short version of table.valid, expanded to check multiple tables at once
-			local Type = General.Type
-			local NotType = General.NotType
-			local Not = General.Not
 
 			local tbls = {...}
 
 			if table.valid(tbl) then
-				local IsItValid = true
 				if table.valid(tbls) then
 					for i = 1, #tbls do
 						if Not(IsItValid,false) then
@@ -1207,16 +1260,12 @@ MoogleDebug = {}
 		end
 
 		function Table.NotValid(tbl,...)
-			local Type = General.Type
-			local NotType = General.NotType
-			local Not = General.Not
 
 			local tbls = {...}
 
 			if table.valid(tbl) then
 				return false
 			else
-				local IsItNotValid = true
 				if table.valid(tbls) then
 					for i = 1, #tbls do
 						if Not(IsItNotValid,false) then
@@ -1249,17 +1298,13 @@ MoogleDebug = {}
 			end
 		end
 
-		function Table.InsertIfNil(tbl, key, value)
-			local Type = General.Type
-			local NotNil = General.NotNil
-			local IsNil = General.IsNil
-			local Not = General.Not
+		function Table.InsertIfNil(tbl, key, value, update)
 
 			if Type(tbl,"table") then
 				if NotNil(value) then
 					if IsNil(tbl[key]) then
 						tbl[key] = value
-					elseif Not(value, "") and Not(value, " ") then
+					elseif update and Not(value, "") and Not(value, " ") then
 						if tbl[key] ~= value then
 							tbl[key] = value
 						end
@@ -1269,14 +1314,13 @@ MoogleDebug = {}
 					-- Value does not exist in table, add it to table --
 					tbl[#tbl + 1] = key
 				end
-			elseif NotNil(tbl) and IsNil(value) then
+			elseif update and IsNil(value) then
 				-- We're now checking to see if we should update a variable instead --
 				if tbl ~= key then tbl = key end
 			end
 		end
 
 		function Table.RemoveIfNil(tbl,CrossCheck)
-			local IsNil = General.IsNil
 
 			if table.valid(tbl) then
 				for k,v in pairs(tbl) do
@@ -1291,7 +1335,6 @@ MoogleDebug = {}
 
 		function Table.UpdateIfChanged(tbl, key, value)
 			-- works for both tables and variables --
-			local IsNil = General.IsNil
 
 			if value then
 				if tbl[key] ~= value then tbl[key] = value end
@@ -1302,9 +1345,6 @@ MoogleDebug = {}
 
 		function Table.RemoveExpired(table1,table2)
 			-- Removes entries from Table 1 if they don't exist in Table 2 --
-			local IsNil = General.IsNil
-			local Valid = Table.Valid
-			local NotValid = Table.NotValid
 
 			if Valid(table1) and Valid(table2) then
 
@@ -1319,8 +1359,6 @@ MoogleDebug = {}
 		end
 
 		function Table.Unpack(method,...)
-			local Is = General.Is
-			local NotAll = General.NotAll
 
 			if NotAll(method,"print","d","return") then
 				Table.Unpack("return",...)
@@ -1372,15 +1410,6 @@ MoogleDebug = {}
 		local PrintToFileTable = {}
 		local PrintTables = {}
 		function Table.Print(tbl,name,search,filelocation,depth,history)
-			local Is = General.Is
-			local Type = General.Type
-			local Not = General.Not
-			local IsNil = General.IsNil
-			local NotNil = General.NotNil
-			local NotAll = General.NotAll
-			local Print = Table.Print
-			local Valid = Table.Valid
-			local InsertIfNil = Table.InsertIfNil
 			local max = 50
 			if IsNil(name) then
 				if Type(tbl,"string") then
@@ -1536,7 +1565,6 @@ MoogleDebug = {}
 
 	-- GUI Functions --
 		function Gui.WindowStyle(table)
-			local ColorConv = Gui.ColorConv
 			local counter = 0
 			if table["Text"][4] ~= 0 then
 				counter = counter + 1
@@ -1779,7 +1807,6 @@ MoogleDebug = {}
 		end
 
 		function Gui.SameLine(posX, spacingX)
-			local NotNil = General.NotNil
 
 			if NotNil(spacingX) then
 				GUI:SameLine(posX, spacingX)
@@ -1788,10 +1815,8 @@ MoogleDebug = {}
 				GUI:SameLine(0, posX)
 			end
 		end
-		local SameLine = Gui.SameLine
 
 		function Gui.Indent(spacing)
-			local Type = General.Type
 
 			if Type(spacing,"number") then
 				GUI:PushStyleVar(GUI.StyleVar_IndentSpacing, spacing)
@@ -1800,10 +1825,8 @@ MoogleDebug = {}
 				GUI:Indent()
 			end
 		end
-		local Indent = Gui.Indent
 
 		function Gui.Unindent(spacing)
-			local Type = General.Type
 
 			if Type(spacing,"number") then
 				GUI:Unindent()
@@ -1812,17 +1835,13 @@ MoogleDebug = {}
 				GUI:Unindent()
 			end
 		end
-		local Unindent = Gui.Unindent
 
 		function Gui.Space(spacing)
 			spacing = spacing or 5
 			GUI:SameLine(0, spacing)
 		end
-		local Space = Gui.Space
 
 		function Gui.Text(string, RGB, SameLineSpacing, beforetext)
-			local NotNil = General.NotNil
-			local SameLine = Gui.SameLine
 			local ColorText = false
 
 			local RGB = RGB
@@ -1875,14 +1894,8 @@ MoogleDebug = {}
 				end
 			end
 		end
-		local Text = Gui.Text
 
 		function Gui.Checkbox(string, varname, varstring, reverse, tooltip)
-			local NotNil = General.NotNil
-			local Is = General.Is
-			local Text = Gui.Text
-			local Tooltip = Gui.Tooltip
-			local Space = Gui.Space
 
 			if reverse then
 				c = Text(string)
@@ -1907,7 +1920,6 @@ MoogleDebug = {}
 			end
 			return varname
 		end
-		local Checkbox = Gui.Checkbox
 
 		-- function Gui.SliderInt(string, varname, varstring, min, max, width, reverse, tooltip)
 		-- 	if reverse then
@@ -1962,7 +1974,6 @@ MoogleDebug = {}
 		-- end
 
 		function Gui.Tooltip(string, length)
-			local Text = Gui.Text
 
 			length = length or 400
 			GUI:BeginTooltip()
@@ -1971,11 +1982,8 @@ MoogleDebug = {}
 			GUI:PopTextWrapPos()
 			GUI:EndTooltip()
 		end
-		local Tooltip = Gui.Tooltip
 
 		function Gui.GetRemaining(which)
-			local NotNil = General.NotNil
-			local Is = General.Is
 
 			if NotNil(which) then
 				local x, y = GUI:GetContentRegionAvail()
@@ -1984,7 +1992,6 @@ MoogleDebug = {}
 				return GUI:GetContentRegionAvail()
 			end
 		end
-		local GetRemaining = Gui.GetRemaining
 
 		Gui.VirtualKeys = {
 			[0] = [[None]],
@@ -2151,7 +2158,6 @@ MoogleDebug = {}
 			end
 			return tbl
 		end
-		local HotKey = Gui.HotKey
 
 		local FunctionsRevealed = {}
 		function Gui.DrawTables(tbl, depth)
@@ -2213,15 +2219,8 @@ MoogleDebug = {}
 				end
 			end
 		end
-		local DrawTables = Gui.DrawTables
 	-- End GUI Functions --
 -- End Core Functions & Helper Functions --
-
-function MoogleLib.Init()
-	if FileExists(MooglePath..[[BannedKeys.lua]]) then
-		Table.BannedKeys = FileLoad(MooglePath..[[BannedKeys.lua]])
-	end
-end
 
 -- MoogleLib.API.ToggleGUI = false
 -- function MoogleLib.Draw()
@@ -2523,7 +2522,6 @@ local function MarkerLogic(MarkerType,filters,AddPlayer,buffids,time,ownerid,Mis
 	end
 end
 function MoogleLib.OnUpdate()
-	local NotAll = General.NotAll
 	-- While executing Table.Print, if you hit a function you can't dump, it skips trying to --
 	if PrintRunning then
 		if TimeSince(PrintTime) > 100 then
@@ -2544,17 +2542,15 @@ function MoogleLib.OnUpdate()
 	-- if ToggleVersionCheck then OS.VersionCheck() end
 	-- if ToggleDownloadString then OS.DownloadString() end
 	-- MarkerLogic("attack",[[type=1,targetable]],true,"48")
-	MoogleDebug.ToggleCMD = ToggleCMD
 	MoogleDebug.lastCopy = lastCopy
 	MoogleDebug.CMD = CMD
-	if oldClip then
-		MoogleDebug.oldClip = string.len(oldClip)
-	end
+	MoogleDebug.outputfile = io.type(outputfile)
 	MoogleDebug.CommandSent = CommandSent
+	MoogleDebug.lastcmd = lastcmd
 	if filetimestart then
-		MoogleDebug.FileTimeStart = filetimestart
-		MoogleDebug.TimeSinceFileTimeStart = TimeSince(MoogleDebug.FileTimeStart)
+		MoogleDebug.TimeSinceFileTimeStart = TimeSince(filetimestart)
 	end
+	MoogleDebug.writecomplete = writecomplete
 	if MoogleDebug.LastSuccessfulUpdate then
 		MoogleDebug.TimeSinceLastUpdate = TimeSince(MoogleDebug.LastSuccessfulUpdate)
 	end
@@ -2563,6 +2559,5 @@ function MoogleLib.OnUpdate()
 	end
 end
 
-RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 -- RegisterEventHandler("Gameloop.Draw", MoogleLib.Draw)
 RegisterEventHandler("Gameloop.Update", MoogleLib.OnUpdate)
