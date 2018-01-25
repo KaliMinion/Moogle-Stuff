@@ -2,7 +2,7 @@ KaliMainWindow = {}
 
 KaliMainWindow.Info = {
 	Creator = "Kali",
-	Version = "1.2.8",
+	Version = "1.2.9",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
@@ -38,7 +38,7 @@ KaliMainWindow.GUI = {
 	WindowName = "KaliMainWindow##KaliMainWindow",
 	name = "Moogle Script Management",
 	NavName = "Moogle Script Management",
-	open = true,
+	open = false,
 	visible = false,
 	MiniButton = false,
 	OnClick = loadstring("KaliMainWindow.GUI.open = not KaliMainWindow.GUI.open"),
