@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.2.8",
+	Version = "1.3.1",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -43,15 +43,16 @@ local loaded = MoogleLib.Settings.loaded
 
 MoogleDebug = {}
 
-local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, PowerShell, CreateFolder, DeleteFile, MoogleCMDQueue, MoogleDownloadBuffer, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, Valid, NotValid, pairs, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, HotKey, DrawTables
+local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, PowerShell, CreateFolder, DeleteFile, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, StrToTable, Valid, NotValid, pairs, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, HotKey, DrawTables
 
 local function UpdateLocals1()
-	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars Distance2D = API.Distance2D Distance3D = API.Distance3D CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 DrawDebugInfo = Debug.DrawDebugInfo Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile MoogleCMDQueue = OS.MoogleCMDQueue MoogleDownloadBuffer = OS.MoogleDownloadBuffer CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split starts = String.starts ends = String.ends Valid = Table.Valid NotValid = Table.NotValid pairs = Table.pairs InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired
+	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars Distance2D = API.Distance2D Distance3D = API.Distance3D CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 DrawDebugInfo = Debug.DrawDebugInfo Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split starts = String.starts ends = String.ends StrToTable = String.ToTable Valid = Table.Valid NotValid = Table.NotValid pairs = Table.pairs InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack
 end
 
 local function UpdateLocals2()
-	Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining HotKey = Gui.HotKey DrawTables = Gui.DrawTables
+	Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining HotKey = Gui.HotKey DrawTables = Gui.DrawTables
 end
+
 
 function MoogleLib.Init()
 	UpdateLocals1() UpdateLocals2()
@@ -714,7 +715,7 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 			local pass = true
 			url = url or cmd
 			if OS.MoogleDownloadBuffer[url] then
-				if TimeSince(MoogleDownloadBuffer[url]) < 5000 then
+				if TimeSince(OS.MoogleDownloadBuffer[url]) < 5000 then
 					pass = false
 				end
 			end
@@ -751,7 +752,7 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 
 				MoogleDebug.cmd = cmd
 				url = url or cmd
-				if NotNil(MoogleCMDQueue[url]) then -- Already in the queue, find which one
+				if NotNil(OS.MoogleCMDQueue[url]) then -- Already in the queue, find which one
 					local tblnumber
 					for i=1, #OS.CMDTable do
 						if OS.CMDTable[i].lasturl == url then
@@ -781,9 +782,9 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 										CMDtbl.filetimestart = nil
 										CMDtbl.CommandSent = false
 										CMDtbl.CMD:close()
-										MoogleCMDQueue[url] = nil
+										OS.MoogleCMDQueue[url] = nil
 										CMDtbl.lasturl = nil
-										MoogleDownloadBuffer[url] = Now()
+										OS.MoogleDownloadBuffer[url] = Now()
 										OS.CMDTable[i] = {}
 										return text
 									end
@@ -844,7 +845,7 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 									OS.CMDTable[i].CMD = io.popen(str..[[ > "]]..MooglePath..[[output]]..tostring(i)..[[.lua"]])
 									OS.CMDTable[i]["CommandSent"] = true
 									OS.CMDTable[i]["lasturl"] = url
-									InsertIfNil(MoogleCMDQueue,url,PowerShell)
+									InsertIfNil(OS.MoogleCMDQueue,url,PowerShell)
 								end
 							else
 								ml_error("LastURL & CommandSent are both nil, but CMD is open")
@@ -966,7 +967,7 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 		end
 
 		local ToggleDownloadFile,queue,result = false,{}
-		function OS.DownloadFile(url, path)
+		function OS.DownloadFile(url, path, NotExist)
 			-- if result then
 			-- 	if result then
 			-- 		queue[url] = nil
@@ -978,7 +979,12 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 			-- 		result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true,url)
 			-- 	end
 			-- else
-				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true,url)
+			-- if NotExist then
+			-- 	if FileExists(path) then
+			-- 		return false
+			-- 	end
+			-- end
+			result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true,url)
 			-- 	ToggleDownloadFile = true
 			-- end
 		end
@@ -1229,6 +1235,14 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 
 		function String.ends(str, End)
 			return End=='' or string.sub(str,-string.len(End))==End
+		end
+
+		function String.ToTable(str)
+			local t = {}
+			for w in str:gmatch("[%P/_/:]+") do
+				t[#t+1] = w
+			end
+			return t
 		end
 	-- End String Functions --
 
@@ -1896,19 +1910,39 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 		end
 
 		function Gui.Checkbox(string, varname, varstring, reverse, tooltip)
-
+			local tbl
+			local key = _G
+			local value
+			if Type(varname,"string") then
+				tbl = StrToTable(varname)
+				for i = 1, table.size(tbl) do
+					if Not(i,table.size(tbl)) then
+						key = key[tbl[i]]
+					else
+						value = tbl[i]
+					end
+				end
+			end
 			if reverse then
 				c = Text(string)
 				if tooltip ~= nil and GUI:IsItemHovered(c) then
 					Tooltip(tooltip, 400)
 				end
 				Space()
-				varname = GUI:Checkbox("##"..varstring, varname)
+				if tbl then
+					key[value] = GUI:Checkbox("##"..varstring, key[value])
+				else
+					varname = GUI:Checkbox("##"..varstring, varname)
+				end
 				if tooltip ~= nil and GUI:IsItemHovered(c) then
 					Tooltip(tooltip, 400)
 				end
 			else
-				varname = GUI:Checkbox("##"..varstring, varname)
+				if tbl then
+					key[value] = GUI:Checkbox("##"..varstring, key[value])
+				else
+					varname = GUI:Checkbox("##"..varstring, varname)
+				end
 				if tooltip ~= nil and GUI:IsItemHovered(c) then
 					Tooltip(tooltip, 400)
 				end
@@ -1918,7 +1952,11 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 					Tooltip(tooltip, 400)
 				end
 			end
-			return varname
+			if tbl then
+				return key[value]
+			else
+				return varname
+			end
 		end
 
 		-- function Gui.SliderInt(string, varname, varstring, min, max, width, reverse, tooltip)
