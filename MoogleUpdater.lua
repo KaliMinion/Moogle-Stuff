@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.8",
+	Version = "1.2.9",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -17,7 +17,7 @@ MoogleUpdater.Info = {
 		["1.1.8"] = "Core Category Renamed",
 		["1.2.1"] = "Now outputs Windows and PowerShell version to System Info.txt",
 		["1.2.2"] = "Removed auto reload when checking for missing core files.",
-		["1.2.5"] = "Download Fixes..."
+		["1.2.9"] = "Download Fixes..."
 	}
 }
 
@@ -94,6 +94,12 @@ function MoogleUpdater.Draw()
 				local finished = true
 				for url,image in table.pairsbykeys(Images) do
 					if not FileExists(ImageFolder..image) then
+						if IsNil(MoogleDownloadBuffer[url]) then
+							MoogleDebug.NeedImagesURL = url
+							DownloadFile(url,ImageFolder..image)
+						end
+						finished = false
+					else
 						if IsNil(MoogleDownloadBuffer[url]) then
 							MoogleDebug.NeedImagesURL = url
 							DownloadFile(url,ImageFolder..image)
