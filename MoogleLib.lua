@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.3.1",
+	Version = "1.3.2",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -43,16 +43,15 @@ local loaded = MoogleLib.Settings.loaded
 
 MoogleDebug = {}
 
-local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, PowerShell, CreateFolder, DeleteFile, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, StrToTable, Valid, NotValid, pairs, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, HotKey, DrawTables
+local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, RecordKeybinds, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, MoogleCMDQueue, MoogleDownloadBuffer, CMDTable, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, StrToTable, Valid, NotValid, pairs, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables
 
 local function UpdateLocals1()
-	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars Distance2D = API.Distance2D Distance3D = API.Distance3D CurrentTarget = API.CurrentTarget Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 DrawDebugInfo = Debug.DrawDebugInfo Sign = Math.Sign Round = Math.Round PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split starts = String.starts ends = String.ends StrToTable = String.ToTable Valid = Table.Valid NotValid = Table.NotValid pairs = Table.pairs InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack
+	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars Distance2D = API.Distance2D Distance3D = API.Distance3D CurrentTarget = API.CurrentTarget MovePlayer = API.MovePlayer SetTarget = API.SetTarget ConvertCID = API.ConvertCID Entities = API.Entities Entities2 = API.Entities2 EntitiesUpdateInterval = API.EntitiesUpdateInterval EntitiesLastUpdate = API.EntitiesLastUpdate UpdateEntities = API.UpdateEntities CMDKeyPress = API.CMDKeyPress SendKey = API.SendKey RecordKeybinds = API.RecordKeybinds Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 DrawDebugInfo = Debug.DrawDebugInfo Sign = Math.Sign Round = Math.Round Convert4Bytes = Math.Convert4Bytes PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile MoogleCMDQueue = OS.MoogleCMDQueue MoogleDownloadBuffer = OS.MoogleDownloadBuffer CMDTable = OS.CMDTable CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable
 end
 
 local function UpdateLocals2()
-	Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining HotKey = Gui.HotKey DrawTables = Gui.DrawTables
+	DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split starts = String.starts ends = String.ends StrToTable = String.ToTable Valid = Table.Valid NotValid = Table.NotValid pairs = Table.pairs InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining VirtualKeys = Gui.VirtualKeys OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey DrawTables = Gui.DrawTables
 end
-
 
 function MoogleLib.Init()
 	UpdateLocals1() UpdateLocals2()
@@ -249,10 +248,17 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 		end
 
 		function API.Distance3D(table1,table2)
-			if table2 == nil then
-				table2 = table1
-				table1 = Player
+			if IsNil(table1.pos) then
+				table1 = {["pos"] = table1}
+				table1["hitradius"] = Player.hitradius
 			end
+			if IsNil(table2) then
+				table2 = Player
+			elseif IsNil(table2.pos) then
+				table2 = {["pos"] = table2}
+				table2["hitradius"] = Player.hitradius
+			end
+
 			if table.valid(table1) and table.valid(table2) then
 				return (math.sqrt(math.pow((table2.pos.x - table1.pos.x),2)+math.pow((table2.pos.z - table1.pos.z),2)+math.pow((table2.pos.y - table1.pos.y),2))) - (table1.hitradius + table2.hitradius)
 			end
@@ -290,6 +296,193 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 				end
 			else
 				return false
+			end
+		end
+
+		local CanTeleport,TeleportTime = true,0
+		function API.MovePlayer(pos,map,stopdist)
+			local map = map or Player.localmapid
+			local ppos = Player.pos
+			local pmap = Player.localmapid
+			local stopdist = stopdist or 3
+
+			if pmap == map then
+				CanTeleport = true
+				if Distance3D(pos) <= stopdist then
+					if MIsMoving() then Player:Stop() end
+					return true
+				else
+					if not MIsLoading() and not MIsMoving() and NotValid(ml_navigation.path) then
+						Player:MoveTo(pos.x, pos.y, pos.z, stopdist, true, true)
+					end
+
+					if MIsMoving() then
+						local Sprint = ActionList:Get(1,3)
+
+						if Sprint and Valid(ml_navigation.path) and Sprint.usable and Sprint:IsReady() then
+							Sprint:Cast()
+						end
+					end
+				end
+			elseif CanTeleport then
+				if MIsMoving() then Player:Stop() end
+				if not MIsLoading() and not MIsCasting() and NotAll(Player.action,92,93,164) then
+					Player:Teleport(GetAetheryteByMapID(map, pos).id)
+					CanTeleport = false
+					TeleportTime = Now()
+				end
+			elseif TimeSince(TeleportTime) > 5000 then
+				CanTeleport = true
+			end
+			return false
+		end
+
+		local LastInteract = 0
+		function API.SetTarget(targetid,act)
+			local target = Player:GetTarget()
+			local entity = EntityList:Get(id)
+
+			if Type(targetid,"table") then
+				targetid = targetid.id
+			end
+
+			if not target or target.id ~= targetid then
+				Player:SetTarget(targetid)
+
+				if act and TimeSince(LastInteract) > 500 then
+					Player:Interact(targetid)
+					LastInteract = Now()
+				end
+				return true
+			elseif target and target.id == targetid then
+				return true
+			end
+			return false
+		end
+
+		function API.ConvertCID(CID,returntable)
+			local el = EntityList("contentid="..tostring(CID))
+			if table.valid(el) then
+				for k,v in pairs(el) do
+					if returntable then
+						return v
+					else
+						return v.id
+					end
+				end
+			end
+		end
+
+		API.Entities,API.Entities2,API.EntitiesUpdateInterval,API.EntitiesLastUpdate = {},{},250,0
+		function API.UpdateEntities()
+			if TimeSince(API.EntitiesLastUpdate) >= API.EntitiesUpdateInterval then
+				API.EntitiesLastUpdate = Now()
+				API.Entities = EntityList("")
+				if Valid(API.Entities) then
+					table.insert(API.Entities,Player)
+					for k,v in pairs(API.Entities) do
+						InsertIfNil(API.Entities2,"zone",Player.localmapid)
+						if API.Entities2.zone ~= Player.localmapid then
+							API.Entities2 = {}
+							API.Entities2.zone = Player.localmapid
+						end
+						InsertIfNil(API.Entities2,v.id,{})
+						InsertIfNil(API.Entities2[v.id],"name",v.name)
+						if v.incombat then
+							InsertIfNil(API.Entities2[v.id],"combatstart",Now())
+							InsertIfNil(API.Entities2[v.id],"starthp",v.hp.current)
+							if API.Entities2[v.id].percent then
+								if API.Entities2[v.id].percent < 75 and v.hp.percent > 75 then
+									API.Entities2[v.id].combatstart = Now()
+									API.Entities2[v.id].starthp = v.hp.current
+									API.Entities2[v.id].combattime = nil
+									API.Entities2[v.id].dps = nil
+									API.Entities2[v.id].ttd = nil
+								end
+							end
+							UpdateIfChanged(API.Entities2[v.id],"percent",(v.hp.current / v.hp.max) * 100)
+							if API.Entities2[v.id].combatstart then
+								API.Entities2[v.id].combattime = TimeSince(API.Entities2[v.id].combatstart) / 1000
+								API.Entities2[v.id].dps = (API.Entities2[v.id].starthp - v.hp.current) / API.Entities2[v.id].combattime
+								if API.Entities2[v.id].dps > 0 then
+									API.Entities2[v.id].ttd = v.hp.current / API.Entities2[v.id].dps
+								end
+							end
+						else
+							API.Entities2[v.id].combatstart = nil
+							API.Entities2[v.id].starthp = nil
+							API.Entities2[v.id].percent = nil
+							API.Entities2[v.id].combattime = nil
+							API.Entities2[v.id].dps = nil
+							API.Entities2[v.id].ttd = nil
+						end
+
+						if Valid(v.buffs) then
+							
+						end
+					end
+				end
+			end
+		end
+
+		API.CMDKeyPress = ""
+		local CMDKeyPress = API.CMDKeyPress
+		function API.SendKey(key)
+			local SendKeyPress = ScriptsFolder..[[SendKeyPress.exe]]
+			if not FileExists(SendKeyPress) then
+				FileWrite(SendKeyPress,[[ControlSend, , %1%, FINAL FANTASY XIV ]])
+			end
+			if Type(key,"string") then
+				CMDKeyPress = io.popen([["]]..SendKeyPress..[[" {]]..key..[[}]])
+			else
+				Error("API.SendKey `key` was not a valid string")
+			end
+		end
+		SendKey = API.SendKey
+
+		API.Keybinds = {
+			Movement = {},
+			Targeting = {},
+			Shortcuts = {},
+			Chat = {},
+			System = {},
+			Hotbar = {},
+			Gamepad = {}
+		}
+		local SendOpen = true
+		local Keybinds = API.Keybinds
+		function API.RecordKeybinds()
+			if IsControlOpen("ConfigKeybind") then
+				SendOpen = true
+				local data = GetControl("ConfigKeybind"):GetRawData()
+				if data then
+					local TabCount = {
+						Movement = 32,
+						Targeting = 50,
+						Shortcuts = 61,
+						Chat = 41,
+						System = 42,
+						Hotbar = 133,
+						Gamepad = 24
+					}
+					local page = 1
+					for k,v in table.pairsbykeys(TabCount) do
+						GetControl("ConfigKeybind"):PushButton(24,page)
+						for i = 10, v*4, 4 do
+							if GetControl("ConfigKeybind"):GetRawData()[i] and GetControl("ConfigKeybind"):GetRawData()[i+2] and GetControl("ConfigKeybind"):GetRawData()[i+3] then
+								d(GetControl("ConfigKeybind"):GetRawData()[i].value)
+								API.Keybinds[k][tostring(GetControl("ConfigKeybind"):GetRawData()[i].value)] = GetControl("ConfigKeybind"):GetRawData()[i+2].value
+								API.Keybinds[k][tostring(GetControl("ConfigKeybind"):GetRawData()[i].value).."2"] = GetControl("ConfigKeybind"):GetRawData()[i+3].value
+								
+							end
+						end
+						page = page + 1
+					end
+					FileSave(MooglePath.."keybinds.lua",API.Keybinds)
+				end
+			elseif SendOpen then
+				ActionList:Get(10,20):Cast()
+				SendOpen = false
 			end
 		end
 
@@ -693,6 +886,18 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 			local floor = math.floor
 			return floor(value / bracket + Sign(value) * 0.5) * bracket
 		end
+		function Math.Convert4Bytes(tbl)
+			if tbl.type and tbl.value then
+				if tbl.type == "4bytes" then
+					local val = tbl.value
+					local A = val.A * math.pow(256,0)
+					local B = val.B * math.pow(256,1)
+					local C = val.C * math.pow(256,2)
+					local D = val.D * math.pow(256,3)
+					return A + B + C + D
+				end
+			end
+		end
 	-- End Math Functions --
 
 	-- Operating System (OS) Functions --
@@ -804,33 +1009,6 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 					local CommandSent = OS.CMDTable[i].CommandSent
 					local filetimestart = OS.CMDTable[i].filetimestart
 
-					-- if lasturl then -- CMD is back for follow-up to retrieve results
-					-- 	if lasturl == url then -- same CMD as before
-					-- 		if Is(ctype,"file") then -- File is open, check to see if CommandSent is true --
-					-- 			if CommandSent then -- it better..
-					-- 				if filetimestart == nil then
-					-- 					CMDtbl.filetimestart = Now()
-					-- 				end
-					-- 				if FileExists(MooglePath.."output.lua") then
-					-- 					CMDtbl.outputfile = io.open(MooglePath.."output.lua","r") MoogleDebug.OutputType[i] = io.type(CMDtbl.outputfile)
-					-- 					local text = CMDtbl.outputfile:read("*a")
-					-- 					if #text > 0 then
-					-- 						outputfile:close() MoogleDebug.OutputType[i] = io.type(CMDtbl.outputfile)
-					-- 						CMDtbl.filetimestart = nil
-					-- 						CMDtbl.CommandSent = false
-					-- 						CMDtbl.CMD:close() MoogleDebug.CMDtype[i] = io.type(CMDtbl.CMD)
-					-- 						MoogleCMDQueue[url] = nil
-					-- 						CMDtbl.lasturl = nil
-					-- 						MoogleDownloadBuffer[url] = Now()
-					-- 					end
-					-- 				end
-					-- 			else
-					-- 				ml_error("wtf, lasturl + cmd the same, file is open, but CommandSent is false?")
-					-- 			end
-					-- 		end
-					-- 	else
-					-- 	end -- Different CMD, ignore and wait for the previous CMD to return
-					-- else
 						if not CommandSent then -- LastURL and CommandSent are nil/false, which means a new command
 							if Not(ctype,"file") then
 								local erase = io.open(MooglePath.."output"..tostring(i)..".lua","w+")
@@ -845,6 +1023,8 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 									OS.CMDTable[i].CMD = io.popen(str..[[ > "]]..MooglePath..[[output]]..tostring(i)..[[.lua"]])
 									OS.CMDTable[i]["CommandSent"] = true
 									OS.CMDTable[i]["lasturl"] = url
+									OS.CMDTable[i]["lastcmd"] = cmd
+									OS.CMDTable[i]["lastps"] = powershell
 									InsertIfNil(OS.MoogleCMDQueue,url,PowerShell)
 								end
 							else
@@ -1316,11 +1496,13 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 
 			if Type(tbl,"table") then
 				if NotNil(value) then
-					if IsNil(tbl[key]) then
-						tbl[key] = value
-					elseif update and Not(value, "") and Not(value, " ") then
-						if tbl[key] ~= value then
+					if NotNil(key) then
+						if IsNil(tbl[key]) then
 							tbl[key] = value
+						elseif update and Not(value, "") and Not(value, " ") then
+							if tbl[key] ~= value then
+								tbl[key] = value
+							end
 						end
 					end
 				elseif table.find(tbl, key) == nil then
@@ -1348,13 +1530,7 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 		end
 
 		function Table.UpdateIfChanged(tbl, key, value)
-			-- works for both tables and variables --
-
-			if value then
-				if tbl[key] ~= value then tbl[key] = value end
-			else
-				if tbl ~= key then tbl = key end
-			end
+			if tbl[key] ~= value then tbl[key] = value end
 		end
 
 		function Table.RemoveExpired(table1,table2)
@@ -2595,6 +2771,17 @@ function MoogleLib.OnUpdate()
 	if MoogleDebug.LastCMDUse then
 		MoogleDebug.TimeSinceLastCMDUse = TimeSince(MoogleDebug.LastCMDUse)
 	end
+	API.UpdateEntities()
+
+	-- if Valid(OS.CMDTable) then
+	-- 	local CMD = OS.CMDTable
+	-- 	local Threads = MoogleLib.Settings.DownloadThreads
+	-- 	for i=1, Threads do
+	-- 		if CMD[i] then
+	-- 			OS.CMD(CMD[i].lastcmd,CMD[i].lastps,CMD[i].lasturl)
+	-- 		end
+	-- 	end
+	-- end
 end
 
 -- RegisterEventHandler("Gameloop.Draw", MoogleLib.Draw)
