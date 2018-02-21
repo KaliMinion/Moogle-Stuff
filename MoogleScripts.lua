@@ -104,11 +104,11 @@ enabled=1]]
 		filepath = [[Moogle Scripts\Moogle Tweaks\Moogle Tweaks.lua]],
 		table = "return MoogleTweaks",
 		url = [[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleTweaks.lua]],
-		version = "1.0.0",
+		version = "1.0.1",
 		category = "Utility",
 		stability = "WiP but Working",
 		releasedate = os.time { year = 2018, month = 02, day = 19 },
-		lastupdate = 1519064468,
+		lastupdate = 1519253097,
 		info = [[Navigate to NPCs and trade in items for stuffs, temp name, will make it better later.]],
 		module = [[[Module]
 Name=Moogle Tweaks
