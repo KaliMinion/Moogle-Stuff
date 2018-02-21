@@ -2,10 +2,10 @@ MoogleTweaks = {}
 
 MoogleTweaks.Info = {
 	Creator = "Kali",
-	Version = "1.0.0",
+	Version = "1.0.1",
 	StartDate = "02/02/18",
-	ReleaseDate = "02/19/18",
-	LastUpdate = "02/19/18",
+	StartDate = "02/02/18",
+	StartDate = "02/02/18",
 	ChangeLog = {
 		["1.0.0"] = "Initial release"
 	}
@@ -593,14 +593,66 @@ function MoogleTweaks.MiniCactpot()
 								if uncovered == countcheck and countcheck < 4 then
 									local max = 0
 									local tbl = {}
+									local slotrows = {
+										NW = {
+											NWSE = true,
+											NWSW = true,
+											NWNE = true
+										},
+										N = {
+											NS = true,
+											NWNE = true
+										},
+										NE = {
+											NESE = true,
+											NESW = true,
+											NWNE = true
+										},
+										W = {
+											WE = true,
+											NWSW = true
+										},
+										C = {
+											NWSE = true,
+											NS = true,
+											NESW = true,
+											WE = true
+										},
+										E = {
+											NESE = true,
+											WE = true
+										},
+										SW = {
+											NWSW = true,
+											NESW = true,
+											SWSE = true
+										},
+										S = {
+											NS = true,
+											SWSE = true
+										},
+										SE = {
+											NWSE = true,
+											NESE = true,
+											SWSE = true
+										}
+									}
 									for k,v in pairs(SlotCount) do
 										if Slots[k] == 0 then
-											if v == max then
-												tbl[#tbl+1] = k
-											elseif v > max then
-												max = v
-												tbl = {}
-												tbl[#tbl+1] = k
+											local found = false
+											for i,e in pairs(slotrows[k]) do
+												if table.find(absmaxtbl,i) then
+													found = true
+												end
+											end
+											if found then
+												if v == max then
+													tbl[#tbl+1] = k
+												elseif v > max then
+													max = v
+													tbl = {}
+													tbl[#tbl+1] = k
+												end
 											end
 										end
 									end
