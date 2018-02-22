@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.10",
+	Version = "1.2.11",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -513,7 +513,7 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			if os.difftime(os.time(),MoogleUpdater.Settings.LastCheck) >= timevalue then
 				local scripts = MoogleUpdater.MoogleScripts
 				
-				local tbl = DownloadString([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]])
+				local tbl = DownloadString([[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/MoogleScripts.lua]])
 				if NotNil(tbl) and type(tbl) == "string" then webpage = loadstring(tbl)() end
 				if table.valid(webpage) then
 					MoogleDebug.LastSuccessfulUpdate = Now()
