@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.3.3",
+	Version = "1.3.4",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -984,9 +984,7 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 										CMDtbl.outputfile = io.open(MooglePath.."output"..tostring(i)..".lua","r")
 									end
 									if CMDtbl.outputfile then
-										d("test")
 										local text = CMDtbl.outputfile:read("*a")
-										d("text: "..tostring(text))
 										if #text > 0 then
 											CMDtbl.outputfile:close()
 											CMDtbl.filetimestart = nil
