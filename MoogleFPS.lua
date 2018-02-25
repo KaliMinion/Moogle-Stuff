@@ -13,8 +13,7 @@ MoogleFPS.Info = {
 		["1.1.2"] = "Forgot to include BannedKeys for Debug.",
 		["1.2.0"] = "Rework for new Moolge Script Manager.",
 		["1.2.3"] = "Tweaks and MiniButton support",
-		["1.2.4"] = "Pushed Locals",
-		["1.2.7"] = "Added Save Settings"
+		["1.2.4"] = "Pushed Locals"
 	}
 }
 
@@ -93,17 +92,17 @@ function MoogleFPS.ModuleInit()
 		Initialize(MoogleFPS.GUI)
 
 		MoogleLoad({
-					["MoogleFPS.enable"] = "MoogleFPS.Settings.enable",
-					["MoogleFPS.FPSTime"] = "MoogleFPS.Settings.FPSTime",
-					["MoogleFPS.Position"] = "MoogleFPS.Settings.Position",
-					["MoogleFPS.EdgeDistance"] = "MoogleFPS.Settings.EdgeDistance",
-					["MoogleFPS.Opacity"] = "MoogleFPS.Settings.Opacity",
-					["MoogleFPS.PulseDelay"] = "MoogleFPS.Settings.PulseDelay",
-					["MoogleFPS.ShowMs"] = "MoogleFPS.Settings.ShowMs",
-					["MoogleFPS.ShowPer"] = "MoogleFPS.Settings.ShowPer",
-					["MoogleFPS.ShowLabels"] = "MoogleFPS.Settings.ShowLabels",
-					["MoogleFPS.Scale"] = "MoogleFPS.Settings.Scale"
-				})
+			["MoogleFPS.enable"] = "MoogleFPS.Settings.enable",
+			["MoogleFPS.FPSTime"] = "MoogleFPS.Settings.FPSTime",
+			["MoogleFPS.Position"] = "MoogleFPS.Settings.Position",
+			["MoogleFPS.EdgeDistance"] = "MoogleFPS.Settings.EdgeDistance",
+			["MoogleFPS.Opacity"] = "MoogleFPS.Settings.Opacity",
+			["MoogleFPS.PulseDelay"] = "MoogleFPS.Settings.PulseDelay",
+			["MoogleFPS.ShowMs"] = "MoogleFPS.Settings.ShowMs",
+			["MoogleFPS.ShowPer"] = "MoogleFPS.Settings.ShowPer",
+			["MoogleFPS.ShowLabels"] = "MoogleFPS.Settings.ShowLabels",
+			["MoogleFPS.Scale"] = "MoogleFPS.Settings.Scale"
+		})
 		if not FileExists(ImageFolder..MoogleFPS.GUI.name..".png") then
 			DownloadFile([[https://i.imgur.com/cdbXSLt.png]],ImageFolder..MoogleFPS.GUI.name..".png")
 		end
@@ -334,17 +333,17 @@ end
 function MoogleFPS.OnUpdate( event, tickcount )
 	if MoogleLib ~= nil then
 		MoogleSave({
-					["MoogleFPS.enable"] = "MoogleFPS.Settings.enable",
-					["MoogleFPS.FPSTime"] = "MoogleFPS.Settings.FPSTime",
-					["MoogleFPS.Position"] = "MoogleFPS.Settings.Position",
-					["MoogleFPS.EdgeDistance"] = "MoogleFPS.Settings.EdgeDistance",
-					["MoogleFPS.Opacity"] = "MoogleFPS.Settings.Opacity",
-					["MoogleFPS.PulseDelay"] = "MoogleFPS.Settings.PulseDelay",
-					["MoogleFPS.ShowMs"] = "MoogleFPS.Settings.ShowMs",
-					["MoogleFPS.ShowPer"] = "MoogleFPS.Settings.ShowPer",
-					["MoogleFPS.ShowLabels"] = "MoogleFPS.Settings.ShowLabels",
-					["MoogleFPS.Scale"] = "MoogleFPS.Settings.Scale"
-				})
+			["MoogleFPS.enable"] = "MoogleFPS.Settings.enable",
+			["MoogleFPS.FPSTime"] = "MoogleFPS.Settings.FPSTime",
+			["MoogleFPS.Position"] = "MoogleFPS.Settings.Position",
+			["MoogleFPS.EdgeDistance"] = "MoogleFPS.Settings.EdgeDistance",
+			["MoogleFPS.Opacity"] = "MoogleFPS.Settings.Opacity",
+			["MoogleFPS.PulseDelay"] = "MoogleFPS.Settings.PulseDelay",
+			["MoogleFPS.ShowMs"] = "MoogleFPS.Settings.ShowMs",
+			["MoogleFPS.ShowPer"] = "MoogleFPS.Settings.ShowPer",
+			["MoogleFPS.ShowLabels"] = "MoogleFPS.Settings.ShowLabels",
+			["MoogleFPS.Scale"] = "MoogleFPS.Settings.Scale"
+		})
 		if MoogleFPS.Settings.enable then
 			local main = KaliMainWindow.GUI
 			local nav = KaliMainWindow.GUI.NavigationMenu
