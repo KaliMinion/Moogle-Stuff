@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.3.4",
+	Version = "1.3.5",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -43,14 +43,14 @@ local loaded = MoogleLib.Settings.loaded
 
 MoogleDebug = {}
 
-local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, RecordKeybinds, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, MoogleCMDQueue, MoogleDownloadBuffer, CMDTable, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, StrToTable, Valid, NotValid, pairs, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables
+local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, RecordKeybinds, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, MoogleCMDQueue, MoogleDownloadBuffer, CMDTable, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, StrToTable, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables
 
 local function UpdateLocals1()
 	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars Distance2D = API.Distance2D Distance3D = API.Distance3D CurrentTarget = API.CurrentTarget MovePlayer = API.MovePlayer SetTarget = API.SetTarget ConvertCID = API.ConvertCID Entities = API.Entities Entities2 = API.Entities2 EntitiesUpdateInterval = API.EntitiesUpdateInterval EntitiesLastUpdate = API.EntitiesLastUpdate UpdateEntities = API.UpdateEntities CMDKeyPress = API.CMDKeyPress SendKey = API.SendKey RecordKeybinds = API.RecordKeybinds Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 DrawDebugInfo = Debug.DrawDebugInfo Sign = Math.Sign Round = Math.Round Convert4Bytes = Math.Convert4Bytes PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile MoogleCMDQueue = OS.MoogleCMDQueue MoogleDownloadBuffer = OS.MoogleDownloadBuffer CMDTable = OS.CMDTable CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable
 end
 
 local function UpdateLocals2()
-	DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split starts = String.starts ends = String.ends StrToTable = String.ToTable Valid = Table.Valid NotValid = Table.NotValid pairs = Table.pairs InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining VirtualKeys = Gui.VirtualKeys OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey DrawTables = Gui.DrawTables
+	DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split starts = String.starts ends = String.ends StrToTable = String.ToTable Valid = Table.Valid NotValid = Table.NotValid InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining VirtualKeys = Gui.VirtualKeys OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey DrawTables = Gui.DrawTables
 end
 
 function MoogleLib.Init()
@@ -153,12 +153,12 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 
 				local changed = false
 				local Type = General.Type
-				if Type(Tbl,"table") and Valid(Tbl) then
+				if Type(Tbl,"table") and table.valid(Tbl) then
 					for k,v in pairs(Tbl) do
 						local stop = false
-						_G.SaveTable = Settings
+						local SaveTable = Settings
 						local savevar = ""
-						_G.ModuleTable = _G
+						local ModuleTable = _G
 						local modvar = ""
 						local t = {}
 						local t2 = {}
@@ -169,63 +169,34 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 							t2[#t2+1] = w
 						end
 
-						if Valid(t,t2) then
-							SaveTable = SaveTable[t2[1]]
-							for i,e in ipairs(t) do
-								if stop == false then
-									if NotNil(tonumber(e)) then
-										e = tonumber(e)
-									end
-									if i < #t then
-										if load then
-											if IsNil(SaveTable[e]) then
-												stop = true
-											else
-												SaveTable = SaveTable[e]
-											end
-										else
-											-- Create a Table since the table string is not finished --
-											if IsNil(SaveTable[e]) then
-												SaveTable[e] = {}
-												changed = true
-											elseif Type(SaveTable[e],"table") == false then 
-												Error("SaveTable[e] is not a table, but is a: "..type(SaveTable[e]))
-											end
-											SaveTable = SaveTable[e]
-										end
-									else
-										if load then
-											if IsNil(SaveTable[e]) then
-												stop = true
-											else
-												savevar = e
-											end
-										else
-											savevar = e
-										end
-									end
-								end
+						for i,e in pairs(t) do
+							if i < #t then
+								if SaveTable[e] == nil then SaveTable[e] = {} end
+								SaveTable = SaveTable[e]
+							else
+								savevar = e
 							end
-							if stop == false then
-								table.print(t) table.print(t2)
-								for i,e in ipairs(t2) do
-									if NotNil(tonumber(e)) then
-										e = tonumber(e)
-									end
-									if i < #t2 then
-										ModuleTable = ModuleTable[e]
-									else
-										modvar = e
-									end
-								end
-								if load then
-									ModuleTable[modvar] = SaveTable[savevar]
-								else
-									SaveTable[savevar] = ModuleTable[modvar]
-								end
+						end
+
+						for i,e in pairs(t2) do
+							if i < #t2 then
+								ModuleTable = ModuleTable[e]
+							else
+								modvar = e
 							end
+						end
+
+						if load then
+							if SaveTable[savevar] == nil then
+								SaveTable[savevar] = ModuleTable[modvar]
+								changed = true
+							end
+							ModuleTable[modvar] = SaveTable[savevar]
 						else
-							Error(tostring(k).." is not a valid table string")
+							if SaveTable[savevar] ~= ModuleTable[modvar] then
+								SaveTable[savevar] = ModuleTable[modvar]
+								changed = true
+							end
 						end
 					end
 				end
@@ -234,8 +205,11 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 				end
 			end
 		end
+
 		MoogleSave = API.Vars
-		MoogleLoad = API.Vars
+		function MoogleLoad(Tbl)
+			API.Vars(Tbl,true)
+		end
 
 		function API.Distance2D(table1,table2)
 			if table2 == nil then
