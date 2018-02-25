@@ -47,7 +47,7 @@ local tbl =
 		filepath = [[Moogle Scripts\Moogle TTS\Moogle TTS.lua]],
 		table = "return MoogleTTS",
 		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/MoogleTTS.lua]],
-		version = "1.1.5",
+		version = "1.1.6",
 		category = "Utility",
 		stability = "WiP but Working",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
