@@ -1,0 +1,79 @@
+Sigmascape V3.0 Savage
+
+ACT Information
+	Air Force (125,000 HP)
+		Diffractive Laser (Magic)
+		Unknown_2B3e (Magic)
+	Bibliolatrist
+		Attack (Slashing)
+		Void Slash (Slashing)
+	Bibliotaph (765,000 HP)
+		Attack (Blunt)
+		Thrub (Blunt)
+	Dadaluma (840,000 HP)
+		Attack (Blunt)
+		Aura Cannon (Magic) -> Bleeding (12 sec) on targets hit
+	Fire Control System
+		Electric Pulse (Lightning Magic) -> Paralysis (30 sec)
+		Epidemic (Magic) -> Vulnerability Up (?? sec)
+	Guardian
+		Arm and Hammer (Blunt)
+		Atomic Ray (Magic)
+		Attack (Blunt)
+		Chain Cannon (Magic)
+		Chakra Burst (Magic)
+		Diffractive Laser (Magic)
+		Diffractive Plasma (Lightning Magic)
+		Extermination Sequence (Nil)
+		Ink (Magic)
+		Magitek Ray (Magic)
+		Main Cannon (Magic)
+		Missile (Nil)
+		Shockwave (Magic)
+		Super Chakra Burst (Magic)
+		The Heat (Fire Magic)
+
+		Buffs:
+			Air Force Simulation
+			Bibliotaph Simulation
+			Dadaluma Simulation
+			Ultros Simulation
+			Virus
+
+		Debuffs:
+			Burns (15 seconds)
+			Damage Down (65 seconds)
+			Stun (5 seconds)
+			Temporary Misdirection (15 seconds)
+			Vulnerability Up (90 seconds)
+	Interdimensional Bomb
+		Interdimensional Explosion (Fire Magic)
+		Light Blast (Fire Magic)
+
+		Debuffs:
+			Fire Resistance Down II
+			Vulnerability Up
+	Lightning Bomb
+		Explosion (Magic) -> Vulnerability Up (???)
+	Missile
+		Explosion (Nil) -> Vulnerability Up (???)
+	Tentacle
+		Wallop (Blunt) -> Vulnerability Up (90 sec) on target
+	Ultros (400,000 HP)
+		Attack (Blunt)
+		Stoneskin (Self Buff)
+		Killing
+	Unknown
+		Debuffs:
+			Abandonment
+			Aether Rot
+			Aether Rot Immunity
+			Damage Up
+			Hover
+			Hysteria
+			Negative Charge
+			Positive Charge
+			Prey
+			Searing Wind
+			Shocked
+			Stun
