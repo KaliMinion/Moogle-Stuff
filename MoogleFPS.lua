@@ -13,7 +13,8 @@ MoogleFPS.Info = {
 		["1.1.2"] = "Forgot to include BannedKeys for Debug.",
 		["1.2.0"] = "Rework for new Moolge Script Manager.",
 		["1.2.3"] = "Tweaks and MiniButton support",
-		["1.2.4"] = "Pushed Locals"
+		["1.2.4"] = "Pushed Locals",
+		["1.2.7"] = "Added Save Settings"
 	}
 }
 
