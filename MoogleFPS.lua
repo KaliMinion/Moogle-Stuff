@@ -2,7 +2,7 @@ MoogleFPS = {}
 
 MoogleFPS.Info = {
 	Creator = "Kali",
-	Version = "1.2.6",
+	Version = "1.2.7",
 	StartDate = "05/26/17",
 	ReleaseDate = "05/29/17",
 	LastUpdate = "01/03/18",
@@ -13,7 +13,8 @@ MoogleFPS.Info = {
 		["1.1.2"] = "Forgot to include BannedKeys for Debug.",
 		["1.2.0"] = "Rework for new Moolge Script Manager.",
 		["1.2.3"] = "Tweaks and MiniButton support",
-		["1.2.4"] = "Pushed Locals"
+		["1.2.4"] = "Pushed Locals",
+		["1.2.7"] = "Added Save Settings"
 	}
 }
 
@@ -90,6 +91,19 @@ function MoogleFPS.ModuleInit()
 	if MoogleLib ~= nil then
 		UpdateLocals1() UpdateLocals2()
 		Initialize(MoogleFPS.GUI)
+
+		MoogleLoad({
+					["MoogleFPS.enable"] = "MoogleFPS.Settings.enable",
+					["MoogleFPS.FPSTime"] = "MoogleFPS.Settings.FPSTime",
+					["MoogleFPS.Position"] = "MoogleFPS.Settings.Position",
+					["MoogleFPS.EdgeDistance"] = "MoogleFPS.Settings.EdgeDistance",
+					["MoogleFPS.Opacity"] = "MoogleFPS.Settings.Opacity",
+					["MoogleFPS.PulseDelay"] = "MoogleFPS.Settings.PulseDelay",
+					["MoogleFPS.ShowMs"] = "MoogleFPS.Settings.ShowMs",
+					["MoogleFPS.ShowPer"] = "MoogleFPS.Settings.ShowPer",
+					["MoogleFPS.ShowLabels"] = "MoogleFPS.Settings.ShowLabels",
+					["MoogleFPS.Scale"] = "MoogleFPS.Settings.Scale"
+				})
 		if not FileExists(ImageFolder..MoogleFPS.GUI.name..".png") then
 			DownloadFile([[https://i.imgur.com/cdbXSLt.png]],ImageFolder..MoogleFPS.GUI.name..".png")
 		end
@@ -318,68 +332,82 @@ function MoogleFPS.Draw()
 end
 
 function MoogleFPS.OnUpdate( event, tickcount )
-	if MoogleLib ~= nil and MoogleFPS.Settings.enable then
-		local main = KaliMainWindow.GUI
-		local nav = KaliMainWindow.GUI.NavigationMenu
-		local settings = MoogleFPS.Settings
-		local PulseDelay = MoogleFPS.Settings.PulseDelay
-		local Data = MoogleFPS.Data
-		local LastTic = Data.LastTic
+	if MoogleLib ~= nil then
+		MoogleSave({
+					["MoogleFPS.enable"] = "MoogleFPS.Settings.enable",
+					["MoogleFPS.FPSTime"] = "MoogleFPS.Settings.FPSTime",
+					["MoogleFPS.Position"] = "MoogleFPS.Settings.Position",
+					["MoogleFPS.EdgeDistance"] = "MoogleFPS.Settings.EdgeDistance",
+					["MoogleFPS.Opacity"] = "MoogleFPS.Settings.Opacity",
+					["MoogleFPS.PulseDelay"] = "MoogleFPS.Settings.PulseDelay",
+					["MoogleFPS.ShowMs"] = "MoogleFPS.Settings.ShowMs",
+					["MoogleFPS.ShowPer"] = "MoogleFPS.Settings.ShowPer",
+					["MoogleFPS.ShowLabels"] = "MoogleFPS.Settings.ShowLabels",
+					["MoogleFPS.Scale"] = "MoogleFPS.Settings.Scale"
+				})
+		if MoogleFPS.Settings.enable then
+			local main = KaliMainWindow.GUI
+			local nav = KaliMainWindow.GUI.NavigationMenu
+			local settings = MoogleFPS.Settings
+			local PulseDelay = MoogleFPS.Settings.PulseDelay
+			local Data = MoogleFPS.Data
+			local LastTic = Data.LastTic
 
-		if table.find(nav.Menu,MoogleFPS.GUI.NavName) == nil then
-			table.insert(nav.Menu,MoogleFPS.GUI.NavName)
-		end
-
-		if TimeSince(LastTic) > PulseDelay then
-			Data.LastTic,LastTic = Now(),Now()
-			Data.FPS.FrameCount = GUI:GetFrameCount()
-			Data.MPF.Time = os.clock()
-			Data.BotPerformance.BotPerformance = GetBotPerformance()
-			local FrameCount = Data.FPS.FrameCount
-			local PreviousFrame = Data.FPS.PreviousFrame
-			local FPSTime = MoogleFPS.Settings.FPSTime * 1000
-			local Time = Data.MPF.Time
-			local PreviousTime = Data.MPF.PreviousTime
-			local CurrentBotPerformance = Data.BotPerformance.BotPerformance
-
-			Data.FPS.FPS = (FrameCount - PreviousFrame) / (Time - PreviousTime)
-			local FPS = Data.FPS.FPS
-			Data.FPS.History[LastTic] = FPS
-				for k,v in pairs(Data.FPS.History) do
-					if k < LastTic - (FPSTime) then
-						Data.FPS.History[k] = nil
-					end
-				end
-
-			Data.MPF.MPF = ((Time - PreviousTime) / (FrameCount - PreviousFrame)) * 1000
-			local MPF = Data.MPF.MPF
-			Data.MPF.History[LastTic] = MPF
-				for k,v in pairs(Data.MPF.History) do
-					if k < LastTic - (FPSTime) then
-						Data.MPF.History[k] = nil
-					end
-				end
-
-			Data.BotPerformance.History[LastTic] = CurrentBotPerformance
-				for k,v in pairs(Data.BotPerformance.History) do
-					if k < LastTic - (FPSTime) then
-						Data.BotPerformance.History[k] = nil
-					end
-				end
-
-			local function TableAverage(tbl)
-				local sum = 0
-				local size = 0
-				for k,v in pairs(tbl) do sum = sum + v size = size + 1 end
-				return sum / size
+			if table.find(nav.Menu,MoogleFPS.GUI.NavName) == nil then
+				table.insert(nav.Menu,MoogleFPS.GUI.NavName)
 			end
 
-			Data.FPS.Average = TableAverage(Data.FPS.History)
-			Data.MPF.Average = TableAverage(Data.MPF.History)
-			Data.BotPerformance.Average = TableAverage(Data.BotPerformance.History)
+			if TimeSince(LastTic) > PulseDelay then
+				Data.LastTic,LastTic = Now(),Now()
+				Data.FPS.FrameCount = GUI:GetFrameCount()
+				Data.MPF.Time = os.clock()
+				Data.BotPerformance.BotPerformance = GetBotPerformance()
+				local FrameCount = Data.FPS.FrameCount
+				local PreviousFrame = Data.FPS.PreviousFrame
+				local FPSTime = MoogleFPS.Settings.FPSTime * 1000
+				local Time = Data.MPF.Time
+				local PreviousTime = Data.MPF.PreviousTime
+				local CurrentBotPerformance = Data.BotPerformance.BotPerformance
 
-			Data.FPS.PreviousFrame = FrameCount
-			Data.MPF.PreviousTime = Time
+				Data.FPS.FPS = (FrameCount - PreviousFrame) / (Time - PreviousTime)
+				local FPS = Data.FPS.FPS
+				Data.FPS.History[LastTic] = FPS
+					for k,v in pairs(Data.FPS.History) do
+						if k < LastTic - (FPSTime) then
+							Data.FPS.History[k] = nil
+						end
+					end
+
+				Data.MPF.MPF = ((Time - PreviousTime) / (FrameCount - PreviousFrame)) * 1000
+				local MPF = Data.MPF.MPF
+				Data.MPF.History[LastTic] = MPF
+					for k,v in pairs(Data.MPF.History) do
+						if k < LastTic - (FPSTime) then
+							Data.MPF.History[k] = nil
+						end
+					end
+
+				Data.BotPerformance.History[LastTic] = CurrentBotPerformance
+					for k,v in pairs(Data.BotPerformance.History) do
+						if k < LastTic - (FPSTime) then
+							Data.BotPerformance.History[k] = nil
+						end
+					end
+
+				local function TableAverage(tbl)
+					local sum = 0
+					local size = 0
+					for k,v in pairs(tbl) do sum = sum + v size = size + 1 end
+					return sum / size
+				end
+
+				Data.FPS.Average = TableAverage(Data.FPS.History)
+				Data.MPF.Average = TableAverage(Data.MPF.History)
+				Data.BotPerformance.Average = TableAverage(Data.BotPerformance.History)
+
+				Data.FPS.PreviousFrame = FrameCount
+				Data.MPF.PreviousTime = Time
+			end
 		end
 	end
 end
