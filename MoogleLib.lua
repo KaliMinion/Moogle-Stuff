@@ -41,6 +41,7 @@ MoogleLib.Settings = {
 	DownloadThreads = 3
 }
 local loaded = MoogleLib.Settings.loaded
+local self = "MoogleLib"
 
 MoogleDebug = {}
 

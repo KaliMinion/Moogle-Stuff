@@ -1,6 +1,0 @@
-[Module]
-Name=Moogle PushButton
-Dependencies=minionlib
-Version=1
-Files=Moogle PushButton.lua
-enabled=1
