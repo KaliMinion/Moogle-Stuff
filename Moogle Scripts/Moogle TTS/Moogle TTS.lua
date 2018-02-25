@@ -2,7 +2,7 @@ MoogleTTS = {}
 
 MoogleTTS.Info = {
 	Creator = "Kali",
-	Version = "1.1.5",
+	Version = "1.1.6",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
@@ -104,6 +104,19 @@ function MoogleTTS.ModuleInit()
 		UpdateLocals1() UpdateLocals2()
 		Initialize(MoogleTTS.GUI)
 		-- MoogleLoad("MoogleTTS.Settings.ReadHotkey",true)
+
+
+
+		MoogleLoad({
+			["MoogleTTS.enable"] = "MoogleTTS.Settings.enable",
+			["MoogleTTS.ReadToggle"] = "MoogleTTS.Settings.ReadToggle",
+			["MoogleTTS.ReadHotkey"] = "MoogleTTS.Settings.ReadHotkey",
+			["MoogleTTS.Reading"] = "MoogleTTS.Settings.Reading",
+			["MoogleTTS.NPCTTS"] = "MoogleTTS.Settings.NPCTTS",
+			["MoogleTTS.NPCTalk"] = "MoogleTTS.Settings.NPCTalk",
+			["MoogleTTS.NPCBattleTalk"] = "MoogleTTS.Settings.NPCBattleTalk",
+			["MoogleTTS.NPCWideText"] = "MoogleTTS.Settings.NPCWideText"
+		})
 	end
 	if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]]) then
 		FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]],MoogleTTS.VBS)
@@ -172,6 +185,18 @@ end
 
 local toggled = false
 function MoogleTTS.OnUpdate( event, tickcount )
+	if MoogleLib then
+		MoogleSave({
+			["MoogleTTS.enable"] = "MoogleTTS.Settings.enable",
+			["MoogleTTS.ReadToggle"] = "MoogleTTS.Settings.ReadToggle",
+			["MoogleTTS.ReadHotkey"] = "MoogleTTS.Settings.ReadHotkey",
+			["MoogleTTS.Reading"] = "MoogleTTS.Settings.Reading",
+			["MoogleTTS.NPCTTS"] = "MoogleTTS.Settings.NPCTTS",
+			["MoogleTTS.NPCTalk"] = "MoogleTTS.Settings.NPCTalk",
+			["MoogleTTS.NPCBattleTalk"] = "MoogleTTS.Settings.NPCBattleTalk",
+			["MoogleTTS.NPCWideText"] = "MoogleTTS.Settings.NPCWideText"
+		})
+	end
 	if MoogleLib and NotNil(MoogleTTS) and MoogleTTS.Settings.enable then
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
