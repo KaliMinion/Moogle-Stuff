@@ -12,7 +12,7 @@ local tbl =
 		stability = "Core Moogle Module",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1519329488,
-		info = [[Downloads scripts, keeps them updated. :P]],
+		info = [[Downloads scripts, keeps them updated. :P!]],
 	},
 	[2] = {
 		name = "Main Window",
@@ -66,11 +66,11 @@ enabled=1]],
 		filepath = [[Moogle Scripts\Moogle FPS\Moogle FPS.lua]],
 		table = "return MoogleFPS",
 		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/MoogleFPS.lua]],
-		version = "1.2.6",
+		version = "1.2.7",
 		category = "Utility",
 		stability = "Working",
 		releasedate = os.time { year = 2017, month = 05, day = 29 },
-		lastupdate = 1519063945,
+		lastupdate = 1519534672,
 		info = [[An FPS overlay like Fraps or Nvidia's GeForce Experience. For people who have issue using Minion with other overlays.]],
 		module = [[[Module]
 Name=Moogle FPS
