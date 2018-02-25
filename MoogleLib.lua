@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.3.5",
+	Version = "1.3.6",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -28,7 +28,8 @@ MoogleLib.Info = {
 		["1.2.2"] = "New Functions",
 		["1.2.3"] = "Download Fixes...again",
 		["1.2.4"] = "Download Tweaks and new Functions",
-		["1.3.0"] = "Huge rework to fix locals and downloading"
+		["1.3.0"] = "Huge rework to fix locals and downloading",
+		["1.3.6"] = "Added Save Settings Function"
 	}
 }
 
@@ -168,6 +169,9 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 						for w in tostring(v):gmatch("[%P/_/:]+") do
 							t2[#t2+1] = w
 						end
+
+						if Settings["MoogleStuff"] == nil then Settings["MoogleStuff"] = {} end
+						SaveTable = Settings["MoogleStuff"]
 
 						for i,e in pairs(t) do
 							if i < #t then
