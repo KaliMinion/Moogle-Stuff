@@ -20,12 +20,12 @@ local tbl =
 		filepath = [[Main Window.lua]],
 		table  = "return KaliMainWindow",
 		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/MainWindow.lua]],
-		version = "1.2.10",
+		version = "1.3.0",
 		category = "Core Moogle Module",
 		stability = "Core Moogle Module",
 		instver = KaliMainWindow.Info.Version or false,
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1519064004,
+		lastupdate = 1519607134,
 		info = [[The Main Window that all Moogle Scripts share to display the settings for each module.]],
 	},
 	[3] = {
@@ -51,7 +51,7 @@ local tbl =
 		category = "Utility",
 		stability = "WiP but Working",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1519064202,
+		lastupdate = 1519607134,
 		info = [[Narrates NPC dialog, as well as some other windows in game.]],
 		module = [[[Module]
 Name=Moogle TTS
