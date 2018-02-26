@@ -2,7 +2,7 @@ KaliMainWindow = {}
 
 KaliMainWindow.Info = {
 	Creator = "Kali",
-	Version = "1.3.0",
+	Version = "1.3.1",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
@@ -176,14 +176,18 @@ local count = 0
 
 -- local TestTable = {}
 
+local lastsave = 0
 function KaliMainWindow.Draw()
 	local gamestate = GetGameState()
 	if MoogleLib then
 		MoogleSave({
 			["KaliMainWindow.enable"] = "KaliMainWindow.Settings.enable",
 			["KaliMainWindow.open"] = "KaliMainWindow.GUI.open",
-			["KaliMainWindow.selected"] = "KaliMainWindow.GUI.NavigationMenu.selected"
 		})
+		if TimeSince(lastsave) > 60000 then
+			MoogleSave({["KaliMainWindow.selected"] = "KaliMainWindow.GUI.NavigationMenu.selected"})
+			lastsave = Now()
+		end
 
 		-- START MAIN WINDOW --
 			local MainX = 0
