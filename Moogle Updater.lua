@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.3.1",
+	Version = "1.3.2",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -18,7 +18,8 @@ MoogleUpdater.Info = {
 		["1.2.1"] = "Now outputs Windows and PowerShell version to System Info.txt",
 		["1.2.2"] = "Removed auto reload when checking for missing core files.",
 		["1.2.9"] = "Download Fixes...",
-		["1.3.1"] = "Added Save Settings"
+		["1.3.1"] = "Added Save Settings",
+		["1.3.2"] = "Made settings visible to users"
 	}
 }
 
@@ -133,6 +134,21 @@ function MoogleUpdater.Draw()
 
 		if nav.selected == MoogleUpdater.GUI.NavName then
 			main.Contents = function()
+				-- Settings for Updater --
+					local setting = MoogleUpdater.Settings
+
+					setting.AutoUpdate = GUI:Checkbox("Auto Update Modules",setting.AutoUpdate) Space(20)
+					local x = GUI:CalcTextSize(tostring(setting.CheckInterval))
+					Text("Update Check Interval:") Space() GUI:PushItemWidth(x+60) setting.CheckInterval = GUI:InputInt("##CheckInterval",setting.CheckInterval,1,365) GUI:PopItemWidth() Space(10)
+					local x = GUI:CalcTextSize(tostring(setting.CheckUnit))
+					local TimeUnits = MoogleUpdater.TimeUnits
+					local UnitIndex
+					GUI:PushItemWidth(x+30) UnitIndex = GUI:Combo("##CheckUnit",table.find(TimeUnits,setting.CheckUnit),MoogleUpdater.TimeUnits,#TimeUnits) GUI:PopItemWidth()
+					if Type(TimeUnits[UnitIndex],"string") and setting.CheckUnit ~= TimeUnits[UnitIndex] then setting.CheckUnit = TimeUnits[UnitIndex] end
+					local x = GUI:CalcTextSize(tostring(setting.ToasterTime))
+					setting.AutoReload = GUI:Checkbox("Auto Reload after Update",setting.AutoReload) Space(20) setting.Notifications = GUI:Checkbox("Toaster Notifications",setting.Notifications) Space(20) Text("Toaster Time (sec):") Space() GUI:PushItemWidth(x+60) setting.ToasterTime = GUI:InputInt("##ToasterTime",setting.ToasterTime,1,300) GUI:PopItemWidth()
+				-- End Settings for Updater --
+
 				-- Check to see if you have pending Download Checks --
 					if Valid(ModuleDownloads) then
 						Text("You need to")
