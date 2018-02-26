@@ -58,9 +58,11 @@ end
 function MoogleLib.Init()
 	UpdateLocals1() UpdateLocals2()
 	MoogleLib.Settings.loaded = true loaded = true
-	-- if FileExists(MooglePath..[[BannedKeys.lua]]) then
-	-- 	Table.BannedKeys = FileLoad(MooglePath..[[BannedKeys.lua]])
-	-- end
+	MoogleLoad({
+		["MoogleTTS.enable"] = "MoogleTTS.Settings.enable",
+		["MoogleTTS.MainMenuType"] = "MoogleTTS.Settings.MainMenuType",
+		["MoogleTTS.DownloadThreads"] = "MoogleTTS.Settings.DownloadThreads",
+	})
 end
 RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 
@@ -2587,6 +2589,11 @@ local function MarkerLogic(MarkerType,filters,AddPlayer,buffids,time,ownerid,Mis
 	end
 end
 function MoogleLib.OnUpdate()
+	MoogleSave({
+		["MoogleTTS.enable"] = "MoogleTTS.Settings.enable",
+		["MoogleTTS.MainMenuType"] = "MoogleTTS.Settings.MainMenuType",
+		["MoogleTTS.DownloadThreads"] = "MoogleTTS.Settings.DownloadThreads",
+	})
 	-- While executing Table.Print, if you hit a function you can't dump, it skips trying to --
 	if PrintRunning then
 		if TimeSince(PrintTime) > 100 then
