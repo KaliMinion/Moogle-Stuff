@@ -16,24 +16,6 @@ KaliMainWindow.Info = {
 	}
 }
 
--- Helper Variables --
-	local MinionPath = MoogleLib.API.MinionPath
-	local LuaPath = MoogleLib.API.LuaPath
-	local MooglePath = MoogleLib.API.MooglePath
-	local ImageFolder = MoogleLib.API.ImageFolder
-	local ScriptsFolder = MoogleLib.API.ScriptsFolder
-	local API = MoogleLib.API
-	local Lua = MoogleLib.Lua
-	local Debug = Lua.debug
-	local General = Lua.general
-	local IO = Lua.io
-	local Math = Lua.math
-	local OS = Lua.os
-	local String = Lua.string
-	local Table = Lua.table
-	local Gui = MoogleLib.Gui
--- End Helper Variables --
-
 KaliMainWindow.GUI = {
 	WindowName = "KaliMainWindow##KaliMainWindow",
 	name = "Moogle Script Management",
@@ -149,7 +131,9 @@ KaliMainWindow.GUI = {
 }
 
 KaliMainWindow.Settings = {
-	enable = true
+	enable = true,
+	open = false,
+	selected = ""
 }
 local self = "KaliMainWindow"
 
@@ -164,8 +148,14 @@ local function UpdateLocals2()
 end
 
 function KaliMainWindow.ModuleInit()
-	if MoogleLib then UpdateLocals1() UpdateLocals2()
+	if MoogleLib then
+		UpdateLocals1() UpdateLocals2()
 		Initialize(KaliMainWindow.GUI)
+		MoogleLoad({
+			["KaliMainWindow.enable"] = "KaliMainWindow.Settings.enable",
+			["KaliMainWindow.open"] = "KaliMainWindow.GUI.open",
+			["KaliMainWindow.selected"] = "KaliMainWindow.GUI.NavigationMenu.selected"
+		})
 	end
 end
 
@@ -188,6 +178,11 @@ local count = 0
 function KaliMainWindow.Draw()
 	local gamestate = GetGameState()
 	if MoogleLib then
+		MoogleSave({
+			["KaliMainWindow.enable"] = "KaliMainWindow.Settings.enable",
+			["KaliMainWindow.open"] = "KaliMainWindow.GUI.open",
+			["KaliMainWindow.selected"] = "KaliMainWindow.GUI.NavigationMenu.selected"
+		})
 
 		-- START MAIN WINDOW --
 			local MainX = 0
