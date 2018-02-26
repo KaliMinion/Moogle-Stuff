@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.3.6",
+	Version = "1.3.7",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -187,7 +187,9 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 
 						for i,e in pairs(t2) do
 							if i < #t2 then
-								ModuleTable = ModuleTable[e]
+                                if ModuleTable[e] ~= nil then
+								    ModuleTable = ModuleTable[e]
+                                end
 							else
 								modvar = e
 							end
