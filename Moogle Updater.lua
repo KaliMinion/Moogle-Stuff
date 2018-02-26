@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.3.0",
+	Version = "1.3.1",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -18,7 +18,7 @@ MoogleUpdater.Info = {
 		["1.2.1"] = "Now outputs Windows and PowerShell version to System Info.txt",
 		["1.2.2"] = "Removed auto reload when checking for missing core files.",
 		["1.2.9"] = "Download Fixes...",
-		["1.3.0"] = "Added Save Settings"
+		["1.3.1"] = "Added Save Settings"
 	}
 }
 
@@ -388,11 +388,15 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			["MoogleUpdater.AutoUpdate"] = "MoogleUpdater.Settings.AutoUpdate",
 			["MoogleUpdater.CheckInterval"] = "MoogleUpdater.Settings.CheckInterval",
 			["MoogleUpdater.CheckUnit"] = "MoogleUpdater.Settings.CheckUnit",
-			["MoogleUpdater.LastCheck"] = "MoogleUpdater.Settings.LastCheck",
 			["MoogleUpdater.AutoReload"] = "MoogleUpdater.Settings.AutoReload",
 			["MoogleUpdater.Notifications"] = "MoogleUpdater.Settings.Notifications",
 			["MoogleUpdater.ToasterTime"] = "MoogleUpdater.Settings.ToasterTime"
 		})
+		if MoogleUpdater.Settings.CheckUnit ~= "Seconds" and MoogleUpdater.Settings.CheckUnit ~= "Minutes" then
+			MoogleSave({
+				["MoogleUpdater.LastCheck"] = "MoogleUpdater.Settings.LastCheck",
+			})
+		end
 	-- Check if all the folders are created --
 		local MooglePath = GetLuaModsPath()..[[MoogleStuff Files\]]
 		if not FolderExists(MooglePath..[[Moogle Images]]) then
