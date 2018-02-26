@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.2.11",
+	Version = "1.3.0",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -17,7 +17,8 @@ MoogleUpdater.Info = {
 		["1.1.8"] = "Core Category Renamed",
 		["1.2.1"] = "Now outputs Windows and PowerShell version to System Info.txt",
 		["1.2.2"] = "Removed auto reload when checking for missing core files.",
-		["1.2.9"] = "Download Fixes..."
+		["1.2.9"] = "Download Fixes...",
+		["1.3.0"] = "Added Save Settings"
 	}
 }
 
@@ -59,7 +60,18 @@ local function UpdateLocals2()
 end
 
 function MoogleUpdater.ModuleInit()
-	if MoogleLib then UpdateLocals1() UpdateLocals2()
+	if MoogleLib then
+		UpdateLocals1() UpdateLocals2()
+		MoogleLoad({
+			["MoogleUpdater.enable"] = "MoogleUpdater.Settings.enable",
+			["MoogleUpdater.AutoUpdate"] = "MoogleUpdater.Settings.AutoUpdate",
+			["MoogleUpdater.CheckInterval"] = "MoogleUpdater.Settings.CheckInterval",
+			["MoogleUpdater.CheckUnit"] = "MoogleUpdater.Settings.CheckUnit",
+			["MoogleUpdater.LastCheck"] = "MoogleUpdater.Settings.LastCheck",
+			["MoogleUpdater.AutoReload"] = "MoogleUpdater.Settings.AutoReload",
+			["MoogleUpdater.Notifications"] = "MoogleUpdater.Settings.Notifications",
+			["MoogleUpdater.ToasterTime"] = "MoogleUpdater.Settings.ToasterTime"
+		})
 		-- DownloadTable([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],"MoogleUpdater.MoogleScripts")
 	io.popen([[powershell -Command "$PSVer = 'PowerShell Version: ' + $PSVersionTable.PSVersion.Major + '.' + $PSVersionTable.PSVersion.Minor; $WinVer = 'Windows Version: ' + (Get-WmiObject -class Win32_OperatingSystem).Caption + ' ' + (Get-CimInstance Win32_OperatingSystem).OSArchitecture; $PackVer = 'Service Pack Version: ' + (Get-CimInstance Win32_OperatingSystem).ServicePackMajorVersion + '.' + (Get-CimInstance Win32_OperatingSystem).ServicePackMinorVersion ; $OSVer = 'OS Version: ' + (Get-CimInstance Win32_OperatingSystem).Version ; ($PSVer, $WinVer, $PackVer, $OSVer) | Out-File -filepath ']]..LuaPath..[[MoogleStuff Files\System Info.txt'"]])
 	end
@@ -371,6 +383,16 @@ local FirstRun = false
 local docheck = true
 function MoogleUpdater.OnUpdate(event, tickcount)
 	if MoogleLib then
+		MoogleSave({
+			["MoogleUpdater.enable"] = "MoogleUpdater.Settings.enable",
+			["MoogleUpdater.AutoUpdate"] = "MoogleUpdater.Settings.AutoUpdate",
+			["MoogleUpdater.CheckInterval"] = "MoogleUpdater.Settings.CheckInterval",
+			["MoogleUpdater.CheckUnit"] = "MoogleUpdater.Settings.CheckUnit",
+			["MoogleUpdater.LastCheck"] = "MoogleUpdater.Settings.LastCheck",
+			["MoogleUpdater.AutoReload"] = "MoogleUpdater.Settings.AutoReload",
+			["MoogleUpdater.Notifications"] = "MoogleUpdater.Settings.Notifications",
+			["MoogleUpdater.ToasterTime"] = "MoogleUpdater.Settings.ToasterTime"
+		})
 	-- Check if all the folders are created --
 		local MooglePath = GetLuaModsPath()..[[MoogleStuff Files\]]
 		if not FolderExists(MooglePath..[[Moogle Images]]) then
