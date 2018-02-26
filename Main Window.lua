@@ -2,7 +2,7 @@ KaliMainWindow = {}
 
 KaliMainWindow.Info = {
 	Creator = "Kali",
-	Version = "1.2.10",
+	Version = "1.3.0",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
@@ -12,7 +12,8 @@ KaliMainWindow.Info = {
 		["1.2.1"] = "Updated to match current Initialize standard.",
 		["1.2.2"] = "Main Window open on start fix",
 		["1.2.3"] = "Updated Forum Link URL",
-		["1.2.5"] = "Pushed Locals"
+		["1.2.5"] = "Pushed Locals",
+		["1.3.0"] = "Now remembers the last open window state and tab selected."
 	}
 }
 
