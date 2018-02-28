@@ -2,7 +2,7 @@ MoogleTweaks = {}
 
 MoogleTweaks.Info = {
 	Creator = "Kali",
-	Version = "1.0.1",
+	Version = "1.0.2",
 	StartDate = "02/02/18",
 	StartDate = "02/02/18",
 	StartDate = "02/02/18",
@@ -760,7 +760,7 @@ function MoogleTweaks.OnUpdate( event, tickcount )
 		local main = KaliMainWindow.GUI
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleTweaks.Settings
-		if NotNil (Player.settings) then
+		if NotNil (Player.settings) and table.valid(Player.settings) then
 			if IsNil(MoogleTweaks.Data.PlayerMoveMode) then MoogleTweaks.Data.PlayerMoveMode = Player.settings.movemode end
 
 			if MoogleTweaks.Data.Navigating == false then

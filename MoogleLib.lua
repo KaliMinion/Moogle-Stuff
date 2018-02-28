@@ -471,7 +471,26 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 
 		function MoogleTime()
 			GUI:SetClipboardText(os.time())
-		end
+        end
+
+        API.ToasterTable = {}
+        API.ToasterTime = 5000
+        local lastsize,lasttime = 0,0
+        function API.Toaster(Title,Text,Time)
+            local tbl = API.ToasterTable
+            Time = Time or API.ToasterTime
+            if NotNil(Title,Text,Time) then
+                tbl[#tbl+1] = {
+                    title = Title,
+                    text = Text,
+                    time = Time,
+                    start = Now()
+                }
+            end
+            if table.valid(API.ToasterTime) then
+                GUI:Begin("ToasterWindow"..tostring())
+            end
+        end
 	-- End API Functions --
 
 	-- General Functions --
@@ -480,35 +499,59 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 			ml_error(string)
 		end
 
-		function General.IsNil(check, alt, original)
-			-- First check if "check" is nil --
-			local x = check or "isnil"
-			if x == "isnil" then
-				-- "check" was nil, now return true or alternate value --
-				if check ~= "" then
-					return alt or true
-				else
-					return original or false
+		function General.IsNil(...)
+			local tbl = {... }
+			if #tbl > 0 then
+				for i = 1, #tbl do
+					local x = tbl[i]
+					if x == nil or x == "" then
+						return true
+					end
 				end
 			else
-				-- "check" was not nil, return false or return original if not nil --
-				return original or false
+				return true
 			end
+			return false
+--			-- First check if "check" is nil --
+--			local x = check or "isnil"
+--			if x == "isnil" then
+--				-- "check" was nil, now return true or alternate value --
+--				if check ~= "" then
+--					return alt or true
+--				else
+--					return original or false
+--				end
+--			else
+--				-- "check" was not nil, return false or return original if not nil --
+--				return original or false
+--			end
 		end
 
-		function General.NotNil(check,alt)
-			-- First check that "check" is nil --
-			local x = check or "isnil"
-			if x == "isnil" then
-				return false
-			else
-				-- Isn't Nil, return alt if provided otherwise return true --
-				if check ~= "" then
-					return alt or true
-				else
-					return false
+		function General.NotNil(...)
+            local tbl = {...}
+			if #tbl > 0 then
+				for i = 1, #tbl do
+					local x = tbl[i]
+					if x == nil or x == "" then
+						return false
+					end
 				end
+			else
+				return false
 			end
+            return true
+--			-- First check that "check" is nil --
+--			local x = check or "isnil"
+--			if x == "isnil" then
+--				return false
+--			else
+--				-- Isn't Nil, return alt if provided otherwise return true --
+--				if check ~= "" then
+--					return alt or true
+--				else
+--					return false
+--				end
+--			end
 		end
 
 		function General.Is(check, ...)
@@ -898,262 +941,78 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 			end
 		end
 
-		OS.MoogleCMDQueue = {} OS.MoogleDownloadBuffer = {} OS.CMDTable = {}
-		function OS.CMD(cmd, PowerShell, url)
-			local pass = true
-			url = url or cmd
-			if OS.MoogleDownloadBuffer[url] then
-				if TimeSince(OS.MoogleDownloadBuffer[url]) < 5000 then
-					pass = false
+		OS.Queue = {}
+		function OS.CMD(cmd, PowerShell)
+			local q = OS.Queue
+			ml_gui.showconsole = true
+
+			local new = true
+			local k
+			for i = 1, #q do
+				if new then
+					if q[i].cmd == cmd then
+						new = false
+						k = i
+					end
 				end
 			end
-			if loaded and pass then
-				local DownloadThreads = MoogleLib.Settings.DownloadThreads
-				local freetable = 0
-				if table.size(OS.CMDTable) > DownloadThreads then
-					-- Too many tables --
-					for k,v in ipairs(OS.CMDTable) do
-						if k > DownloadThreads then
-							if io.type(OS.CMDTable[k].CMD) ~= "file" then
-								OS.CMDTable[k] = nil
-							end
+			if new then
+				for i=1, #q do
+					if IsNil(k) then
+						if not Type(q[i],"table") or not table.valid(q[i]) then
+							k = i
 						end
 					end
 				end
-				
-				-- Create tables that are missing --
-				if table.size(OS.CMDTable) < DownloadThreads then
-					for i = 1, DownloadThreads do
-						if OS.CMDTable[i] == nil then
-							OS.CMDTable[i] = {}
+				k = k or #q+1
+				q[k] = {}
+				q[k].cmd = cmd
+				q[k].PowerShell = PowerShell
+				q[k].time = Now()
+				if PowerShell then cmd = [[PowerShell -Command "]]..cmd..[["]] end
+				q[k].CMD = io.popen(cmd..[[ > "]]..MooglePath..[[output]]..tostring(k)..[[.lua"]])
+			else
+				q[k].type = io.type(q[k].CMD)
+				if Is(q[k].type,"file") and FileExists(MooglePath.."output"..tostring(k)..".lua") then
+					if IsNil(q[k].file) then
+						q[k].file = io.open(MooglePath.."output"..tostring(k)..".lua","r")
+					end
+					if q[k].file then
+						local text = q[k].file:read("*a")
+						if #text > 3 then
+							q[k].file:close()
+							d(TimeSince(q[k].time))
+							q[k] = {}
+							return text
 						end
 					end
-				end
-
-				for i=1, #OS.CMDTable do
-					if freetable == 0 then
-						if IsNil(OS.CMDTable[i].CMD) or io.type(OS.CMDTable[i].CMD) ~= "file" then
-							freetable = i
-						end
-					end
-				end
-
-				MoogleDebug.cmd = cmd
-				url = url or cmd
-				if NotNil(OS.MoogleCMDQueue[url]) then -- Already in the queue, find which one
-					local tblnumber
-					for i=1, #OS.CMDTable do
-						if OS.CMDTable[i].lasturl == url then
-							tblnumber = i
-						end
-					end
-					if tblnumber then
-						local i = tblnumber
-						local CMDtbl = OS.CMDTable[i]
-						local lasturl = OS.CMDTable[i].lasturl
-						local CMD = OS.CMDTable[i].CMD
-						local ctype = io.type(OS.CMDTable[i].CMD)
-						local outputfile = OS.CMDTable[i].outputfile
-						local CommandSent = OS.CMDTable[i].CommandSent
-						local filetimestart = OS.CMDTable[i].filetimestart
-
-						if Is(ctype,"file") then -- File is open, check to see if CommandSent is true --
-							if CommandSent then -- it better..
-								if filetimestart == nil then
-									CMDtbl.filetimestart = Now()
-								end
-								if FileExists(MooglePath.."output"..tostring(i)..".lua") then
-									if IsNil(CMDtbl.outputfile) then
-										CMDtbl.outputfile = io.open(MooglePath.."output"..tostring(i)..".lua","r")
-									end
-									if CMDtbl.outputfile then
-										local text = CMDtbl.outputfile:read("*a")
-										if #text > 0 then
-											CMDtbl.outputfile:close()
-											CMDtbl.filetimestart = nil
-											CMDtbl.CommandSent = false
-											CMDtbl.CMD:close()
-											OS.MoogleCMDQueue[url] = nil
-											CMDtbl.lasturl = nil
-											OS.MoogleDownloadBuffer[url] = Now()
-											OS.CMDTable[i] = {}
-											return text
-										end
-									end
-								end
-							else
-								ml_error("wtf, lasturl + cmd the same, file is open, but CommandSent is false?")
-							end
-						end
-					end
-				elseif freetable ~= 0 then -- Spots available to add additional downloads
-					local i = freetable
-					local CMDtbl = OS.CMDTable[i]
-					local lasturl = OS.CMDTable[i].lasturl
-					local CMD = OS.CMDTable[i].CMD
-					local ctype = io.type(OS.CMDTable[i].CMD)
-					local outputfile = OS.CMDTable[i].outputfile
-					local CommandSent = OS.CMDTable[i].CommandSent
-					local filetimestart = OS.CMDTable[i].filetimestart
-
-						if not CommandSent then -- LastURL and CommandSent are nil/false, which means a new command
-							if Not(ctype,"file") then
-								local erase = io.open(MooglePath.."output"..tostring(i)..".lua","w+")
-								if io.type(erase) == "file" then
-									erase:close()
-									local str
-									if PowerShell then
-										str = [[PowerShell -Command "]]..cmd..[["]]
-									else
-										str = cmd
-									end
-									OS.CMDTable[i].CMD = io.popen(str..[[ > "]]..MooglePath..[[output]]..tostring(i)..[[.lua"]])
-									OS.CMDTable[i]["CommandSent"] = true
-									OS.CMDTable[i]["lasturl"] = url
-									OS.CMDTable[i]["lastcmd"] = cmd
-									OS.CMDTable[i]["lastps"] = powershell
-									InsertIfNil(OS.MoogleCMDQueue,url,PowerShell)
-								end
-							else
-								ml_error("LastURL & CommandSent are both nil, but CMD is open")
-							end
-						else -- shouldn't ever happen
-							ml_error("LastURL = nil but CommandSent = true")
-						end
-					-- end
 				end
 			end
 		end
 
-		local ToggleDownloadString,queue,lastpath,result = false,{}
-		function OS.DownloadString(url, path)
-			if path then
-				lastpath = path
-			else
-				path = lastpath
-			end
-				MoogleDebug.lastpath = lastpath
-			if url then
-				if queue[url] ~= path then queue[url] = path end
-			else
-				url,path = next(queue)
-			end
-				MoogleDebug.DownloadStringqueue = queue
-			if table.valid(queue) then table.print(queue) end
-			local ctype = io.type(CMD)
-			if ctype == "file" or result then
-				if result then
-					MoogleDebug.result = result
-					if path then
-						local file = io.open(path,"w")
-							file:write(result)
-							file:close()
-						queue[url] = nil
-							MoogleDebug.DownloadStringqueue = queue
-						if NotValid(queue) then
-							ToggleDownloadString = false
-								MoogleDebug.ToggleDownloadString = ToggleDownloadString
-						end
-						lastpath = nil
-							MoogleDebug.lastpath = lastpath
-						result = nil
-					else
-						queue[url] = nil
-							MoogleDebug.DownloadStringqueue = queue
-						if NotValid(queue) then
-							ToggleDownloadString = false
-								MoogleDebug.ToggleDownloadString = ToggleDownloadString
-						end
-						lastpath = nil
-						local temp = result
-						result = nil
-							MoogleDebug.result = result
-						return temp
-					end
-				elseif url ~= nil then
-					result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true,url)
-				end
-			elseif url ~= nil then
-				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true,url)
-				ToggleDownloadString = true
-					MoogleDebug.ToggleDownloadString = ToggleDownloadString
-			end
+		function OS.DownloadString(url)
+			return OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true)
 		end
 
-		local ToggleDownloadTable,queue,lasttbl,result = false,{}
-		function OS.DownloadTable(url, TableName)
-			if url then
-				if queue[url] ~= TableName then queue[url] = TableName end
-			else
-				url, TableName = next(queue)
-			end
-
-			if lasttbl then TableName = lasttbl else lasttbl = TableName end
-
-			if type(TableName) ~= "string" then
-				ml_error("TableName is not a string but a "..type(TableName))
-				return nil
-			end
-			local ctype = io.type(CMD)
-			if ctype == "file" or result then
-				if result then
-					local tbl = loadstring(result)()
-					if type(tbl) == "table" then
-						ml_error("tbl is a table")
-						local t = {};
-						for w in TableName:gmatch("[%P/_/:]+") do
-							t[#t+1] = w
-						end
-						local lastkey
-						local Table = _G
-						for k,v in pairs(t) do
-							if k == #t then
-								lastkey = v
-							else
-								Table = Table[v]
-							end
-						end
-						Table[lastkey] = tbl
-
-						queue[url] = nil
-						if NotValid(queue) then
-							ToggleDownloadTable = false
-						end
-						lasttbl = nil
-						result = nil
-					else
-						ml_debug("'Table' is actually a : "..type(tbl).." URL: "..url, "gLogCNE", 1)
+		local tbl = {}
+		function OS.DownloadFile(url, path, overwrite)
+			if overwrite or not FileExists(path) then
+				if General.IsNil(tbl[url]) or TimeSince(tbl[url]) > 5000 then
+					tbl[url] = Now()
+					local result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true)
+					if result then
+						return true
 					end
-				else
-					result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true,url)
 				end
 			else
-				result = OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']]..url..[[')]],true,url)
-				ToggleDownloadTable = true
+				for k,v in pairs(OS.Queue) do
+					if v.url and v.url:match(url) then
+						OS.Queue[k] = {}
+					end
+				end
+				return true
 			end
-		end
-
-		local ToggleDownloadFile,queue,result = false,{}
-		function OS.DownloadFile(url, path, NotExist)
-			-- if result then
-			-- 	if result then
-			-- 		queue[url] = nil
-			-- 		if NotValid(queue) then
-			-- 			ToggleDownloadFile = false
-			-- 		end
-			-- 		result = nil
-			-- 	else
-			-- 		result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true,url)
-			-- 	end
-			-- else
-			-- if NotExist then
-			-- 	if FileExists(path) then
-			-- 		return false
-			-- 	end
-			-- end
-			result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']]..url..[[',']]..path..[['); Write-Host 'MoogleDownload']],true,url)
-			-- 	ToggleDownloadFile = true
-			-- end
+			return false
 		end
 
 		local ToggleVersionCheck,queue,result = false,{}

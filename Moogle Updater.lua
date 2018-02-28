@@ -107,19 +107,22 @@ function MoogleUpdater.Draw()
 				}
 				local finished = true
 				for url,image in table.pairsbykeys(Images) do
-					if not FileExists(ImageFolder..image) then
-						if IsNil(MoogleDownloadBuffer[url]) then
-							MoogleDebug.NeedImagesURL = url
-							DownloadFile(url,ImageFolder..image)
-						end
-						finished = false
-					else
-						if IsNil(MoogleDownloadBuffer[url]) then
-							MoogleDebug.NeedImagesURL = url
-							DownloadFile(url,ImageFolder..image)
-							finished = false
-						end
+					if finished then
+						finished = DownloadFile(url,ImageFolder..image)
 					end
+--					if not FileExists(ImageFolder..image) then
+--						if IsNil(MoogleDownloadBuffer[url]) then
+--							MoogleDebug.NeedImagesURL = url
+--							DownloadFile(url,ImageFolder..image)
+--						end
+--						finished = false
+--					else
+--						if IsNil(MoogleDownloadBuffer[url]) then
+--							MoogleDebug.NeedImagesURL = url
+--							DownloadFile(url,ImageFolder..image)
+--							finished = false
+--						end
+--					end
 				end
 				if finished then
 					NeedImages = false
@@ -559,58 +562,58 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 				local tbl = DownloadString([[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/MoogleScripts.lua]])
 				if NotNil(tbl) and type(tbl) == "string" then
 					webpage = loadstring(tbl)()
-				end
-				if table.valid(webpage) then
-					MoogleDebug.LastSuccessfulUpdate = Now()
-					for i,e in pairs(webpage) do
-						if scripts[i] == nil then -- New Script
-							MoogleUpdater.NewScripts[i] = e.name
-						elseif scripts[i].version ~= e.version then -- Updated Script
-							if MoogleUpdater.UpdatedScripts[i] == nil then
-								FinishedUpdating = false
-								DownloadFile(e.url,MooglePath..e.filepath)
-								MoogleUpdater.UpdatedScripts[i] = e.name
-							end
-						else
-							if loadstring(e.table..[[ ~= nil]])() and loadstring(e.table..[[.Info ~= nil]])() then
-								local InstalledScriptVersion = (loadstring(e.table..[[.Info.Version]])())
-								if scripts[i].version ~= InstalledScriptVersion then
-									-- New Script --
-									if MoogleUpdater.UpdatedScripts[i] == nil then
-										FinishedUpdating = false
-										DownloadFile(e.url,MooglePath..e.filepath)
-										MoogleUpdater.UpdatedScripts[i] = e.name
+					if table.valid(webpage) then
+						MoogleDebug.LastSuccessfulUpdate = Now()
+						for i,e in pairs(webpage) do
+							if scripts[i] == nil then -- New Script
+								MoogleUpdater.NewScripts[i] = e.name
+							elseif scripts[i].version ~= e.version then -- Updated Script
+								if MoogleUpdater.UpdatedScripts[i] == nil then
+									FinishedUpdating = false
+									DownloadFile(e.url,MooglePath..e.filepath)
+									MoogleUpdater.UpdatedScripts[i] = e.name
+								end
+							else
+								if loadstring(e.table..[[ ~= nil]])() and loadstring(e.table..[[.Info ~= nil]])() then
+									local InstalledScriptVersion = (loadstring(e.table..[[.Info.Version]])())
+									if scripts[i].version ~= InstalledScriptVersion then
+										-- New Script --
+										if MoogleUpdater.UpdatedScripts[i] == nil then
+											FinishedUpdating = false
+											DownloadFile(e.url,MooglePath..e.filepath)
+											MoogleUpdater.UpdatedScripts[i] = e.name
+										end
 									end
 								end
 							end
-						end
-						if os.difftime(os.time(),e.releasedate) < 604800 then
-							-- New label scripts, released within 1 week --
-							MoogleUpdater.NewLabelScripts[i] = e.name
-						end
+							if os.difftime(os.time(),e.releasedate) < 604800 then
+								-- New label scripts, released within 1 week --
+								MoogleUpdater.NewLabelScripts[i] = e.name
+							end
 
-						if table.find(MoogleUpdater.NewLabelScripts,e.name) and os.difftime(os.time(),e.releasedate) > 604800 then
-							MoogleUpdater.NewLabelScripts[table.find(MoogleUpdater.NewLabelScripts,e.name)] = nil
+							if table.find(MoogleUpdater.NewLabelScripts,e.name) and os.difftime(os.time(),e.releasedate) > 604800 then
+								MoogleUpdater.NewLabelScripts[table.find(MoogleUpdater.NewLabelScripts,e.name)] = nil
+							end
+
+							if os.difftime(os.time(),e.lastupdate) < 604800 then
+								-- New label scripts, released within 1 week --
+								MoogleUpdater.UpdatedLabelScripts[i] = e.name
+							end
+
+							if table.find(MoogleUpdater.UpdatedLabelScripts,e.name) and os.difftime(os.time(),e.lastupdate) > 604800 then
+								MoogleUpdater.UpdatedLabelScripts[table.find(MoogleUpdater.UpdatedLabelScripts,e.name)] = nil
+							end
 						end
-
-						if os.difftime(os.time(),e.lastupdate) < 604800 then
-							-- New label scripts, released within 1 week --
-							MoogleUpdater.UpdatedLabelScripts[i] = e.name
-						end	
-
-						if table.find(MoogleUpdater.UpdatedLabelScripts,e.name) and os.difftime(os.time(),e.lastupdate) > 604800 then
-							MoogleUpdater.UpdatedLabelScripts[table.find(MoogleUpdater.UpdatedLabelScripts,e.name)] = nil
-						end			
-					end
-					MoogleUpdater.MoogleScripts = webpage
-					webpage = {}
-					if not table.valid(MoogleUpdater.UpdatedScripts) then
-						MoogleUpdater.Settings.LastCheck = os.time()
-					else
-						if FinishedUpdating then
+						MoogleUpdater.MoogleScripts = webpage
+						webpage = {}
+						if not table.valid(MoogleUpdater.UpdatedScripts) then
 							MoogleUpdater.Settings.LastCheck = os.time()
 						else
-							MoogleUpdater.Settings.LastCheck = MoogleUpdater.Settings.LastCheck + 5
+							if FinishedUpdating then
+								MoogleUpdater.Settings.LastCheck = os.time()
+							else
+								MoogleUpdater.Settings.LastCheck = MoogleUpdater.Settings.LastCheck + 5
+							end
 						end
 					end
 				end
