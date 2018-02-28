@@ -981,7 +981,6 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 						local text = q[k].file:read("*a")
 						if #text > 3 then
 							q[k].file:close()
-							d(TimeSince(q[k].time))
 							q[k] = {}
 							return text
 						end
