@@ -52,7 +52,7 @@ end
 function MoogleTweaks.ModuleInit()
 	UpdateLocals1() UpdateLocals2()
 	Initialize(MoogleTweaks.GUI)
-	DownloadFile([[https://i.imgur.com/SBGNinb.png]],ImageFolder..MoogleTweaks.GUI.name..".png")
+--	DownloadFile([[https://i.imgur.com/SBGNinb.png]],ImageFolder..MoogleTweaks.GUI.name..".png")
 end
 
 local step = 0

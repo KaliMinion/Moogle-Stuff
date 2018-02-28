@@ -109,3 +109,9 @@ _Notification
 
 
 Selling Cards = 34,1 = first card, 24,0 = sell card
+
+
+
+-- Crafting Orders --
+     AceLib.API.Items.GetRecipeDetails(####)
+        .id, .name, .attemptlevel, .class, .page, .progress, .durability, .craftsmanship, .control, .requiredequip, .crystal1-2, .ingredient1-6, .iamount1-6
