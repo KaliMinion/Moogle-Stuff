@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.3.8",
+	Version = "1.3.9",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
@@ -944,7 +944,6 @@ RegisterEventHandler("Module.Initalize", MoogleLib.Init)
 		OS.Queue = {}
 		function OS.CMD(cmd, PowerShell)
 			local q = OS.Queue
-			ml_gui.showconsole = true
 
 			local new = true
 			local k
