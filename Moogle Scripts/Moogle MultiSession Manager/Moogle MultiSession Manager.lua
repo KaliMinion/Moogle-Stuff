@@ -2,7 +2,7 @@ MoogleMultiSessionManager = {}
 
 MoogleMultiSessionManager.Info = {
 	Creator = "Kali",
-	Version = "0.0.1",
+	Version = "0.0.9",
 	StartDate = "02/28/2018",
 	ChangeLog = {
 	}
