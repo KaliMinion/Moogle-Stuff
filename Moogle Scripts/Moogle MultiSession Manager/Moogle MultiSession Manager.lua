@@ -2,7 +2,7 @@ MoogleMultiSessionManager = {}
 
 MoogleMultiSessionManager.Info = {
 	Creator = "Kali",
-	Version = "0.0.9",
+	Version = "0.0.10",
 	StartDate = "02/28/2018",
 	ChangeLog = {
 	}
@@ -30,7 +30,8 @@ local self = "MoogleMultiSessionManager"
 
 MoogleMultiSessionManager.Data = {
 	LastWrite = 0,
-	LogTable = {}
+	LogTable = {},
+	ToggleSensitiveInfo = false
 }
 
 local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, RecordKeybinds, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, MoogleCMDQueue, MoogleDownloadBuffer, CMDTable, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, StrToTable, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables
@@ -82,9 +83,17 @@ function MoogleMultiSessionManager.Draw()
 				if IsNil(settings.ManageList[UUID]) then settings.ManageList[UUID] = false end
 				settings.ManageList[UUID] = GUI:Checkbox("Enable Moogle MultiSession Manager for this bot instance.",settings.ManageList[UUID])
 				if settings.ManageList[UUID] == true then
+					Space(10) if GUI:SmallButton("Toggle Sensitive Info") then data.ToggleSensitiveInfo = not data.ToggleSensitiveInfo end
 					for k,v in pairs(data.LogTable) do
 						if GUI:CollapsingHeader(k) then
-							Text("Player Name: ") Text(v.name,{"1","1","0","1"},0,true) Space()
+							Text("Player Name: ")
+							local str
+							if data.ToggleSensitiveInfo then
+								str = string.gsub(v.name,".","?") str = str.."??????"
+							else
+								str = v.name
+							end
+							Text(str,{"1","1","0","1"},0,true) Space()
 							local InCurrentParty,PartySize,IsLeader = false,0,false
 							local el = EntityList.myparty
 							if table.valid(el) then
@@ -136,8 +145,21 @@ function MoogleMultiSessionManager.Draw()
 								end
 							end
 
-							Text("[",0) Text(v.datacenter,{"1","1","0","1"},0) Text("] ",0)
-							Text(v.server,{"1","1","0","1"},0)
+							local str
+							if data.ToggleSensitiveInfo then
+								str = string.gsub(v.datacenter,"%w","?") str = str.."???"
+							else
+								str = v.datacenter
+							end
+							Text("[",0) Text(str,{"1","1","0","1"},0) Text("] ",0)
+
+							local str
+							if data.ToggleSensitiveInfo then
+								str = string.gsub(v.server,"%w","?") str = str.."?????"
+							else
+								str = v.server
+							end
+							Text(str,{"1","1","0","1"},0)
 
 							Text(" - [",0) Text(v.mapid,{"1","1","0","1"},0) Text("] ",0)
 							Text(v.mapname,{"1","1","0","1"})
