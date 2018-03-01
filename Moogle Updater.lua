@@ -63,7 +63,6 @@ local function UpdateLocals2()
 end
 
 function MoogleUpdater.ModuleInit()
-	ml_gui.showconsole = true
 	if MoogleLib then
 		UpdateLocals1() UpdateLocals2()
 		MoogleLoad({
@@ -114,19 +113,6 @@ function MoogleUpdater.Draw()
 					if finished then
 						finished = DownloadFile(url,ImageFolder..image)
 					end
---					if not FileExists(ImageFolder..image) then
---						if IsNil(MoogleDownloadBuffer[url]) then
---							MoogleDebug.NeedImagesURL = url
---							DownloadFile(url,ImageFolder..image)
---						end
---						finished = false
---					else
---						if IsNil(MoogleDownloadBuffer[url]) then
---							MoogleDebug.NeedImagesURL = url
---							DownloadFile(url,ImageFolder..image)
---							finished = false
---						end
---					end
 				end
 				if finished then
 					NeedImages = false
@@ -428,7 +414,6 @@ local timevalue = 0
 local FirstRun = false
 local docheck = true
 function MoogleUpdater.OnUpdate(event, tickcount)
-	ml_gui.showconsole = true
 	if MoogleLib then
 		MoogleSave({
 			["MoogleUpdater.enable"] = "MoogleUpdater.Settings.enable",

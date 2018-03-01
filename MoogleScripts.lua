@@ -104,17 +104,36 @@ enabled=1]]
 		filepath = [[Moogle Scripts\Moogle Tweaks\Moogle Tweaks.lua]],
 		table = "return MoogleTweaks",
 		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Scripts/Moogle%20Tweaks/Moogle%20Tweaks.lua]],
-		version = "1.0.2",
+		version = "1.0.3",
 		category = "Utility",
 		stability = "WiP but Working",
 		releasedate = os.time { year = 2018, month = 02, day = 19 },
-		lastupdate = 1519810141,
+		lastupdate = 1519868918,
 		info = [[Navigate to NPCs and trade in items for stuffs, temp name, will make it better later.]],
 		module = [[[Module]
 Name=Moogle Tweaks
 Dependencies=minionlib
 Version=1
 Files=Moogle Tweaks.lua
+enabled=1]]
+	},
+	[8] = {
+		name = "Moogle MultiSession Manager",
+		status = "open",
+		filepath = [[Moogle Scripts\Moogle MultiSession Manager\Moogle MultiSession Manager.lua]],
+		table = "return MoogleMultiSessionManager",
+		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Scripts/Moogle%20MultiSession%20Manager/Moogle%20MultiSession%20Manager.lua]],
+		version = "0.0.9",
+		category = "Utility",
+		stability = "Beta",
+		releasedate = os.time { year = 2018, month = 02, day = 28 },
+		lastupdate = 1519869146,
+		info = [[A module to monitor what other bot instances on your computer are doing, send commands to specific instances or all at the same time.]],
+		module = [[[Module]
+Name=Moogle MultiSession Manager
+Dependencies=minionlib
+Version=1
+Files=Moogle MultiSession Manager.lua
 enabled=1]]
 	},
 }
