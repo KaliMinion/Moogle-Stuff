@@ -63,7 +63,9 @@ end
 local function Load()
 	local tbl,e = persistence.load(MMMFolder.."LogTable.lua")
 	if table.valid(tbl) then
-		MoogleMultiSessionManager.Data.LogTable = deepcopy(tbl)
+		if table.deepcompare(MoogleMultiSessionManager.Data.LogTable,tbl) == false then
+			MoogleMultiSessionManager.Data.LogTable = deepcopy(tbl)
+		end
 	end
 end
 
@@ -135,17 +137,16 @@ function MoogleMultiSessionManager.Draw()
 							end
 
 							Text("[",0) Text(v.datacenter,{"1","1","0","1"},0) Text("] ",0)
-							Text(v.server,{"1","1","0","1"})
+							Text(v.server,{"1","1","0","1"},0)
 
-							Text("[",0) Text(v.mapid,{"1","1","0","1"},0) Text("] ",0)
-							Text(v.mapname,{"1","1","0","1"},0)
-							Text(" POS:")
-							Indent()
-								Text("x: ") Text(v.pos.x,{"1","1","0","1"},0,true)
+							Text(" - [",0) Text(v.mapid,{"1","1","0","1"},0) Text("] ",0)
+							Text(v.mapname,{"1","1","0","1"})
+							Text("POS x: ") Text(v.pos.x,{"1","1","0","1"},0,true)
+							Indent(GUI:CalcTextSize("POS "))
 								Text("y: ") Text(v.pos.y,{"1","1","0","1"},0,true)
 								Text("z: ") Text(v.pos.z,{"1","1","0","1"},0,true)
 								Text("h: ") Text(v.pos.h,{"1","1","0","1"},0,true)
-							Unindent()
+							Unindent(GUI:CalcTextSize("POS "))
 
 							if data.LogTable[k].SendTellText == nil or data.LogTable[k].SendTellText == "" then
 								data.LogTable[k].SendTellText = " "
@@ -176,7 +177,6 @@ function MoogleMultiSessionManager.OnUpdate( event, tickcount )
 		local nav = KaliMainWindow.GUI.NavigationMenu
 		local settings = MoogleMultiSessionManager.Settings
 		local data = MoogleMultiSessionManager.Data
-		local LogTable = data.LogTable
 		
 		if table.find(nav.Menu,MoogleMultiSessionManager.GUI.NavName) == nil then
 			table.insert(nav.Menu,MoogleMultiSessionManager.GUI.NavName)
@@ -193,10 +193,8 @@ function MoogleMultiSessionManager.OnUpdate( event, tickcount )
 		end
 
 		MoogleSave({})
-
-		-- Write LogTable to File --
 		if data.LogTable[UUID] == nil then
-			LogTable[UUID] = {}
+			data.LogTable[UUID] = {}
 			Update()
 		end
 		if data.LogTable[UUID].name ~= Player.name then data.LogTable[UUID].name = Player.name Update() end
@@ -210,7 +208,6 @@ function MoogleMultiSessionManager.OnUpdate( event, tickcount )
 		if data.LogTable[UUID].mapname ~= GetMapName(Player.localmapid) then data.LogTable[UUID].mapname = GetMapName(Player.localmapid) Update() end
 		if data.LogTable[UUID].datacenter ~= FFXIV_Login_DataCenterName then data.LogTable[UUID].datacenter = FFXIV_Login_DataCenterName Update() end
 		if data.LogTable[UUID].server ~= FFXIV_Login_ServerName then data.LogTable[UUID].server = FFXIV_Login_ServerName Update() end
---			table.print(data.LogTable)
 	end
 end
 

@@ -38,6 +38,8 @@ MoogleUpdater.Settings = {
 	AutoReload = false, -- if True, once updating a script, the updater will automatically reload lua to make the update live
 	Notifications = true, -- if False, then toaster notifications will be disabled
 	ToasterTime = 5, -- if set to zero, toaster popups never disappear until clicked on or updating the script
+
+	Beta = false
 }
 local self = "MoogleUpdater"
 
@@ -61,6 +63,7 @@ local function UpdateLocals2()
 end
 
 function MoogleUpdater.ModuleInit()
+	ml_gui.showconsole = true
 	if MoogleLib then
 		UpdateLocals1() UpdateLocals2()
 		MoogleLoad({
@@ -71,7 +74,8 @@ function MoogleUpdater.ModuleInit()
 			["MoogleUpdater.LastCheck"] = "MoogleUpdater.Settings.LastCheck",
 			["MoogleUpdater.AutoReload"] = "MoogleUpdater.Settings.AutoReload",
 			["MoogleUpdater.Notifications"] = "MoogleUpdater.Settings.Notifications",
-			["MoogleUpdater.ToasterTime"] = "MoogleUpdater.Settings.ToasterTime"
+			["MoogleUpdater.ToasterTime"] = "MoogleUpdater.Settings.ToasterTime",
+			["MoogleUpdater.Beta"] = "MoogleUpdater.Settings.Beta"
 		})
 		-- DownloadTable([[https://github.com/KaliMinion/Moogle-Stuff/raw/master/MoogleScripts.lua]],"MoogleUpdater.MoogleScripts")
 	io.popen([[powershell -Command "$PSVer = 'PowerShell Version: ' + $PSVersionTable.PSVersion.Major + '.' + $PSVersionTable.PSVersion.Minor; $WinVer = 'Windows Version: ' + (Get-WmiObject -class Win32_OperatingSystem).Caption + ' ' + (Get-CimInstance Win32_OperatingSystem).OSArchitecture; $PackVer = 'Service Pack Version: ' + (Get-CimInstance Win32_OperatingSystem).ServicePackMajorVersion + '.' + (Get-CimInstance Win32_OperatingSystem).ServicePackMinorVersion ; $OSVer = 'OS Version: ' + (Get-CimInstance Win32_OperatingSystem).Version ; ($PSVer, $WinVer, $PackVer, $OSVer) | Out-File -filepath ']]..LuaPath..[[MoogleStuff Files\System Info.txt'"]])
@@ -148,8 +152,29 @@ function MoogleUpdater.Draw()
 					local UnitIndex
 					GUI:PushItemWidth(x+30) UnitIndex = GUI:Combo("##CheckUnit",table.find(TimeUnits,setting.CheckUnit),MoogleUpdater.TimeUnits,#TimeUnits) GUI:PopItemWidth()
 					if Type(TimeUnits[UnitIndex],"string") and setting.CheckUnit ~= TimeUnits[UnitIndex] then setting.CheckUnit = TimeUnits[UnitIndex] end
+					Space(20)
+					local str
+					local lastname = KaliMainWindow.GUI.name
+					if setting.Beta then
+						str = "Leave Beta"
+						if KaliMainWindow.GUI.name ~= [[Moogle Script Management (Beta)]] then KaliMainWindow.GUI.name = [[Moogle Script Management (Beta)]] end
+					else
+						str = "Join Beta"
+						if KaliMainWindow.GUI.name ~= [[Moogle Script Management]] then KaliMainWindow.GUI.name = [[Moogle Script Management]] end
+					end
+					if GUI:SmallButton(str) then
+						KaliMainWindow.GUI.oldPOS = {
+							pos = {x = 0, y = 0},
+							size = {x = 0, y = 0},
+							name = lastname
+						}
+						local oldPOS = KaliMainWindow.GUI.oldPOS
+						oldPOS.pos.x, oldPOS.pos.y = GUI:GetWindowPos()
+						oldPOS.size.x, oldPOS.size.y = GUI:GetWindowSize()
+						setting.Beta = not setting.Beta
+					end
 					local x = GUI:CalcTextSize(tostring(setting.ToasterTime))
-					setting.AutoReload = GUI:Checkbox("Auto Reload after Update",setting.AutoReload) Space(20) setting.Notifications = GUI:Checkbox("Toaster Notifications",setting.Notifications) Space(20) Text("Toaster Time (sec):") Space() GUI:PushItemWidth(x+60) setting.ToasterTime = GUI:InputInt("##ToasterTime",setting.ToasterTime,1,300) GUI:PopItemWidth()
+					setting.AutoReload = GUI:Checkbox("Auto Reload after Update",setting.AutoReload) Space(20) setting.Notifications = GUI:Checkbox("Toaster Notifications",setting.Notifications) Space(10) Text("Toaster Time (sec):") Space() GUI:PushItemWidth(x+60) setting.ToasterTime = GUI:InputInt("##ToasterTime",setting.ToasterTime,1,300) GUI:PopItemWidth()
 				-- End Settings for Updater --
 
 				-- Check to see if you have pending Download Checks --
@@ -175,215 +200,217 @@ function MoogleUpdater.Draw()
 				local scripts = MoogleUpdater.MoogleScripts
 				if Valid(scripts) then
 					for k,v in table.pairsbykeys(scripts) do
-						local yChild = AdjustChildren[k] or 50
+						if v.stability ~= "Beta" or setting.Beta then
+							local yChild = AdjustChildren[k] or 50
 
-						GUI:PushStyleVar(GUI.StyleVar_WindowPadding,5,5)
-						GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
-						GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing,0,0)
-						GUI:BeginChild("##"..v.name:gsub(" ",""),0,yChild,true)
-							local name = v.name
-							local category = v.category
-							local stability = v.stability
-							local filepath = v.filepath
-							local url = v.url
+							GUI:PushStyleVar(GUI.StyleVar_WindowPadding,5,5)
+							GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
+							GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing,0,0)
+							GUI:BeginChild("##"..v.name:gsub(" ",""),0,yChild,true)
+								local name = v.name
+								local category = v.category
+								local stability = v.stability
+								local filepath = v.filepath
+								local url = v.url
 
-							local width = GUI:GetContentRegionAvailWidth()
-							local Icon = 23
-							local xName,yName = GUI:CalcTextSize(name)
-							local xCategory,yCategory = GUI:CalcTextSize("Category:"..category) + 4
-							local xStability,yStability = GUI:CalcTextSize("Stability:"..stability) + 4
+								local width = GUI:GetContentRegionAvailWidth()
+								local Icon = 23
+								local xName,yName = GUI:CalcTextSize(name)
+								local xCategory,yCategory = GUI:CalcTextSize("Category:"..category) + 4
+								local xStability,yStability = GUI:CalcTextSize("Stability:"..stability) + 4
 
-							if category == "Core Moogle Module" then
-								-- Core Files ignore all checks --
-									if FileExists(ImageFolder..[[CoreModule.png]]) then
-										local c = GUI:Image(ImageFolder..[[CoreModule.png]],19,19)
+								if category == "Core Moogle Module" then
+									-- Core Files ignore all checks --
+										if FileExists(ImageFolder..[[CoreModule.png]]) then
+											local c = GUI:Image(ImageFolder..[[CoreModule.png]],19,19)
 
-										if GUI:IsItemHovered(c) then
-											Tooltip("Core Moogle Module")
-										end
-									end
-									Space(4)
-									Text(name)
-
-									local Label = ""
-									local LabelSpace = 0
-
-									if table.find(MoogleUpdater.NewLabelScripts,name) then
-										Label = Label.."[New]"
-										LabelSpace = LabelSpace + 4
-										Text("[New]",{"1","0","0","1"},4,true)
-									end
-
-									if table.find(MoogleUpdater.UpdatedScripts,name) then
-										Label = Label.."[Updated]"
-										LabelSpace = LabelSpace + 4
-										Text("[Updated]",{"1","1","0","1"},4,true)
-									end
-
-									local LabelWidth = GUI:CalcTextSize(Label) + LabelSpace
-
-									Space(width - (Icon + xName + LabelWidth + xCategory))
-									Text("Category:") Text(category,{"1","1","0","1"},4,true)
-								-- End Core Module Check --
-							else
-								local tbl = loadstring(v.table)() or "NotInstalled"
-								if Not(tbl,"NotInstalled") then
-									tbl.Settings.enable = Checkbox(name,tbl.Settings.enable,"ScriptEnabled",false,"Enable/Disable Module\n\nNote: Technically the module is still enabled, but this prevents code from running while the table still exists.")
-								else
-									if FileExists(ImageFolder..[[KaliDownload.png]]) then
-										if not FileExists(MooglePath..filepath) then
-											local c = GUI:Image(ImageFolder..[[KaliDownload.png]],19,19)
 											if GUI:IsItemHovered(c) then
-												Tooltip("Download and Install "..name)
-												if GUI:IsItemClicked(c) then
-													if not In(filepath,""," ",nil) then
-														local lastfolder = string.gsub(MooglePath..filepath,"([^\\]+)$","")
-														if not FolderExists(lastfolder) then
-															CreateFolder(lastfolder)
-														end
-														DownloadFile(url,MooglePath..filepath)
-														DownloadOneTimers[url] = MooglePath..filepath
-													end
-												end
+												Tooltip("Core Moogle Module")
 											end
-											Space(4)
-											Text(name)
-										else
-											-- File Exists but need to create module.def file --
-											if FileExists(string.gsub(MooglePath..filepath,"([^\\]+)$","")..[[module.def]]) then
-												-- Module.def file exists, now ready for Lua Reload --
-												InsertIfNil(ModuleDownloads,name)
-												if FileExists(ImageFolder..[[KaliDownloaded.png]]) then
-													local c = GUI:Image(ImageFolder..[[KaliDownloaded.png]],19,19)
-													if GUI:IsItemHovered(c) then
-														Tooltip("Finished Downloading, click again to reload Lua")
-														if GUI:IsItemClicked(c) then
-															Reload()
+										end
+										Space(4)
+										Text(name)
+
+										local Label = ""
+										local LabelSpace = 0
+
+										if table.find(MoogleUpdater.NewLabelScripts,name) then
+											Label = Label.."[New]"
+											LabelSpace = LabelSpace + 4
+											Text("[New]",{"1","0","0","1"},4,true)
+										end
+
+										if table.find(MoogleUpdater.UpdatedScripts,name) then
+											Label = Label.."[Updated]"
+											LabelSpace = LabelSpace + 4
+											Text("[Updated]",{"1","1","0","1"},4,true)
+										end
+
+										local LabelWidth = GUI:CalcTextSize(Label) + LabelSpace
+
+										Space(width - (Icon + xName + LabelWidth + xCategory))
+										Text("Category:") Text(category,{"1","1","0","1"},4,true)
+									-- End Core Module Check --
+								else
+									local tbl = loadstring(v.table)() or "NotInstalled"
+									if Not(tbl,"NotInstalled") then
+										tbl.Settings.enable = Checkbox(name,tbl.Settings.enable,"ScriptEnabled",false,"Enable/Disable Module\n\nNote: Technically the module is still enabled, but this prevents code from running while the table still exists.")
+									else
+										if FileExists(ImageFolder..[[KaliDownload.png]]) then
+											if not FileExists(MooglePath..filepath) then
+												local c = GUI:Image(ImageFolder..[[KaliDownload.png]],19,19)
+												if GUI:IsItemHovered(c) then
+													Tooltip("Download and Install "..name)
+													if GUI:IsItemClicked(c) then
+														if not In(filepath,""," ",nil) then
+															local lastfolder = string.gsub(MooglePath..filepath,"([^\\]+)$","")
+															if not FolderExists(lastfolder) then
+																CreateFolder(lastfolder)
+															end
+															DownloadFile(url,MooglePath..filepath)
+															DownloadOneTimers[url] = MooglePath..filepath
 														end
 													end
 												end
 												Space(4)
-												GUI:Text(name)
+												Text(name)
 											else
-												if NotNil(v.module) then
-													FileWrite(string.gsub(MooglePath..filepath,"([^\\]+)$","")..[[module.def]],v.module)
+												-- File Exists but need to create module.def file --
+												if FileExists(string.gsub(MooglePath..filepath,"([^\\]+)$","")..[[module.def]]) then
+													-- Module.def file exists, now ready for Lua Reload --
+													InsertIfNil(ModuleDownloads,name)
+													if FileExists(ImageFolder..[[KaliDownloaded.png]]) then
+														local c = GUI:Image(ImageFolder..[[KaliDownloaded.png]],19,19)
+														if GUI:IsItemHovered(c) then
+															Tooltip("Finished Downloading, click again to reload Lua")
+															if GUI:IsItemClicked(c) then
+																Reload()
+															end
+														end
+													end
+													Space(4)
+													GUI:Text(name)
+												else
+													if NotNil(v.module) then
+														FileWrite(string.gsub(MooglePath..filepath,"([^\\]+)$","")..[[module.def]],v.module)
+													end
+												end
+											end
+										else
+											Space(23)
+											Text(name)
+										end
+									end
+
+									-- Begin right side options for non core files --
+
+									local Label = ""
+
+									if table.find(MoogleUpdater.NewLabelScripts,name) then
+										Label = "[New]"
+										Text("[New]",{"1","0","0","1"},4,true)
+									end
+
+									if table.find(MoogleUpdater.UpdatedScripts,name) then
+										Label = "[Updated]"
+										Text("[Updated]",{"1","1","0","1"},4,true)
+									end
+
+									local LabelWidth = GUI:CalcTextSize(Label) + 4
+
+									if Not(tbl,"NotInstalled") or FileExists(MooglePath..filepath) then
+										Space(width - (Icon + xName + LabelWidth + xCategory + 4 + xStability + 4 + Icon))
+									else
+										Space(width - (Icon + xName + LabelWidth + xCategory + 4 + xStability + 4))
+									end
+										Text("Category:")
+										Text(category,{"1","1","0","1"},4,true)
+										Text("Stability:",8,true)
+										Text(stability,{"1","1","0","1"},4,true)
+
+									if Not(tbl,"NotInstalled") or FileExists(MooglePath..filepath) then
+										SameLine(4)
+										if FileExists(ImageFolder..[[DeleteModule.png]]) then
+											local c = GUI:Image(ImageFolder..[[DeleteModule.png]],19,19)
+											if GUI:IsItemHovered(c) then
+												Tooltip("Permanently Delete Moogle Module")
+
+												if GUI:IsItemClicked(c) then
+													PendingDeletion[k] = name
 												end
 											end
 										end
-									else
-										Space(23)
-										Text(name)
 									end
 								end
+								local LeftText = GUI:CalcTextSize("Last Update: 000d 00h 00m 00s")
+								GUI:BeginChild("##LeftInfo"..name, LeftText, GUI:GetItemsLineHeightWithSpacing() * 3)
+									Text("Version: "..v.version)
+									Text("Release Date: "..tostring(os.date ("%x", v.releasedate)))
+									local LastUpdateVar = os.difftime(os.time(),v.lastupdate)
+									local days = 0
+									local hours = 0
+									local minutes = 0
+									local seconds = 0
 
-								-- Begin right side options for non core files --
+									if LastUpdateVar > 86400 then
+										local temp = math.floor(LastUpdateVar/86400)
+										days = temp
+										LastUpdateVar = LastUpdateVar - (temp * 86400)
+									end
+									if LastUpdateVar > 3600 then
+										local temp = math.floor(LastUpdateVar/3600)
+										hours = temp
+										LastUpdateVar = LastUpdateVar - (temp * 3600)
+									end
+									if LastUpdateVar > 60 then
+										local temp = math.floor(LastUpdateVar/60)
+										minutes = temp
+										LastUpdateVar = LastUpdateVar - (temp * 60)
+									end
+									if LastUpdateVar < 60 then
+										local temp = LastUpdateVar
+										seconds = temp
+										LastUpdateVar = LastUpdateVar - temp
+									end
 
-								local Label = ""
+									local TimeStr = ""
 
-								if table.find(MoogleUpdater.NewLabelScripts,name) then
-									Label = "[New]"
-									Text("[New]",{"1","0","0","1"},4,true)
-								end
+									if days ~= 0 then TimeStr = TimeStr..days.."d " end
+									if hours ~= 0 or days ~= 0 then TimeStr = TimeStr..string.format("%02d",hours).."h " end
+									if minutes ~= 0 or hours ~= 0 then TimeStr = TimeStr..string.format("%02d",minutes).."m " end
+									if seconds ~= 0 or minutes ~= 0 then TimeStr = TimeStr..string.format("%02d",seconds).."s" end
 
-								if table.find(MoogleUpdater.UpdatedScripts,name) then
-									Label = "[Updated]"
-									Text("[Updated]",{"1","1","0","1"},4,true)
-								end
-
-								local LabelWidth = GUI:CalcTextSize(Label) + 4
-
-								if Not(tbl,"NotInstalled") or FileExists(MooglePath..filepath) then
-									Space(width - (Icon + xName + LabelWidth + xCategory + 4 + xStability + 4 + Icon))
-								else
-									Space(width - (Icon + xName + LabelWidth + xCategory + 4 + xStability + 4))
-								end
-									Text("Category:")
-									Text(category,{"1","1","0","1"},4,true)
-									Text("Stability:",8,true)
-									Text(stability,{"1","1","0","1"},4,true)
-
-								if Not(tbl,"NotInstalled") or FileExists(MooglePath..filepath) then
-									SameLine(4)
-									if FileExists(ImageFolder..[[DeleteModule.png]]) then
-										local c = GUI:Image(ImageFolder..[[DeleteModule.png]],19,19)
+									Text("Last Update: "..TimeStr)
+								GUI:EndChild() SameLine(0)
+								GUI:BeginChild("##Description"..name, GUI:GetContentRegionAvail() - 30, GUI:GetItemsLineHeightWithSpacing() * 3,true)
+									GUI:PushTextWrapPos()
+									GUI:Text(v.info)
+								GUI:EndChild() SameLine(0)
+								GUI:BeginChild("##Image"..name, 30, GUI:GetItemsLineHeightWithSpacing() * 3)
+									local x,y = GUI:GetContentRegionMax()
+									GUI:Dummy(0,y-30)
+									GUI:Dummy(3,0) SameLine(0)
+									if FileExists(ImageFolder..[[ViewCode.png]]) then
+										local c = GUI:Image(ImageFolder..[[ViewCode.png]],30,30)
 										if GUI:IsItemHovered(c) then
-											Tooltip("Permanently Delete Moogle Module")
-
+											Tooltip("View Code")
 											if GUI:IsItemClicked(c) then
-												PendingDeletion[k] = name
+												io.popen([[cmd /c start ]]..v.url)
 											end
 										end
 									end
-								end
-							end
-							local LeftText = GUI:CalcTextSize("Last Update: 000d 00h 00m 00s")
-							GUI:BeginChild("##LeftInfo"..name, LeftText, GUI:GetItemsLineHeightWithSpacing() * 3)
-								Text("Version: "..v.version)
-								Text("Release Date: "..tostring(os.date ("%x", v.releasedate)))
-								local LastUpdateVar = os.difftime(os.time(),v.lastupdate)
-								local days = 0
-								local hours = 0
-								local minutes = 0
-								local seconds = 0
+								GUI:EndChild()
 
-								if LastUpdateVar > 86400 then
-									local temp = math.floor(LastUpdateVar/86400)
-									days = temp
-									LastUpdateVar = LastUpdateVar - (temp * 86400)
-								end
-								if LastUpdateVar > 3600 then
-									local temp = math.floor(LastUpdateVar/3600)
-									hours = temp
-									LastUpdateVar = LastUpdateVar - (temp * 3600)
-								end
-								if LastUpdateVar > 60 then
-									local temp = math.floor(LastUpdateVar/60)
-									minutes = temp
-									LastUpdateVar = LastUpdateVar - (temp * 60)
-								end
-								if LastUpdateVar < 60 then
-									local temp = LastUpdateVar
-									seconds = temp
-									LastUpdateVar = LastUpdateVar - temp
-								end
-
-								local TimeStr = ""
-
-								if days ~= 0 then TimeStr = TimeStr..days.."d " end
-								if hours ~= 0 or days ~= 0 then TimeStr = TimeStr..string.format("%02d",hours).."h " end
-								if minutes ~= 0 or hours ~= 0 then TimeStr = TimeStr..string.format("%02d",minutes).."m " end
-								if seconds ~= 0 or minutes ~= 0 then TimeStr = TimeStr..string.format("%02d",seconds).."s" end
-
-								Text("Last Update: "..TimeStr)
-							GUI:EndChild() SameLine(0)
-							GUI:BeginChild("##Description"..name, GUI:GetContentRegionAvail() - 30, GUI:GetItemsLineHeightWithSpacing() * 3,true)
-								GUI:PushTextWrapPos()
-								GUI:Text(v.info)
-							GUI:EndChild() SameLine(0)
-							GUI:BeginChild("##Image"..name, 30, GUI:GetItemsLineHeightWithSpacing() * 3)
-								local x,y = GUI:GetContentRegionMax()
-								GUI:Dummy(0,y-30)
-								GUI:Dummy(3,0) SameLine(0)
-								if FileExists(ImageFolder..[[ViewCode.png]]) then
-									local c = GUI:Image(ImageFolder..[[ViewCode.png]],30,30)
-									if GUI:IsItemHovered(c) then
-										Tooltip("View Code")
-										if GUI:IsItemClicked(c) then
-											io.popen([[cmd /c start ]]..v.url)
-										end
-									end
+								local xChildAvail,yChildAvail = GUI:GetContentRegionAvail()
+								if AdjustChildren[k] == nil then
+									AdjustChildren[k] = 50 - yChildAvail
+								else
+									AdjustChildren[k] = AdjustChildren[k] - yChildAvail
 								end
 							GUI:EndChild()
-
-							local xChildAvail,yChildAvail = GUI:GetContentRegionAvail()
-							if AdjustChildren[k] == nil then
-								AdjustChildren[k] = 50 - yChildAvail
-							else
-								AdjustChildren[k] = AdjustChildren[k] - yChildAvail
-							end
-						GUI:EndChild()
-						GUI:PopStyleVar(3)
-						GUI:Dummy(0,1)
+							GUI:PopStyleVar(3)
+							GUI:Dummy(0,1)
+						end
 					end
 				end
 				DrawDebugInfo("Moogle Updater",DownloadOneTimers,MoogleCMDQueue,MoogleDownloadBuffer,OS.CMDTable)
@@ -401,6 +428,7 @@ local timevalue = 0
 local FirstRun = false
 local docheck = true
 function MoogleUpdater.OnUpdate(event, tickcount)
+	ml_gui.showconsole = true
 	if MoogleLib then
 		MoogleSave({
 			["MoogleUpdater.enable"] = "MoogleUpdater.Settings.enable",
@@ -409,7 +437,8 @@ function MoogleUpdater.OnUpdate(event, tickcount)
 			["MoogleUpdater.CheckUnit"] = "MoogleUpdater.Settings.CheckUnit",
 			["MoogleUpdater.AutoReload"] = "MoogleUpdater.Settings.AutoReload",
 			["MoogleUpdater.Notifications"] = "MoogleUpdater.Settings.Notifications",
-			["MoogleUpdater.ToasterTime"] = "MoogleUpdater.Settings.ToasterTime"
+			["MoogleUpdater.ToasterTime"] = "MoogleUpdater.Settings.ToasterTime",
+			["MoogleUpdater.Beta"] = "MoogleUpdater.Settings.Beta"
 		})
 		if MoogleUpdater.Settings.CheckUnit ~= "Seconds" and MoogleUpdater.Settings.CheckUnit ~= "Minutes" then
 			MoogleSave({
