@@ -2,7 +2,7 @@ KaliMainWindow = {}
 
 KaliMainWindow.Info = {
 	Creator = "Kali",
-	Version = "1.3.2",
+	Version = "1.3.3",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
@@ -196,7 +196,7 @@ function KaliMainWindow.Draw()
 
 			local StyleVars = WindowStyle(KaliMainWindow.GUI.WindowStyle)
 			if KaliMainWindow.GUI.open then
-				GUI:PushStyleVar(GUI.StyleVar_WindowMinSize,600,500)
+				GUI:PushStyleVar(GUI.StyleVar_WindowMinSize,615,500)
 				if NotNil(KaliMainWindow.GUI.oldPOS) and KaliMainWindow.GUI.name ~= KaliMainWindow.GUI.oldPOS.name then
 					local oldPOS = KaliMainWindow.GUI.oldPOS
 					GUI:SetNextWindowPos(oldPOS.pos.x, oldPOS.pos.y)
