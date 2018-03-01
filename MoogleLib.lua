@@ -14,7 +14,7 @@ MoogleLib = {
 
 MoogleLib.Info = {
 	Creator = "Kali",
-	Version = "1.3.9",
+	Version = "1.3.10",
 	StartDate = "12/28/17",
 	ReleaseDate = "12/30/17",
 	LastUpdate = "01/04/18",
