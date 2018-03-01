@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.3.5",
+	Version = "1.3.6",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -192,7 +192,7 @@ function MoogleUpdater.Draw()
 							GUI:PushStyleVar(GUI.StyleVar_WindowPadding,5,5)
 							GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
 							GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing,0,0)
-							GUI:BeginChild("##"..v.name:gsub(" ",""),0,yChild,true)
+							GUI:BeginChild("##"..v.name:gsub(" ",""),0,yChild,true,GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoInputs)
 								local name = v.name
 								local category = v.category
 								local stability = v.stability
@@ -340,7 +340,7 @@ function MoogleUpdater.Draw()
 									end
 								end
 								local LeftText = GUI:CalcTextSize("Last Update: 000d 00h 00m 00s")
-								GUI:BeginChild("##LeftInfo"..name, LeftText, GUI:GetItemsLineHeightWithSpacing() * 3)
+								GUI:BeginChild("##LeftInfo"..name, LeftText, GUI:GetItemsLineHeightWithSpacing() * 3,false,GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoInputs)
 									Text("Version: "..v.version)
 									Text("Release Date: "..tostring(os.date ("%x", v.releasedate)))
 									local LastUpdateVar = os.difftime(os.time(),v.lastupdate)
@@ -379,11 +379,11 @@ function MoogleUpdater.Draw()
 
 									Text("Last Update: "..TimeStr)
 								GUI:EndChild() SameLine(0)
-								GUI:BeginChild("##Description"..name, GUI:GetContentRegionAvail() - 30, GUI:GetItemsLineHeightWithSpacing() * 3,true)
+								GUI:BeginChild("##Description"..name, GUI:GetContentRegionAvail() - 30, GUI:GetItemsLineHeightWithSpacing() * 3,true,GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoInputs)
 									GUI:PushTextWrapPos()
 									GUI:Text(v.info)
 								GUI:EndChild() SameLine(0)
-								GUI:BeginChild("##Image"..name, 30, GUI:GetItemsLineHeightWithSpacing() * 3)
+								GUI:BeginChild("##Image"..name, 30, GUI:GetItemsLineHeightWithSpacing() * 3,false,GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoInputs)
 									local x,y = GUI:GetContentRegionMax()
 									GUI:Dummy(0,y-30)
 									GUI:Dummy(3,0) SameLine(0)
