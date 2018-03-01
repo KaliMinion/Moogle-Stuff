@@ -2,7 +2,7 @@ MoogleTweaks = {}
 
 MoogleTweaks.Info = {
 	Creator = "Kali",
-	Version = "1.0.2",
+	Version = "1.0.3",
 	StartDate = "02/02/18",
 	StartDate = "02/02/18",
 	StartDate = "02/02/18",
