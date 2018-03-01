@@ -123,11 +123,11 @@ enabled=1]]
 		filepath = [[Moogle Scripts\Moogle MultiSession Manager\Moogle MultiSession Manager.lua]],
 		table = "return MoogleMultiSessionManager",
 		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Scripts/Moogle%20MultiSession%20Manager/Moogle%20MultiSession%20Manager.lua]],
-		version = "0.0.9",
+		version = "0.0.10",
 		category = "Utility",
 		stability = "Beta",
 		releasedate = os.time { year = 2018, month = 02, day = 28 },
-		lastupdate = 1519869146,
+		lastupdate = 1519903610,
 		info = [[A module to monitor what other bot instances on your computer are doing, send commands to specific instances or all at the same time.]],
 		module = [[[Module]
 Name=Moogle MultiSession Manager
