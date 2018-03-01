@@ -2,7 +2,7 @@ MoogleUpdater = {}
 
 MoogleUpdater.Info = {
 	Creator = "Kali",
-	Version = "1.3.4",
+	Version = "1.3.5",
 	StartDate = "12/09/17",
 	ReleaseDate = "12/09/17",
 	LastUpdate = "12/09/17",
@@ -226,6 +226,12 @@ function MoogleUpdater.Draw()
 											Text("[New]",{"1","0","0","1"},4,true)
 										end
 
+										if v.stability == "Beta" then
+											Label = Label.."[Beta]"
+											LabelSpace = LabelSpace + 4
+											Text("[Beta]",{"0.3","1","0.3","1"},4,true)
+										end
+
 										if table.find(MoogleUpdater.UpdatedScripts,name) then
 											Label = Label.."[Updated]"
 											LabelSpace = LabelSpace + 4
@@ -295,6 +301,11 @@ function MoogleUpdater.Draw()
 									if table.find(MoogleUpdater.NewLabelScripts,name) then
 										Label = "[New]"
 										Text("[New]",{"1","0","0","1"},4,true)
+									end
+
+									if v.stability == "Beta" then
+										Label = Label.."[Beta]"
+										Text("[Beta]",{"0.3","1","0.3","1"},4,true)
 									end
 
 									if table.find(MoogleUpdater.UpdatedScripts,name) then
