@@ -2,7 +2,7 @@ MoogleTweaks = {}
 
 MoogleTweaks.Info = {
 	Creator = "Kali",
-	Version = "1.0.3",
+	Version = "1.0.4",
 	StartDate = "02/02/18",
 	StartDate = "02/02/18",
 	StartDate = "02/02/18",
@@ -214,9 +214,9 @@ end
 local step,CardTable,LastMPG,OpenTime = 0
 function MoogleTweaks.SellTripleTriadCards()
 	local TripleTriadTrader = {
-		CID = 1010478,
+		CID = 1016294,
 		localmapid = 144,
-		pos = {h = 2.0858142375946, x = -99.198913574219, y = -0.86297023296356, z = 66.117309570313}
+		pos = {h = -3.0240497589111, x = -55.344543457031, y = 1.6000002622604, z = 19.302612304688}
 	}
 
 	if MovePlayer(TripleTriadTrader.pos, TripleTriadTrader.localmapid) and SetTarget(ConvertCID(TripleTriadTrader.CID),true) then
