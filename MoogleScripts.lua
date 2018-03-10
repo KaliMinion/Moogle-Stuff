@@ -1,5 +1,4 @@
--- MOOGLE SCRIPTS START --
-local tbl = 
+local tbl =
 {
 	[1] = {
 		name = "Moogle Updater",
@@ -18,7 +17,7 @@ local tbl =
 		name = "Main Window",
 		status = "open",
 		filepath = [[Main Window.lua]],
-		table  = "return KaliMainWindow",
+		table = "return KaliMainWindow",
 		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Main%20Window.lua]],
 		version = "1.3.3",
 		category = "Core Moogle Module",
@@ -138,4 +137,3 @@ enabled=1]]
 	},
 }
 return tbl
--- MOOGLE SCRIPTS END --
