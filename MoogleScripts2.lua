@@ -11,7 +11,7 @@ local tbl =
 		stability = "Core Moogle Module",
 		releasedate = os.time { year = 2017, month = 12, day = 9 },
 		lastupdate = 1519938708,
-		info = [[Downloads scripts, keeps them updated. :P!]],
+		info = [[Downloads scripts, keeps them updated. :P! :o]],
 	},
 	[2] = {
 		name = "Main Window",
