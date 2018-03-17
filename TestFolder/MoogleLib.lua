@@ -75,10 +75,12 @@ API.GitURL = function(ModuleFileName, Branch) Branch = Branch or "master" return
 
 MoogleDebug, MoogleLog = {}, false
 
-local Initialize, LoadModule, VersionCheck, LastPush, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, Keybinds, RecordKeybinds, ToasterTable, ToasterTime, Toaster, Error, debug, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, TimeSince, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, Queue, CMD, DownloadString, DownloadTable, DownloadFile, Ping, Split, starts, ends, ToTable, StrToTable, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, BannedKeys, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables, FinishedLoading
+local Initialize, LoadModule, VersionCheck, LastPush, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, Keybinds, RecordKeybinds, ToasterTable, ToasterTime, Toaster, Error, debug, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, TimeSince, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, WriteToFile, Queue, CMD, DownloadString, DownloadTable, DownloadFile, Ping, Split, starts, ends, ToTable, StrToTable, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, BannedKeys, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables, FinishedLoading
 
 local loaded = true
 local function UpdateLocals3()
+	if loaded and InsertIfNil == nil then if Table.InsertIfNil then InsertIfNil = Table.InsertIfNil else loaded = false end end
+	if loaded and RemoveIfNil == nil then if Table.RemoveIfNil then RemoveIfNil = Table.RemoveIfNil else loaded = false end end
 	if loaded and UpdateIfChanged == nil then if Table.UpdateIfChanged then UpdateIfChanged = Table.UpdateIfChanged else loaded = false end end
 	if loaded and RemoveExpired == nil then if Table.RemoveExpired then NotAll = Table.RemoveExpired else loaded = false end end
 	if loaded and Unpack == nil then if Table.Unpack then Unpack = Table.Unpack else loaded = false end end
@@ -125,6 +127,8 @@ local function UpdateLocals2()
 	if loaded and PowerShell == nil then if OS.PowerShell then PowerShell = OS.PowerShell else loaded = false end end
 	if loaded and CreateFolder == nil then if OS.CreateFolder then CreateFolder = OS.CreateFolder else loaded = false end end
 	if loaded and DeleteFile == nil then if OS.DeleteFile then DeleteFile = OS.DeleteFile else loaded = false end end
+	if loaded and WriteToFile == nil then if OS.WriteToFile then WriteToFile = OS.WriteToFile else loaded = false end end
+	if loaded and WipeFile == nil then if OS.WipeFile then WipeFile = OS.WipeFile else loaded = false end end
 	if loaded and Queue == nil then if OS.Queue then Queue = OS.Queue else loaded = false end end
 	if loaded and CMD == nil then if OS.CMD then CMD = OS.CMD else loaded = false end end
 	if loaded and DownloadString == nil then if OS.DownloadString then DownloadString = OS.DownloadString else loaded = false end end
@@ -138,8 +142,6 @@ local function UpdateLocals2()
 
 	if loaded and Valid == nil then if Table.Valid then Valid = Table.Valid else loaded = false end end
 	if loaded and NotValid == nil then if Table.NotValid then NotValid = Table.NotValid else loaded = false end end
-	if loaded and InsertIfNil == nil then if Table.InsertIfNil then InsertIfNil = Table.InsertIfNil else loaded = false end end
-	if loaded and RemoveIfNil == nil then if Table.RemoveIfNil then RemoveIfNil = Table.RemoveIfNil else loaded = false end end
 	if loaded then UpdateLocals3() end
 end
 
@@ -263,11 +265,11 @@ function API.LoadModule(filepath)
 end
 
 function API.VersionCheck(name, url, version)
-	if _G[name] then
+	if Type(_G[name],"table") then
 		url = url or GitURL(name)
 		version = version or _G[name].Info.Version
 		local result = OS.DownloadString(url)
-		if NotAll(result, nil, "nil", "", " ") then
+		if Type(result,"string") and #result > 3 then
 			local str
 			for s in result:gmatch("[^\r\n]+") do
 				if IsNil(str) and s:match([[.*Version = "([^"]+)]]) then
@@ -284,7 +286,7 @@ function API.VersionCheck(name, url, version)
 				elseif tbl[1] == tbl2[1] and tbl[2] == tbl2[2] and (tbl[3] > tbl2[3]) then update = true
 				end
 
-				return update, result, str
+				return update, str, result
 			end
 		end
 	else -- User currently doesn't have module installed, but still retrieve the version number --
@@ -299,7 +301,7 @@ function API.VersionCheck(name, url, version)
 			end
 			if str then
 				local update = false
-				return update, result, str
+				return update, str, result
 			end
 		end
 	end
@@ -307,15 +309,17 @@ end
 
 function API.LastPush(GitFile, date)
 	local tbl = {}
-	local result = OS.CMD([[[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; @((Invoke-WebRequest 'https://github.com/KaliMinion/Moogle-Stuff/commits/master/]] .. GitFile ..[[').ParsedHtml.body.getElementsByTagName('relative-time'))[0].outerHTML]],true)
+	local result = OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; @((Invoke-WebRequest 'https://github.com/KaliMinion/Moogle-Stuff/commits/master/]] .. GitFile ..[[').ParsedHtml.body.getElementsByTagName('relative-time'))[0].outerHTML | Set-Content -Path 'outputfile'"]])
 	if result then
 		for s in (result:match("\"[^\"]+"):gsub("\"","")):gmatch("[%d]+") do
 			tbl[#tbl+1] = s
 		end
-		if date then
-			return os.date ("%x %X", os.time{ year = tbl[1], month = tbl[2], day = tbl[3], hour = tbl[4], min = tbl[5], sec = tbl[6]} - 21600)
-		else
-			return os.time{ year = tbl[1], month = tbl[2], day = tbl[3], hour = tbl[4], min = tbl[5], sec = tbl[6]} - 21600
+		if #tbl == 6 then
+			if date then
+				return os.date ("%x %X", os.time{ year = tbl[1], month = tbl[2], day = tbl[3], hour = tbl[4], min = tbl[5], sec = tbl[6]} - 21600)
+			else
+				return os.time{ year = tbl[1], month = tbl[2], day = tbl[3], hour = tbl[4], min = tbl[5], sec = tbl[6]} - 21600
+			end
 		end
 	end
 end
@@ -1142,27 +1146,48 @@ function OS.DeleteFile(path)
 	if FileExists(path) then
 		local file = io.popen([[del /f /q "]] .. path .. [["]])
 		file:close()
+		return false
 	end
+	return true
 end
 
-OS.Queue = {}
+function OS.WriteToFile(path, str)
+	local str2 = ""
+	if Type(str,"table") then
+		for i=1, #str do
+			if i < #str then
+				str2 = str2.."'"..str[i].."',"
+			else
+				str2 = str2.."'"..str[i].."'"
+			end
+		end
+	elseif Type(str,"string") then
+		if str:sub(-1) == "\n" then str = str:sub(-str:len()+1) end
+		str2 = "'"..str:gsub("\n","','").."'"
+	end
+	local cmd = io.popen([[PowerShell -Command "$stream = [System.IO.StreamWriter] ']] .. path .. [['; $a = ]] .. str2 .. [[; $a | ForEach-Object{ $stream.WriteLine( $_ ) }; $stream.close()"]])
+	cmd:close()
+end
+
+function OS.WipeFile(path)
+	OS.WriteToFile(path,"")
+end
+
+OS.Queue, OS.MaxConnections, OS.CurrentConnections = {}, 3, 0
 local lastcheck = 0
-function OS.CMD(cmd, PowerShell)
---	if TimeSince(lastcheck) > 0 then
---		lastcheck = Now()
-		if PowerShell then cmd = [[PowerShell -Command "]] .. cmd .. [["]] end
+function OS.CMD(cmd)
 		local q, new, k = OS.Queue, true, 0
 		-- First, let's find the first open slot --
 		if Valid(q) then
 			while true do
 				k = k + 1
 				if Type(q[k],"table") and table.size(q[k]) > 0 then
-					if Is(q[k].cmd, cmd) then
+					if Is(q[k].cmd, cmd:gsub("outputfile",TempFolder .. [[output]] .. k .. [[.txt]])) then
 						debug(cmd,3)
 						debug("CMD: Found a matching cmd string, setting key to "..tostring(k),2)
 						new = false
 						break
-					elseif TimeSince(q[k].time,10000) then
+					elseif TimeSince(q[k].time,1000) then
 						debug(cmd,3)
 						debug("CMD: Time has expired on this entry, clearing entry and setting k to "..tostring(k),2)
 						if q[k].CMD then q[k].CMD:close() end
@@ -1182,41 +1207,36 @@ function OS.CMD(cmd, PowerShell)
 			debug("CMD: Queue Table empty, starting new table and setting k to "..tostring(k))
 		end
 
+		local outputfile = TempFolder .. [[output]] .. k .. [[.txt]]
+		cmd = cmd:gsub("outputfile",outputfile)
 		if new then
-			debug("CMD: New Entry, creating table and setting variables, while executing the command.")
---			DeleteFile(TempFolder .. [[output]] .. tostring(k) .. [[.lua]])
-			q[k] = {}
-			q[k].cmd = cmd
-			q[k].PowerShell = PowerShell
-			q[k].timestart = Now()
-			q[k].time = Now()
-			q[k].CMD = io.popen(cmd .. [[ > "]] .. TempFolder .. [[output]] .. tostring(k) .. [[.lua"]])
+			if OS.CurrentConnections < OS.MaxConnections then
+				if DeleteFile(outputfile) then
+					debug("CMD: New Entry, creating table and setting variables, while executing the command.")
+					q[k] = {}
+					q[k].cmd = cmd
+					q[k].timestart = Now()
+					q[k].time = Now()
+					q[k].CMD = io.popen(cmd)
+					OS.CurrentConnections = OS.CurrentConnections + 1
+				end
+			end
 		else
 			q[k].time = Now()
 			q[k].type = io.type(q[k].CMD)
---				 and FileExists(TempFolder .. "output" .. tostring(k) .. ".lua")
-			if q[k].type == "file" then
+			if q[k].type == "file" and FileExists(outputfile) then
 				debug("CMD: Our CMD process is a file.",2)
-				if not q[k].file then
-					debug("CMD: Now opening our output file, output"..tostring(k)..".lua")
-					q[k].file = io.open(TempFolder .. "output" .. tostring(k) .. ".lua", "r")
-					q[k].fileloaded = true
-					q[k].timeloaded = Now()
-					q[k].timesincestart = TimeSince(q[k].timestart)
-				end
-				if q[k].file then
-					q[k].file:seek ("set", 0)
-					local text = q[k].file:read("*a")
-					q[k].textsize = #text
-					debug("CMD: Our output file, output"..tostring(k)..".lua, has a file size of "..tostring(q[k].textsize),2)
-					if #text > 3 then
-						debug("CMD: We have a result and are sending it back, while also cleaning up our open files and table entry.",2)
-						debug("CMD: First 100 characters of the string: "..text:sub(1,100),3)
-						q[k].file:close()
-						q[k].CMD:close()
-						q[k] = nil
-						return text
-					end
+				local str, file = nil, io.open(outputfile) str = file:read("*a") file:close()
+				if Type(str,"string") and #str > 3 then
+					debug("CMD: We have a result and are sending it back, while also cleaning up our open files and table entry.",2)
+					debug("CMD: First 100 characters of the string: "..str:sub(1,100),3)
+					q[k].CMD:close()
+					q[k] = nil
+					Error(str)
+--					Error("success")
+					WipeFile(outputfile)
+					OS.CurrentConnections = OS.CurrentConnections - 1
+					return str
 				end
 			else
 				debug("CMD: Our CMD process is not a file yet...",2)
@@ -1226,7 +1246,8 @@ function OS.CMD(cmd, PowerShell)
 end
 
 function OS.DownloadString(url)
-	return OS.CMD([[(New-Object System.Net.WebClient).DownloadString(']] .. url .. [[')]], true)
+--	return OS.CMD([[PowerShell -Command "Begin { Remove-Item -path \"outputfile\"; $str = (New-Object System.Net.WebClient).DownloadString(\"]] .. url .. [[\") } End { Set-Content -Path \"outputfile\" -Value $str }"]])
+	return OS.CMD([[PowerShell -Command "(New-Object System.Net.WebClient).DownloadString(']] .. url .. [[') | Set-Content -Path 'outputfile'"]])
 end
 
 local tbl = {}
