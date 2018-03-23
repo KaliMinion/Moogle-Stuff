@@ -1,8 +1,20 @@
+local API = MoogleLib.API
+API.MinionPath = GetStartupPath() local MinionPath = API.MinionPath
+API.LuaPath = GetLuaModsPath() local LuaPath = API.LuaPath
+
+API.MooglePath = LuaPath .. [[MoogleStuff Files\]] local MooglePath = API.MooglePath
+API.ImageFolder = MooglePath .. [[Moogle Images\]] local ImageFolder = API.ImageFolder
+API.ScriptsFolder = MooglePath .. [[Moogle Scripts\]] local ScriptsFolder = API.ScriptsFolder
+API.TempFolder = MooglePath .. [[Temp\]] local TempFolder = API.TempFolder
+
+API.ACRFolder = LuaPath .. [[ACR\CombatRoutines\]] local ACRFolder = API.ACRFolder
+API.SenseProfiles = LuaPath .. [[Sense\profiles\]] local SenseProfiles = API.SenseProfiles
+API.SenseTriggers = LuaPath .. [[Sense\triggers\]] local SenseTriggers = API.SenseTriggers
 local MoogleScripts = {
 	[1] = {
 		name = [[Moogle Updater]],
 		status = [[open]],
-		filepath = [[Moogle Updater.lua]],
+		filepath = MooglePath..[[Moogle Updater.lua]],
 		table = [[return MoogleUpdater]],
 		url = [[TestFolder/Moogle Updater]],
 		category = [[Core Moogle Module]],
@@ -12,7 +24,7 @@ local MoogleScripts = {
 	[2] = {
 		name = [[Main Window]],
 		status = [[open]],
-		filepath = [[Main Window.lua]],
+		filepath = MooglePath..[[Main Window.lua]],
 		table = [[return KaliMainWindow]],
 		url = [[TestFolder/Main Window]],
 		category = [[Core Moogle Module]],
@@ -22,7 +34,7 @@ local MoogleScripts = {
 	[3] = {
 		name = [[MoogleLib]],
 		status = [[open]],
-		filepath = [[MoogleLib.lua]],
+		filepath = MooglePath..[[MoogleLib.lua]],
 		table = [[return MoogleLib]],
 		url = [[TestFolder/MoogleLib]],
 		category = [[Core Moogle Module]],
@@ -32,7 +44,7 @@ local MoogleScripts = {
 	[4] = {
 		name = [[Moogle FPS]],
 		status = [[open]],
-		filepath = [[Moogle Scripts\Moogle FPS.lua]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle FPS.lua]],
 		table = [[return Moogle FPS]],
 		url = [[TestFolder/Moogle Scripts/Moogle FPS]],
 		category = [[Utility]],
