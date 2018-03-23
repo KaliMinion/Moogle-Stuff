@@ -10,6 +10,7 @@ API.TempFolder = MooglePath .. [[Temp\]] local TempFolder = API.TempFolder
 API.ACRFolder = LuaPath .. [[ACR\CombatRoutines\]] local ACRFolder = API.ACRFolder
 API.SenseProfiles = LuaPath .. [[Sense\profiles\]] local SenseProfiles = API.SenseProfiles
 API.SenseTriggers = LuaPath .. [[Sense\triggers\]] local SenseTriggers = API.SenseTriggers
+
 local MoogleScripts = {
 	[1] = {
 		name = [[Moogle Updater]],
