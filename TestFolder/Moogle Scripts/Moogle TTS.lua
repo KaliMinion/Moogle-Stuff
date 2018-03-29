@@ -53,107 +53,85 @@ self.Settings = {
 	NPCBattleTalk = true,
 	NPCWideText = true
 }
-local enable, loaded, ReadToggle, ReadHotkey, ReadToggleLast, LastTalkSpeaker, LastBattleTalkSpeaker, LastTalkString, LastBattleTalkString, LastWideTextStrings, ReadTable, ReadSize, Reading, CurrentRead, NPCTTS, NPCTalk, NPCBattleTalk, NPCWideText = settings.enable, settings.loaded, settings.ReadToggle, settings.ReadHotkey, settings.ReadToggleLast, settings.LastTalkSpeaker, settings.LastBattleTalkSpeaker, settings.LastTalkString, settings.LastBattleTalkString, settings.LastWideTextStrings, settings.ReadTable, settings.ReadSize, settings.Reading, settings.CurrentRead, settings.NPCTTS, settings.NPCTalk, settings.NPCBattleTalk, settings.NPCWideText
+local settings = self.Settings
+local enable, loaded, ReadToggle, ReadHotkey, ReadToggleLast, LastTalkSpeaker, LastBattleTalkSpeaker, LastBattleTalkString, LastWideTextStrings, ReadTable, ReadSize, Reading, CurrentRead, NPCTTS, NPCTalk, NPCBattleTalk, NPCWideText = settings.enable, settings.loaded, settings.ReadToggle, settings.ReadHotkey, settings.ReadToggleLast, settings.LastTalkSpeaker, settings.LastBattleTalkSpeaker, settings.LastBattleTalkString, settings.LastWideTextStrings, settings.ReadTable, settings.ReadSize, settings.Reading, settings.CurrentRead, settings.NPCTTS, settings.NPCTalk, settings.NPCBattleTalk, settings.NPCWideText
 
-self.VBS = [[Dim objVoice : Set objVoice = CreateObject("SAPI.SpVoice")
-Dim args, arg : Set args = WScript.Arguments
-
-Dim setrate : setrate = false
-Dim setvolume : setvolume = false
-Dim setvoice : setvoice = false
-Dim settimestamp : settimestamp = false
-Dim timestamp : timestamp = 0
-
-for each arg in args
-	if setrate then
-		objVoice.Rate = arg : setrate = false
-	elseif setvolume then
-		objVoice.Volume = arg : setvolume = false
-	elseif setvoice then
-		Set objVoice.Voice = objVoice.GetVoices.Item(arg) : setvoice = false
-	elseif settimestamp then
-		timestamp = arg : settimestamp = false
-	elseif arg = "-rate" then setrate = true
-	elseif arg = "-volume" then setvolume = true
-	elseif arg = "-voice" then setvoice = true
-	elseif arg = "-timestamp" then settimestamp = true
-	elseif arg = "-list" then
-		Dim v
-		for each v in objVoice.GetVoices
-			WScript.Echo(v.GetDescription)
-		next
-	else
-	Set objFSO=CreateObject("Scripting.FileSystemObject")
-	strFolder = objFSO.GetParentFolderName(WScript.ScriptFullName)
-	Set objFile = objFSO.CreateTextFile(strFolder & "\TTS Status.txt",True)
-	objVoice.Speak(arg)
-	objFile.Write timestamp & vbCrLf
-	objFile.Close
-	end if
-next]]
+self.Data = {
+	Initialized = false,
+	VoiceInfo = {},
+	VoiceNames = {},
+	Dialog = {
+		Talk = {
+			LastSpeaker = "",
+			LastString = ""
+		},
+		BattleTalk = {
+			LastSpeaker = "",
+			LastString = ""
+		},
+		WideText = {}
+	}
+}
+local data = self.Data
 
 function self.ModuleInit()
 	Initialize(self.GUI)
-	if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]]) then
-		FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]],self.VBS)
-	end
-	if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) then
-		FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]],"")
-	end
+--		if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]]) then
+--			FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]],self.VBS)
+--	end
+--	if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) then
+--		FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]],"")
+--	end
 end
 
-function self.Draw()
-	local main = KaliMainWindow.GUI
-	local nav = KaliMainWindow.GUI.NavigationMenu
-	local settings = self.Settings
+self.Filter = {
+	["%\xe2%\x94%\x80"] = [[ = ]],
+	["%\x02%\x10%\x01%\x03"] = "",
+	["\xe2\x94\x80"] = "... - ",
+	["%\x02%\x13%\x06%\xfe%\xff%`%\xb8%\xfa%\x03%\xee%\x81%\x91%\x02%\x13%\x02%\xec%\x03"] = "left mouse button",
+	["%\r"] = " ",
+	["%<"] = " - ",
+	["%>"] = " - ",
+	["\xe2\x80\x9c"] = [[']],
+	["\xe2\x80\x9d"] = [[']],
+	["\xee\x80\xb3"] = "itemset level "
+	--	[ [[]] ] = "",
+}
+function self.ProcessString(str)
+	for k,v in pairs(self.Filter) do
+		str = str:gsub(k,v)
+	end
+	return str
+end
 
-	if nav.selected == self.GUI.NavName then
-		main.Contents = function()
-			settings.NPCTTS = GUI:Checkbox("NPC Dialog Text To Speech",settings.NPCTTS)
-			Indent()
-				settings.NPCTalk = GUI:Checkbox("Listen to normal NPC Dialog that isn't voice acted.",settings.NPCTalk)
-				settings.NPCBattleTalk = GUI:Checkbox("Listen to NPC Dialog in battle.",settings.NPCBattleTalk)
-				settings.NPCWideText = GUI:Checkbox("Listen to special notifications which might indicate what a boss is doing.",settings.NPCWideText)
-			Unindent()
-
-			local tbl = self.Settings.ReadTable
-			local Xend,Yend = GUI:GetContentRegionAvail()
-			local Ytrack = 0
-			local ReadSize = self.Settings.ReadSize
-			local Yspace = ml_gui.style.original.itemspacing["y"]
-			if In(ReadSize,0,1) then ReadSize = 1 else GUI:PushStyleColor(GUI.Col_ChildWindowBg,0,0,0,0.50) end
-			GUI:BeginChild("#ChatLines",0,ReadSize,false)
-				GUI:PushTextWrapPos(0)
-				GUI:PushItemWidth(-1)
-				if table.valid(tbl) then
-					local x,y = GUI:GetItemRectSize(GUI:Separator())
-					Ytrack = Ytrack + y
-					for k,v in table.pairsbykeys(tbl) do
-						Ytrack = Ytrack + Yspace
-						local x1,y1 = GUI:GetItemRectSize(Text(v.."\n"))
-						Ytrack = Ytrack + Yspace
-						local x2,y2 = GUI:GetItemRectSize(GUI:Separator())
-						Ytrack = (Ytrack + y1 + y2) - 1
-					end
-				end
-				GUI:PopItemWidth()
-				GUI:PopTextWrapPos()
-			GUI:EndChild()
-			if not In(ReadSize,0,1) then GUI:PopStyleColor() end
-			if Ytrack > Yend then
-				self.Settings.ReadSize = Yend
-			else
-				self.Settings.ReadSize = Ytrack
+local SpeechInitialized,LastVoice,LastRate,LastVolume
+function self.Speak(str)
+	if Type(str,"string") then
+		str = self.ProcessString(str)
+		if SpeechInitialized then
+			if LastVoice ~= data.SelectedVoiceName then
+				OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[$speech.SelectVoice("]]..data.SelectedVoiceName..[[")]].."\r\n")
+				LastVoice = data.SelectedVoiceName
 			end
-			GUI:Text("TTL HotKey Toggle: ") GUI:SameLine(0,0)
-			local ReadHotkey = self.Settings.ReadHotkey
-			local ReturnedTable = ReadHotkey
-			ReturnedTable = HotKey(ReturnedTable)
-			if table.deepcompare(ReadHotkey,ReturnedTable) == false then
-				self.Settings.ReadHotkey = table.deepcopy(ReturnedTable)
-				MoogleSave("_G.MoogleTTS[Settings][ReadHotkey]")
+			if LastRate ~= data.Rate then
+				OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[$speech.Rate = ]]..data.Rate.."\r\n")
+				LastRate = data.Rate
 			end
+			if LastVolume ~= data.Volume then
+				OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[$speech.Volume = ]]..data.Volume.."\r\n")
+				LastVolume = data.Volume
+			end
+			OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[$speech.SpeakAsync("]]..str..[[")]].."\r\n")
+		else
+			local file = io.open(TempFolder..[[input\Moogle TTS Voice]], "w+") file:write("") file:close()
+			OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[Add-Type -AssemblyName System.speech]].."\r\n"..[[$speech = (New-Object System.Speech.Synthesis.SpeechSynthesizer)]].."\r\n"..[[$speech.SelectVoice("]]..data.SelectedVoiceName..[[")]].."\r\n"..[[$speech.Rate = ]]..data.Rate.."\r\n"..[[$speech.Volume = ]]..data.Volume.."\r\n"..[[$speech.SpeakAsync("]]..str..[[")]].."\r\n")
+			LastVoice = data.SelectedVoiceName
+			LastRate = data.Rate
+			LastVolume = data.Volume
+			SpeechInitialized = true
 		end
+	else
+		Error("[Moogle TTS]: Speak recieved a value that's "..type(str)..", needs to be a string.")
 	end
 end
 
@@ -171,152 +149,124 @@ function self.OnUpdate()
 				--	CheckVer = false
 				--end
 			else -- We are running the current version, time for logic --
-				if self.Settings.enable then
-					local main = KaliMainWindow.GUI
-					local nav = KaliMainWindow.GUI.NavigationMenu
-					local settings = self.Settings
-
-					if table.find(nav.Menu,self.GUI.NavName) == nil then
-						table.insert(nav.Menu,self.GUI.NavName)
-					end
-					local ReadHotkey = self.Settings.ReadHotkey
-					if table.valid(ReadHotkey) then
-						local keyspressed = true
-						for k,v in pairs(ReadHotkey) do
-							v = IndexToDecimal[v]
-							if keyspressed then
-								if not GUI:IsKeyDown(v) then keyspressed = false end
-							end
-						end
-						if keyspressed then
-							if toggled ~= true then toggled = true end
-						else
-							if toggled then
-								settings.NPCTTS = not settings.NPCTTS
-								if toggled ~= false then toggled = false end
-							end
+				if NotValid(data.VoiceInfo) then
+					AddTree("Moogle TTS","Get Installed Voices")
+					local result = OS.CMD([[PowerShell -Command "Add-Type -AssemblyName System.speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).GetInstalledVoices().VoiceInfo | ForEach-Object -Process {\"local tbl = { name = '$($_.Name)', age = '$($_.Age)', gender = '$($_.Gender)', description = '$($_.Description)' }; return tbl\"} | Set-Content -Path 'outputfile'"]])
+					if result then
+						AddTree("Moogle TTS.Get Installed Voices","Valid Result",true)
+						for line in result:gmatch("[^\n]+") do
+							data.VoiceInfo[#data.VoiceInfo+1] = loadstring(line)()
 						end
 					end
-
-					if settings.NPCTTS then
-						-- http://cherrytree.at/misc/vk.htm
-						if (settings.ReadToggleLast == 0 or TimeSince(settings.ReadToggleLast) > 1000) and (GUI:IsKeyDown(17)) then -- CTRL
-							if (GUI:IsKeyDown(16)) then -- SHIFT
-								if (GUI:IsKeyDown(18)) then -- ALT
-									settings.ReadToggleLast = Now()
-									settings.ReadToggle = not ReadToggle
-								end
-							end
+				else
+					if NotValid(data.VoiceNames) then
+						for i=1, #data.VoiceInfo do
+							data.VoiceNames[#data.VoiceNames+1] = data.VoiceInfo[i].description
+							local x,y = GUI:CalcTextSize(data.VoiceInfo[i].description)
+							if IsNil(data.SelectedVoiceTextSize) or  x > data.SelectedVoiceTextSize then data.SelectedVoiceTextSize = x end
 						end
-						if settings.ReadToggle then
-							for id,e in pairs(GetControls()) do
-								if e:IsOpen() then
-									local ControlName = e.name
-									local speaker = ""
-									local text = ""
+					end
+					if IsNil(data.SelectedVoice) then data.SelectedVoice = data.VoiceNames[1] end
+					if IsNil(data.SelectedVoiceIndex) then data.SelectedVoiceIndex = 1 end
+					if IsNil(data.SelectedVoiceName) then data.SelectedVoiceName = data.VoiceInfo[1].name end
+					if IsNil(data.Rate) then data.Rate = 0 end
+					if IsNil(data.Volume) then data.Volume = 100 end
 
-									-- Reduce Table WideText Strings
-									if table.size(settings.LastWideTextStrings) >= 50 then
-										settings.LastWideTextStrings[1] = nil
-									end
-
-									if ControlName == "Talk" and settings.NPCTalk then
-										local str = e:GetStrings()
-										if str[3] ~= settings.LastTalkString then
-											if settings.LastTalkSpeaker ~= str[2] and not In(str[2],"\"\"","???","\?\?\?",""," ",nil) then
-												speaker = str[2]
-												settings.LastTalkSpeaker = str[2]
-											end
-											text = str[3]
-											settings.LastTalkString = str[3]
-										end
-									elseif ControlName == "_BattleTalk" and settings.NPCBattleTalk then
-										local str = e:GetStrings()
-										if str[5] ~= settings.LastBattleTalkString then
-											if settings.LastBattleTalkSpeaker ~= str[4] and not In(str[4],"\"\"",""," ",nil) then
-												speaker = str[4]
-												settings.LastBattleTalkSpeaker = str[4]
-											end
-											text = str[5]
-											settings.LastBattleTalkString = str[5]
-										end
-									elseif ControlName == "_WideText" and settings.NPCWideText then
-										local str = e:GetStrings()
-										if not (str[3]:match("equipped") or
-												str[3]:match("selling items") or
-												str[3]:match("FATE") or
-												str[3]:match("The location affects")
-										) then -- Filter through unneded TTS Wide Texts
-											if not table.contains(settings.LastWideTextStrings,str[3]) then
-												text = str[3]
-												table.insert(settings.LastWideTextStrings,str[3])
-											end
-										end
-									end
-
-									if text ~= "" then
-										text = string.gsub( text, "%\xe2%\x94%\x80", " - ")
-										text = string.gsub( text, "%\x02%\x10%\x01%\x03", "")
-										text = string.gsub( text, "%\x02%\x13%\x06%\xfe%\xff%`%\xb8%\xfa%\x03%\xee%\x81%\x91%\x02%\x13%\x02%\xec%\x03", "left mouse button")
-										text = string.gsub( text, "%\r", " ")
-										text = string.gsub( text, "%<", " - ")
-										text = string.gsub( text, "%>", " - ")
-										-- text = string.gsub( text, "%c", "")
-
-										if speaker ~= "" then
-											if In(speaker,"???","\?\?\?") then
-												settings.ReadTable[Now()] = "Unknown Speaker says - "..text
+					if ReadToggle then
+						local Dialog = data.Dialog
+						local Controls = GetControls()
+						if Valid(Controls) then
+							local c = 0
+							for id,e in pairs(Controls) do
+								local ControlName = e.name
+								if ControlName == "Talk" then
+									local Talk, str, speaker, dialog = Dialog.Talk, e:GetStrings(), nil, nil
+									if data.Initialized then
+										if str[3] ~= Talk.LastString then
+											Talk.LastString = str[3]
+											speaker = str[2]
+											if Is(speaker,[[""]],[[???]],[[ ]],[[]]) then speaker = "Unknown Speaker" end
+											if Talk.LastSpeaker ~= speaker then
+												Talk.LastSpeaker = speaker
+												dialog = speaker.." says - "
 											else
-												settings.ReadTable[Now()] = speaker.." says - "..text
+												dialog = ""
+											end
+											dialog = dialog..str[3]
+											self.Speak(dialog)
+										end
+									else
+										Talk.LastString = str[3]
+									end
+								end
+								if ControlName == "_BattleTalk" then
+									local BattleTalk, str, speaker, dialog = Dialog.BattleTalk, e:GetStrings(), nil, nil
+									if data.Initialized then
+										if str[5] ~= BattleTalk.LastString then
+											BattleTalk.LastString = str[5]
+											speaker = str[4]
+											if Is(speaker,[[""]],[[???]],[[ ]],[[]]) then speaker = "Unknown Speaker" end
+											if BattleTalk.LastSpeaker ~= speaker then
+												BattleTalk.LastSpeaker = speaker
+												dialog = speaker.." says - "
+											else
+												dialog = ""
+											end
+											dialog = dialog..str[5]
+											self.Speak(dialog)
+										end
+									else
+										BattleTalk.LastString = str[5]
+									end
+								end
+								if ControlName == "_WideText" then
+									c = c + 1
+									local WideText, str = Dialog.WideText, e:GetStrings()[3]
+									if data.Initialized then
+										if e:IsOpen() then
+											if WideText[c] ~= str then
+												WideText[c] = str
+												if not (str:match("equipped") or
+														str:match("selling items") or
+														str:match("FATE") or
+														str:match("The location affects")
+												) then
+													self.Speak(str)
+												end
 											end
 										else
-											settings.ReadTable[Now()] = text
+											if WideText[c] ~= "" then WideText[c] = "" end
 										end
+									else
+										WideText[c] = str
 									end
 								end
 							end
-						end
-					end
-					if table.valid(settings.ReadTable) then
-						-- We have lines in our table, first let's find out if we need to remove one --
-						local lasttext = ""
-						for line in io.lines(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) do
-							lasttext = tonumber(line)
-						end
-						if settings.ReadTable[lasttext] ~= nil then
-							-- Top line in the table has been read, time to remove it --
-							settings.ReadTable[lasttext] = nil
-							Reading = false
-						end
-						if not Reading and table.valid(settings.ReadTable) then
-							local lowk = 9999999999
-							for k,v in pairs(settings.ReadTable) do if k < lowk then lowk = k end end
-							CurrentRead = io.popen([[cscript /nologo "]]..LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\tts.vbs" -timestamp ]]..lowk..[[ "]]..settings.ReadTable[lowk]..[["]])
-							Reading = true
+							data.Initialized = true
 						end
 					end
 				end
 			end
 			MoogleSave({
-				[selfs .. [[.enable]]] = selfs .. [[.Settings.enable]],
-				[selfs .. [[.ReadToggle]]] = selfs .. [[.Settings.ReadToggle]],
-				[selfs .. [[.ReadHotkey]]] = selfs .. [[.Settings.ReadHotkey]],
-				[selfs .. [[.Reading]]] = selfs .. [[.Settings.Reading]],
-				[selfs .. [[.NPCTTS]]] = selfs .. [[.Settings.NPCTTS]],
-				[selfs .. [[.NPCTalk]]] = selfs .. [[.Settings.NPCTalk]],
-				[selfs .. [[.NPCBattleTalk]]] = selfs .. [[.Settings.NPCBattleTalk]],
-				[selfs .. [[.NPCWideText]]] = selfs .. [[.Settings.NPCWideText]]
+				[selfs .. [[.enable]]] = selfs .. [[.enable]],
+				[selfs .. [[.ReadToggle]]] = selfs .. [[.ReadToggle]],
+				[selfs .. [[.ReadHotkey]]] = selfs .. [[.ReadHotkey]],
+				[selfs .. [[.Reading]]] = selfs .. [[.Reading]],
+				[selfs .. [[.NPCTTS]]] = selfs .. [[.NPCTTS]],
+				[selfs .. [[.NPCTalk]]] = selfs .. [[.NPCTalk]],
+				[selfs .. [[.NPCBattleTalk]]] = selfs .. [[.NPCBattleTalk]],
+				[selfs .. [[.NPCWideText]]] = selfs .. [[.NPCWideText]]
 			})
 		else
 			MoogleLoad({
-				[selfs .. [[.enable]]] = selfs .. [[.Settings.enable]],
-				[selfs .. [[.ReadToggle]]] = selfs .. [[.Settings.ReadToggle]],
-				[selfs .. [[.ReadHotkey]]] = selfs .. [[.Settings.ReadHotkey]],
-				[selfs .. [[.Reading]]] = selfs .. [[.Settings.Reading]],
-				[selfs .. [[.NPCTTS]]] = selfs .. [[.Settings.NPCTTS]],
-				[selfs .. [[.NPCTalk]]] = selfs .. [[.Settings.NPCTalk]],
-				[selfs .. [[.NPCBattleTalk]]] = selfs .. [[.Settings.NPCBattleTalk]],
-				[selfs .. [[.NPCWideText]]] = selfs .. [[.Settings.NPCWideText]]
+				[selfs .. [[.enable]]] = selfs .. [[.enable]],
+				[selfs .. [[.ReadToggle]]] = selfs .. [[.ReadToggle]],
+				[selfs .. [[.ReadHotkey]]] = selfs .. [[.ReadHotkey]],
+				[selfs .. [[.Reading]]] = selfs .. [[.Reading]],
+				[selfs .. [[.NPCTTS]]] = selfs .. [[.NPCTTS]],
+				[selfs .. [[.NPCTalk]]] = selfs .. [[.NPCTalk]],
+				[selfs .. [[.NPCBattleTalk]]] = selfs .. [[.NPCBattleTalk]],
+				[selfs .. [[.NPCWideText]]] = selfs .. [[.NPCWideText]]
 			})
 			loaded = true
 		end
@@ -328,13 +278,126 @@ function self.OnUpdate()
 	end
 end
 
+function self.Draw()
+	if self.enable then
+		local main = KaliMainWindow.GUI
+		local nav = main.NavigationMenu
+
+		if table.find(nav.Menu,self.GUI.NavName) == nil then
+			table.insert(nav.Menu,self.GUI.NavName)
+		end
+		if nav.selected == self.GUI.NavName then
+			main.Contents = function()
+				if data.SelectedVoiceIndex then
+					GUI:PushItemWidth(data.SelectedVoiceTextSize + 28)
+					local index, changed = GUI:Combo("##SelectVoice",data.SelectedVoiceIndex,data.VoiceNames,#data.VoiceNames)
+					if changed then
+						data.SelectedVoiceIndex = index
+						data.SelectedVoice = data.VoiceNames[index]
+						data.SelectedVoiceName = data.VoiceInfo[index].name
+					end
+					GUI:PopItemWidth()
+
+					GUI:PushItemWidth(100)
+					Text("Volume: ",0)
+					local value, changed = GUI:SliderInt("##Volume",data.Volume,0,100)
+					if changed then
+						data.Volume = value
+					end
+					Space(10)
+					Text("Rate: ",0)
+					local value,changed = GUI:SliderInt("##Rate",data.Rate,-10,10)
+					if changed then
+						data.Rate = value
+					end
+					GUI:PopItemWidth()
+				else
+					local time = os.clock()
+					local c = math.floor(math.floor((time - math.floor(time)) * 10) / 2)
+					Text("Loading"..string.rep(".",c))
+				end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--				NPCTTS = GUI:Checkbox("NPC Dialog Text To Speech",NPCTTS)
+--				Indent()
+--				NPCTalk = GUI:Checkbox("Listen to normal NPC Dialog that isn't voice acted.",NPCTalk)
+--				NPCBattleTalk = GUI:Checkbox("Listen to NPC Dialog in battle.",NPCBattleTalk)
+--				NPCWideText = GUI:Checkbox("Listen to special notifications which might indicate what a boss is doing.",NPCWideText)
+--				Unindent()
+--
+--				local tbl = self.ReadTable
+--				local Xend,Yend = GUI:GetContentRegionAvail()
+--				local Ytrack = 0
+--				local ReadSize = self.ReadSize
+--				local Yspace = ml_gui.style.original.itemspacing["y"]
+--				if In(ReadSize,0,1) then ReadSize = 1 else GUI:PushStyleColor(GUI.Col_ChildWindowBg,0,0,0,0.50) end
+--				GUI:BeginChild("#ChatLines",0,ReadSize,false)
+--				GUI:PushTextWrapPos(0)
+--				GUI:PushItemWidth(-1)
+--				if table.valid(tbl) then
+--					local x,y = GUI:GetItemRectSize(GUI:Separator())
+--					Ytrack = Ytrack + y
+--					for k,v in table.pairsbykeys(tbl) do
+--						Ytrack = Ytrack + Yspace
+--						local x1,y1 = GUI:GetItemRectSize(Text(v.."\n"))
+--						Ytrack = Ytrack + Yspace
+--						local x2,y2 = GUI:GetItemRectSize(GUI:Separator())
+--						Ytrack = (Ytrack + y1 + y2) - 1
+--					end
+--				end
+--				GUI:PopItemWidth()
+--				GUI:PopTextWrapPos()
+--				GUI:EndChild()
+--				if not In(ReadSize,0,1) then GUI:PopStyleColor() end
+--				if Ytrack > Yend then
+--					self.ReadSize = Yend
+--				else
+--					self.ReadSize = Ytrack
+--				end
+--				GUI:Text("TTL HotKey Toggle: ") GUI:SameLine(0,0)
+--				local ReadHotkey = self.ReadHotkey
+--				local ReturnedTable = ReadHotkey
+--				ReturnedTable = HotKey(ReturnedTable)
+--				if table.deepcompare(ReadHotkey,ReturnedTable) == false then
+--					self.ReadHotkey = table.deepcopy(ReturnedTable)
+--					MoogleSave("_G.MoogleTTS[Settings][ReadHotkey]")
+--				end
+			end
+		end
+	else
+		local main = KaliMainWindow.GUI
+		local nav = main.NavigationMenu
+		if NotNil(nav.Menu[table.find(nav.Menu,self.GUI.NavName)]) then nav.Menu[table.find(nav.Menu,self.GUI.NavName)] = nil end
+	end
+end
+
 local function RegisterInitFunction() if self.Init then self.Init() end end
-local function RegisterDrawFunction() if self.Draw then self.Draw() end end
 local function RegisterUpdateFunction() if self.OnUpdate then self.OnUpdate() end end
+local function RegisterDrawFunction() if self.Draw then self.Draw() end end
 
 RegisterEventHandler("Module.Initalize", RegisterInitFunction)
-RegisterEventHandler("Gameloop.Draw", RegisterDrawFunction)
 RegisterEventHandler("Gameloop.Update", RegisterUpdateFunction)
+RegisterEventHandler("Gameloop.Draw", RegisterDrawFunction)
 
 _G.MoogleTTS = MoogleTTS
 -- End of File --
