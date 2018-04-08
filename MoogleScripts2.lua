@@ -60,5 +60,14 @@ local MoogleScripts = {
 		category = [[Utility]],
 		info = [[Narrates NPC dialog, as well as some other windows in game.]]
 	},
+	[6] = {
+		name = [[Moogle PushButton]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle PushButton.lua]],
+		table = [[return MooglePushButton]],
+		url = [[TestFolder/Moogle Scripts/Moogle PushButton]],
+		category = [[Dev]],
+		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
+	},
 }
 return MoogleScripts
