@@ -6,8 +6,8 @@ self.Info = {
 	Creator = "Kali",
 	Version = "1.0.1",
 	StartDate = "01/24/18",
-	StartDate = "01/24/18",
-	StartDate = "01/24/18",
+	ReleaseDate = "01/24/18",
+	LastUpdate = "01/24/18",
 	ChangeLog = {
 		["1.0.0"] = "Initial release"
 	}
@@ -34,11 +34,6 @@ local settings = self.Settings
 
 self.Data = {}
 local data = self.Data
-
-function self.Init()
-	Initialize(self.GUI)
-	DownloadFile([[https://i.imgur.com/SBGNinb.png]], ImageFolder .. self.GUI.name .. ".png")
-end
 
 local LongestStr, listheight, buttonheight, devtable, IterateDev, selected, selectedtbl, actionarg, scrollbarsize, padding, framepadding = 0, 10, 20, { arg1min = 0, arg1max = 50, arg2min = 0, arg2max = 50, rate = 0, lasttic = 0, control = "" }, false, nil, nil, nil, nil, nil, nil
 function self.Draw()
