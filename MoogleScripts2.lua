@@ -20,7 +20,7 @@ local MoogleScripts = {
 		url = [[TestFolder/Moogle Updater]],
 		category = [[Core Moogle Module]],
 		stability = [[open]],
-		info = [[Downloads scripts, keeps them updated. :P!]]
+		info = [[Downloads scripts, keeps them updated. :P!!]]
 	},
 	[2] = {
 		name = [[Main Window]],
