@@ -19,7 +19,7 @@ local MoogleScripts = {
 		table = [[return MoogleUpdater]],
 		url = [[TestFolder/Moogle Updater]],
 		category = [[Core Moogle Module]],
-		stability = [[Core Moogle Module]],
+		stability = [[open]],
 		info = [[Downloads scripts, keeps them updated. :P! :o]]
 	},
 	[2] = {
@@ -29,7 +29,7 @@ local MoogleScripts = {
 		table = [[return KaliMainWindow]],
 		url = [[TestFolder/Main Window]],
 		category = [[Core Moogle Module]],
-		stability = [[Core Moogle Module]],
+		stability = [[open]],
 		info = [[The Main Window that all Moogle Scripts share to display the settings for each module.]]
 	},
 	[3] = {
@@ -39,7 +39,7 @@ local MoogleScripts = {
 		table = [[return MoogleLib]],
 		url = [[TestFolder/MoogleLib]],
 		category = [[Core Moogle Module]],
-		stability = [[Core Moogle Module]],
+		stability = [[open]],
 		info = [[Where all my Moogle Functions are stored.]]
 	},
 	[4] = {
@@ -49,6 +49,7 @@ local MoogleScripts = {
 		table = [[return MoogleFPS]],
 		url = [[TestFolder/Moogle Scripts/Moogle FPS]],
 		category = [[Utility]],
+		stability = [[open]],
 		info = [[An FPS overlay like Fraps or Nvidia's GeForce Experience. For people who have issue using Minion with other overlays.]]
 	},
 	[5] = {
@@ -58,6 +59,7 @@ local MoogleScripts = {
 		table = [[return MoogleTTS]],
 		url = [[TestFolder/Moogle Scripts/Moogle TTS]],
 		category = [[Utility]],
+		stability = [[open]],
 		info = [[Narrates NPC dialog, as well as some other windows in game.]]
 	},
 	[6] = {
@@ -67,6 +69,7 @@ local MoogleScripts = {
 		table = [[return MooglePushButton]],
 		url = [[TestFolder/Moogle Scripts/Moogle PushButton]],
 		category = [[Dev]],
+		stability = [[open]],
 		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
 	},
 }
