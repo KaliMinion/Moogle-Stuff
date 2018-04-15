@@ -364,7 +364,7 @@ function self.Draw()
 						local xStability,yStability = GUI:CalcTextSize("Stability:" .. stability)
 
 						if Is(category,"Core Moogle Module") then
-							Image("CoreModule",19,19,{tooltip="Core Moogle Module"})
+							Image("CoreModule",19,19,{tooltip=category})
 						else
 						end
 						GUI:EndChild()

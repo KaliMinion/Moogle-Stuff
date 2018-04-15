@@ -2399,7 +2399,7 @@ end
 function Gui.Image(path,x,y,more)
 	if not path:match([[\]]) then
 		path = ImageFolder..path
-		if not path:match([[.]]) then
+		if not path:match("%.") then
 			path = path..[[.png]]
 		end
 	end
