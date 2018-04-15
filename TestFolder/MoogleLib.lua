@@ -310,6 +310,7 @@ function API.LoadModule(filepath)
 
 		local pos = 0
 		loadstring(str)()
+		local filename = filepath:match("[^\\]+$"):gsub("%..+$","") if filename then d("MoogleLib: Loading "..filename) end
 	end
 end
 
@@ -3038,7 +3039,7 @@ local function LoadMoogleCore()
 				pass = false
 				local file = MooglePath..k..".lua"
 				if fileexist(file) then
-					d("MoogleLib: Loading "..k)
+					--					d("MoogleLib: Loading "..k)
 					LoadModule(file)
 					corefiles[k] = true
 				else
