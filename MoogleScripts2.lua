@@ -1,6 +1,4 @@
-local API = MoogleLib.API
-API.LuaPath = GetLuaModsPath() local LuaPath = API.LuaPath
-API.MooglePath = LuaPath .. [[MoogleStuff Files\]] local MooglePath = API.MooglePath
+local MooglePath = GetLuaModsPath() .. [[MoogleStuff Files\]]
 
 local MoogleScripts = {
 	[1] = {
