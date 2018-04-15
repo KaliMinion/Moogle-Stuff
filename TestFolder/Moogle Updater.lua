@@ -357,11 +357,15 @@ function self.Draw()
 
 						GUI:PushStyleVar(GUI.StyleVar_WindowPadding, 5, 5) GUI:PushStyleVar(GUI.StyleVar_ItemSpacing, 0, 0) GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing, 0, 0)
 						GUI:BeginChild("##" .. name:gsub(" ", ""), 0, yChild, true, GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoInputs)
-						local width, icon = GUI:GetContentRegionAvailWidth(), 23
-						local xName, yName = GUI:CalcTextSize(name)
-						local xCategory, yCategory = GUI:CalcTextSize("Category:" .. category)
-						local xStability, yStability = GUI:CalcTextSize("Stability:" .. stability)
+							local width, icon = GUI:GetContentRegionAvailWidth(), 23
+							local xName, yName = GUI:CalcTextSize(name)
+							local xCategory, yCategory = GUI:CalcTextSize("Category:" .. category)
+							local xStability, yStability = GUI:CalcTextSize("Stability:" .. stability)
 
+							if Is(category,"Core Moogle Module") then
+
+							else
+							end
 
 						GUI:EndChild()
 						GUI:PopStyleVar(3)

@@ -48,6 +48,9 @@ self.Settings = {
 }
 local Settings = self.Settings
 
+MoogleDebug, MoogleLog = {}, false
+if not MoogleEvents then _G.MoogleEvents = {} end
+
 -- Start Locals  --
 local API = MoogleLib.API
 local Lua = MoogleLib.Lua
@@ -73,16 +76,52 @@ API.SenseProfiles = LuaPath .. [[Sense\profiles\]] local SenseProfiles = API.Sen
 API.SenseTriggers = LuaPath .. [[Sense\triggers\]] local SenseTriggers = API.SenseTriggers
 API.GitURL = function(ModuleFileName, Branch) Branch = Branch or "master" return [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/]] .. Branch .. [[/]] .. ModuleFileName .. [[.lua]] end local GitURL = API.GitURL
 
-MoogleDebug, MoogleLog = {}, false
+local function sec(val,ms) val = val ms = ms or true if ms then return val*1000 else return val end end
+local function min(val,ms) val = val*60 ms = ms or true if ms then return val*1000 else return val end end
+local function hr(val,ms) val = val*3600 ms = ms or true if ms then return val*1000 else return val end end
+local function day(val,ms) val = val*86400 ms = ms or true if ms then return val*1000 else return val end end
+local function week(val,ms) val = val*604800 ms = ms or true if ms then return val*1000 else return val end end
+local function month(val,days,ms)
+	if Type(days,"boolean") then ms = days; days = nil end
+	days = days or 30; ms = ms or true; local val2 = 0
+	if Type(days,"number") then val2 = day(days) else val2 = 2629744 end val = val * val2
+	if ms then return val*1000 else return val end
+end
+local function year(val,days,ms)
+	if Type(days,"boolean") then ms = days; days = nil end
+	days = days or 365.24219907408; ms = ms or true; local val2 = 0
+	if Type(days,"number") then val2 = day(days) else val2 = 31556926 end val = val * val2
+	if ms then return val*1000 else return val end
+end
 
-local Initialize, LoadModule, VersionCheck, LastPush, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, Keybinds, RecordKeybinds, ToasterTable, ToasterTime, Toaster, Error, debug, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, TimeSince, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, WriteToFile, Queue, CMD, DownloadString, DownloadTable, DownloadFile, Ping, Split, starts, ends, ToTable, StrToTable, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, BannedKeys, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables, FinishedLoading
+--DownloadImages,MoogleLoad
+
+local Initialize, LoadModule, VersionCheck, LastPush, GitFileText, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, Keybinds, RecordKeybinds, ToasterTable, ToasterTime, Toaster, Error, debug, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, TimeSince, Size, Empty, NotEmpty, d2, DrawDebugInfo, DrawTree, AddTree, RemoveTree, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, WriteToFile, WipeFile, Queue, CMD, DownloadString, DownloadTable, DownloadFile, Ping, Split, starts, ends, ToTable, ProperCase, Proper, Case, Title, TitleCase, IsURL, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, BannedKeys, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables, FinishedLoading
 
 local loaded = true
+local function UpdateLocals4()
+	if loaded and OrderedKeys == nil then if Gui.OrderedKeys then OrderedKeys = Gui.OrderedKeys else loaded = false end end
+	if loaded and IndexToDecimal == nil then if Gui.IndexToDecimal then IndexToDecimal = Gui.IndexToDecimal else loaded = false end end
+	if loaded and HotKey == nil then if Gui.HotKey then HotKey = Gui.HotKey else loaded = false end end
+	if loaded and DrawTables == nil then if Gui.DrawTables then DrawTables = Gui.DrawTables else loaded = false end end
+	if loaded then FinishedLoading = true end
+end
 local function UpdateLocals3()
+	if loaded and ends == nil then if String.ends then ends = String.ends else loaded = false end end
+	if loaded and ToTable == nil then if String.ToTable then ToTable = String.ToTable else loaded = false end end
+	if loaded and ProperCase == nil then if String.ProperCase then ProperCase = String.ProperCase else loaded = false end end
+	if loaded and Proper == nil then if String.Proper then Proper = String.Proper else loaded = false end end
+	if loaded and Case == nil then if String.Case then Case = String.Case else loaded = false end end
+	if loaded and Title == nil then if String.Title then Title = String.Title else loaded = false end end
+	if loaded and TitleCase == nil then if String.TitleCase then TitleCase = String.TitleCase else loaded = false end end
+	if loaded and IsURL == nil then if String.IsURL then IsURL = String.IsURL else loaded = false end end
+
+	if loaded and Valid == nil then if Table.Valid then Valid = Table.Valid else loaded = false end end
+	if loaded and NotValid == nil then if Table.NotValid then NotValid = Table.NotValid else loaded = false end end
 	if loaded and InsertIfNil == nil then if Table.InsertIfNil then InsertIfNil = Table.InsertIfNil else loaded = false end end
 	if loaded and RemoveIfNil == nil then if Table.RemoveIfNil then RemoveIfNil = Table.RemoveIfNil else loaded = false end end
 	if loaded and UpdateIfChanged == nil then if Table.UpdateIfChanged then UpdateIfChanged = Table.UpdateIfChanged else loaded = false end end
-	if loaded and RemoveExpired == nil then if Table.RemoveExpired then NotAll = Table.RemoveExpired else loaded = false end end
+	if loaded and RemoveExpired == nil then if Table.RemoveExpired then RemoveExpired = Table.RemoveExpired else loaded = false end end
 	if loaded and Unpack == nil then if Table.Unpack then Unpack = Table.Unpack else loaded = false end end
 	if loaded and BannedKeys == nil then if Table.BannedKeys then BannedKeys = Table.BannedKeys else loaded = false end end
 	if loaded and Print == nil then if Table.Print then Print = Table.Print else loaded = false end end
@@ -99,15 +138,12 @@ local function UpdateLocals3()
 	if loaded and Tooltip == nil then if Gui.Tooltip then Tooltip = Gui.Tooltip else loaded = false end end
 	if loaded and GetRemaining == nil then if Gui.GetRemaining then GetRemaining = Gui.GetRemaining else loaded = false end end
 	if loaded and VirtualKeys == nil then if Gui.VirtualKeys then VirtualKeys = Gui.VirtualKeys else loaded = false end end
-	if loaded and OrderedKeys == nil then if Gui.OrderedKeys then OrderedKeys = Gui.OrderedKeys else loaded = false end end
-	if loaded and IndexToDecimal == nil then if Gui.IndexToDecimal then IndexToDecimal = Gui.IndexToDecimal else loaded = false end end
-	if loaded and HotKey == nil then if Gui.HotKey then HotKey = Gui.HotKey else loaded = false end end
-	if loaded and DrawTables == nil then if Gui.DrawTables then DrawTables = Gui.DrawTables else loaded = false end end
-	if loaded then FinishedLoading = true end
+	if loaded then UpdateLocals4() end
 end
 
 local loaded = true
 local function UpdateLocals2()
+	if loaded and IsAll == nil then if General.IsAll then IsAll = General.IsAll else loaded = false end end
 	if loaded and Not == nil then if General.Not then Not = General.Not else loaded = false end end
 	if loaded and NotAll == nil then if General.NotAll then NotAll = General.NotAll else loaded = false end end
 	if loaded and Type == nil then if General.Type then Type = General.Type else loaded = false end end
@@ -119,6 +155,9 @@ local function UpdateLocals2()
 
 	if loaded and d2 == nil then if Debug.d2 then d2 = Debug.d2 else loaded = false end end
 	if loaded and DrawDebugInfo == nil then if Debug.DrawDebugInfo then DrawDebugInfo = Debug.DrawDebugInfo else loaded = false end end
+	if loaded and DrawTree == nil then if Debug.DrawTree then DrawTree = Debug.DrawTree else loaded = false end end
+	if loaded and AddTree == nil then if Debug.AddTree then AddTree = Debug.AddTree else loaded = false end end
+	if loaded and RemoveTree == nil then if Debug.RemoveTree then RemoveTree = Debug.RemoveTree else loaded = false end end
 
 	if loaded and Sign == nil then if Math.Sign then Sign = Math.Sign else loaded = false end end
 	if loaded and Round == nil then if Math.Round then Round = Math.Round else loaded = false end end
@@ -137,11 +176,6 @@ local function UpdateLocals2()
 
 	if loaded and Split == nil then if String.Split then Split = String.Split else loaded = false end end
 	if loaded and starts == nil then if String.starts then starts = String.starts else loaded = false end end
-	if loaded and ends == nil then if String.ends then ends = String.ends else loaded = false end end
-	if loaded and ToTable == nil then if String.ToTable then ToTable = String.ToTable else loaded = false end end
-
-	if loaded and Valid == nil then if Table.Valid then Valid = Table.Valid else loaded = false end end
-	if loaded and NotValid == nil then if Table.NotValid then NotValid = Table.NotValid else loaded = false end end
 	if loaded then UpdateLocals3() end
 end
 
@@ -151,6 +185,7 @@ local function UpdateLocals()
 	if loaded and LoadModule == nil then if API.LoadModule then LoadModule = API.LoadModule else loaded = false end end
 	if loaded and VersionCheck == nil then if API.VersionCheck then VersionCheck = API.VersionCheck else loaded = false end end
 	if loaded and LastPush == nil then if API.LastPush then LastPush = API.LastPush else loaded = false end end
+	if loaded and GitFileText == nil then if API.GitFileText then GitFileText = API.GitFileText else loaded = false end end
 	if loaded and Vars == nil then if API.Vars then Vars = API.Vars else loaded = false end end
 	if loaded and Distance2D == nil then if API.Distance2D then Distance2D = API.Distance2D else loaded = false end end
 	if loaded and Distance3D == nil then if API.Distance3D then Distance3D = API.Distance3D else loaded = false end end
@@ -170,16 +205,14 @@ local function UpdateLocals()
 	if loaded and ToasterTable == nil then if API.ToasterTable then ToasterTable = API.ToasterTable else loaded = false end end
 	if loaded and ToasterTime == nil then if API.ToasterTime then ToasterTime = API.ToasterTime else loaded = false end end
 	if loaded and Toaster == nil then if API.Toaster then Toaster = API.Toaster else loaded = false end end
-	
+
 	if loaded and Error == nil then if General.Error then Error = General.Error else loaded = false end end
 	if loaded and debug == nil then if General.Debug then debug = General.Debug else loaded = false end end
 	if loaded and IsNil == nil then if General.IsNil then IsNil = General.IsNil else loaded = false end end
 	if loaded and NotNil == nil then if General.NotNil then NotNil = General.NotNil else loaded = false end end
 	if loaded and Is == nil then if General.Is then Is = General.Is else loaded = false end end
-	if loaded and IsAll == nil then if General.IsAll then IsAll = General.IsAll else loaded = false end end
 	if loaded then UpdateLocals2() end
 end
-
 -- End Locals  --
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -238,9 +271,24 @@ function API.Initialize(ModuleTable)
 	end
 end
 
+function API.Event(event,module,name,func)
+	if func then
+		if not MoogleEvents[module.." - "..event.." - "..name] then
+			local function run()
+				func()
+			end
+			RegisterEventHandler(event,run)
+			MoogleEvents[module.." - "..event.." - "..name] = true
+		end
+	end
+end
+
 local LocalsStr
 function API.LoadModule(filepath)
+	AddTree("MoogleLib.API","Load Module")
+	AddTree("MoogleLib.API.Load Module",filepath:gsub("%.","_"),true)
 	if fileexist(filepath) then
+		AddTree("MoogleLib.API.Load Module."..filepath:gsub("%.","_"),"Valid Result",true)
 		local str,start,line = "",false,""
 		if IsNil(LocalsStr) then
 			local Lib = io.open(MooglePath..[[MoogleLib.lua]],"r")
@@ -265,19 +313,40 @@ function API.LoadModule(filepath)
 end
 
 function API.VersionCheck(name, url, version)
-	if Type(_G[name],"table") then
-		url = url or GitURL(name)
-		version = version or _G[name].Info.Version
-		local result = OS.DownloadString(url)
-		if Type(result,"string") and #result > 3 then
-			local str
-			for s in result:gmatch("[^\r\n]+") do
-				if IsNil(str) and s:match([[.*Version = "([^"]+)]]) then
-					str = s:gsub("[^%d\.]", "")
-				end
+	AddTree("MoogleLib.API","Version Check")
+	AddTree("MoogleLib.API.Version Check",name,true)
+	url = url or GitURL(name)
+
+	local result, localversion = DownloadString(url), nil
+	if Type(_G[name],"table") then localversion = _G[name].Info.Version end
+	if Type(result,"string") and #result > 3 then
+		AddTree("MoogleLib.API.Version Check."..name,"Valid Result",true)
+		local str
+		for s in result:gmatch("[^\r\n]+") do
+			if IsNil(str) and s:match([[.*Version = "([^"]+)]]) then
+				str = s:gsub("[^%d\.]", "")
 			end
-			if str then
+		end
+		if str then
+			if version and localversion then
 				local str2 = version:gsub("[^%d\.]", "")
+				local str3 = localversion:gsub("[^%d\.]", "")
+				local tbl = str:totable("%p")
+				local tbl2 = str2:totable("%p")
+				local tbl3 = str3:totable("%p")
+				local update = false
+				if (tbl[1] > tbl2[1]) then update = true
+				elseif tbl[1] == tbl2[1] and (tbl[2] > tbl2[2]) then update = true
+				elseif tbl[1] == tbl2[1] and tbl[2] == tbl2[2] and (tbl[3] > tbl2[3]) then update = true
+				elseif (tbl[1] > tbl3[1]) then update = true
+				elseif tbl[1] == tbl3[1] and (tbl[2] > tbl3[2]) then update = true
+				elseif tbl[1] == tbl3[1] and tbl[2] == tbl3[2] and (tbl[3] > tbl3[3]) then update = true
+				end
+				if update then AddTree("MoogleLib.API.Version Check."..name..".Valid Result","Update Available") end
+
+				return update, str, result
+			elseif localversion then
+				local str2 = localversion:gsub("[^%d\.]", "")
 				local tbl = str:totable("%p")
 				local tbl2 = str2:totable("%p")
 				local update = false
@@ -285,32 +354,23 @@ function API.VersionCheck(name, url, version)
 				elseif tbl[1] == tbl2[1] and (tbl[2] > tbl2[2]) then update = true
 				elseif tbl[1] == tbl2[1] and tbl[2] == tbl2[2] and (tbl[3] > tbl2[3]) then update = true
 				end
+				if update then AddTree("MoogleLib.API.Version Check."..name..".Valid Result","Update Available") end
 
 				return update, str, result
-			end
-		end
-	else -- User currently doesn't have module installed, but still retrieve the version number --
-		url = url or GitURL(name)
-		local result = OS.DownloadString(url)
-		if NotAll(result, nil, "nil", "", " ") then
-			local str
-			for s in result:gmatch("[^\r\n]+") do
-				if IsNil(str) and s:match([[.*Version = "([^"]+)]]) then
-					str = s:gsub("[^%d\.]", "")
-				end
-			end
-			if str then
-				local update = false
-				return update, str, result
+			else
+				return false, str, result
 			end
 		end
 	end
 end
 
 function API.LastPush(GitFile, date)
+	AddTree("MoogleLib.API","LastPush")
+	AddTree("MoogleLib.API.LastPush",tostring(GitFile:gsub("%.lua",""):gsub("%/"," - ")),true)
 	local tbl = {}
 	local result = OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; @((Invoke-WebRequest 'https://github.com/KaliMinion/Moogle-Stuff/commits/master/]] .. GitFile ..[[').ParsedHtml.body.getElementsByTagName('relative-time'))[0].outerHTML | Set-Content -Path 'outputfile'"]])
 	if result then
+		AddTree("MoogleLib.API.LastPush."..tostring(GitFile:gsub("%.lua",""):gsub("%/"," - ")),"Valid Result",true)
 		for s in (result:match("\"[^\"]+"):gsub("\"","")):gmatch("[%d]+") do
 			tbl[#tbl+1] = s
 		end
@@ -322,6 +382,13 @@ function API.LastPush(GitFile, date)
 			end
 		end
 	end
+end
+
+function API.GitFileText(GitFile)
+	AddTree("MoogleLib.API","GitFile Text")
+	AddTree("MoogleLib.API.GitFile Text", GitFile,true)
+	local url; if IsURL(GitFile) then url = GitFile else url = [[https://github.com/KaliMinion/Moogle-Stuff/blob/master/]]..GitFile..[[.lua]] end
+	return OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; @((Invoke-WebRequest ']]..url..[[').ParsedHtml.body.getElementsByTagName('table'))[0].innerText | Set-Content -Path 'outputfile'"]])
 end
 
 function API.Vars(Tbl, load, UseJustSettings)
@@ -381,6 +448,26 @@ function API.Vars(Tbl, load, UseJustSettings)
 		end
 	end
 end
+
+API.ImageList, API.FinishedImages, API.ImageLastCheck = {},{},0
+function API.DownloadImages(image,path)
+	if FinishedLoading then
+		if image == nil then
+			if TimeSince(API.ImageLastCheck,min(1)) then
+				AddTree("MoogleLib.API","Download Image")
+				AddTree("MoogleLib.API.Download Image","Automated Check",true)
+				path = path or ImageFolder
+				API.ImageCMD = io.popen([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $path = ']]..path..[['; mkdir -Force $path | Out-Null; (Invoke-WebRequest -Uri 'https://github.com/KaliMinion/Moogle-Stuff/tree/master/Moogle%20Images').Links | Where-Object -Property class -EQ -Value 'js-navigation-open' | Select-Object -Skip 1 | ForEach-Object{$url = 'https://github.com' + ($_.href -replace 'blob/', 'raw/'); if(![System.IO.File]::Exists($path+$_.title)){try{Invoke-WebRequest $url -OutFile ($path+$_.title)} catch { $_.Exception.Response }}}"]])
+				API.ImageLastCheck = Now()
+			end
+		else
+			AddTree("MoogleLib.API","Download Image")
+			AddTree("MoogleLib.API.Download Image",image,true)
+			path = path or ImageFolder
+		end
+	end
+end
+API.Event("Gameloop.Update",selfs,"DownloadImages",API.DownloadImages)
 
 MoogleSave = API.Vars
 function MoogleLoad(Tbl)
@@ -817,11 +904,7 @@ function General.Not(check, ...)
 		return false
 	else
 		if Type(check, "boolean") then
-			if check == false then
-				return true
-			else
-				return false
-			end
+			return not check
 		else
 			return false
 		end
@@ -829,43 +912,18 @@ function General.Not(check, ...)
 end
 
 function General.NotAll(check, ...)
-
 	local compare = { ... }
-
 	if Valid(compare) then
-		local IsAllFalse = true
-		if Type(check, "boolean") then
-			if check == false then
-				for i = 1, #compare do
-					if compare[i] then
-						return false
-					end
-				end
-			else
+		for i = 1, #compare do
+			if (check == compare[i] or (tonumber(check) ~= nil and tonumber(check) == tonumber(compare[i]))) then
 				return false
 			end
-		else
-			for i = 1, #compare do
-				if IsAllFalse then
-					if (check == compare[i] or (tonumber(check) ~= nil and tonumber(check) == tonumber(compare[i]))) then
-						return false
-					end
-				end
-			end
 		end
 
-		if IsAllFalse then
-			return true
-		else
-			return false
-		end
+		return true
 	else
 		if Type(check, "boolean") then
-			if check == false then
-				return true
-			else
-				return false
-			end
+			return not check
 		else
 			return false
 		end
@@ -1100,6 +1158,181 @@ function Debug.DrawDebugInfo(ModuleName, ...)
 	end
 end
 
+Debug.Tree, Debug.TreeSettings = {},{}
+function Debug.DrawTree()
+	--	table.print(Debug.Tree)
+	if FinishedLoading and KaliMainWindow then
+		local main = KaliMainWindow.GUI
+		local nav = KaliMainWindow.GUI.NavigationMenu
+
+		InsertIfNil(nav.Menu, "Moogle Debug Tree")
+
+		if nav.selected == "Moogle Debug Tree" then
+			main.Contents = function()
+				local lowestY,widestX
+				local function Draw(tbl,x,y,depth)
+					local keypos = 0
+					local LowestY
+					depth = depth or 0
+					local posx,posy = GUI:GetWindowPos()
+					x,y = x or (posx+10)-GUI:GetScrollX(), y or (posy+25)-GUI:GetScrollY()
+					if depth > 0 then x = x + 10 end
+					if NotNil(lowestY,widestX) then
+						if y > lowestY then lowestY = y else y = lowestY end
+						--						if x > widestX then widestX = x else x = widestX end
+					else
+						lowestY = y
+						widestX = x
+					end
+					local preY3 = 0
+					local x2, y2 = 0, 0
+					for k,v in table.pairsbykeys(tbl) do
+						if not In(k,"time","expanded","color","value","destroy") then
+							if v.destroy == false or TimeSince(v.time,"<",5000) then
+								keypos = keypos + 1
+								if LowestY and keypos > 1 then
+									if LowestY > y then y = LowestY end
+									y = y + 10
+								end
+								local TextX, TextY = GUI:CalcTextSize(k)
+								local Padding, Padding2 = 5, 10
+								x2, y2 = Padding2 + x + TextX, Padding2 + y + TextY
+
+								if x2 > widestX then widestX = x2 end
+								if y > lowestY then lowestY = y end
+								if LowestY then
+									if y2 > LowestY then LowestY = y2 end
+								else
+									LowestY = y2
+								end
+								local color, colorchange, textcolor
+								if Type(v.color,"table") then
+									color = v.color
+									color[4] = color[4] or 1
+								else
+									color = ColorConv(v.color) or {1,1,0.4,1}
+								end
+								if TimeSince(v.time,"<=",500) then
+									colorchange = color
+								else
+									colorchange = {0.337,0.337,0.337,1}
+								end
+
+								GUI:AddRectFilled(x,y,x2,y2,GUI:ColorConvertFloat4ToU32(colorchange[1],colorchange[2],colorchange[3],colorchange[4]),10)
+
+								local MouseX,MouseY = GUI:GetMousePos()
+								if MouseX > x and MouseX < x2 and MouseY > y and MouseY < y2 then
+									if GUI:IsMouseClicked(0) then v.expanded = not v.expanded end
+								end
+
+								if Gui.ColorBrightness(colorchange) > 123 then
+									-- Background is considered bright --
+									textcolor = {0.149,0.098,0.078,1}
+								else
+									-- Background is considered dark --
+									textcolor = {0.85,0.90,0.92,1}
+								end
+								GUI:AddText(x+Padding,y+Padding,GUI:ColorConvertFloat4ToU32(textcolor[1],textcolor[2],textcolor[3],textcolor[4]),k)
+
+								local x3,y3
+								if depth > 0 then
+									local line = 0
+									if keypos > 1 then line = 5 else line = 10 end
+									x3 = x - line
+									y3 = y + ((Padding2 + TextY) / 2)
+									GUI:AddLine(x3,y3,x,y3,GUI:ColorConvertFloat4ToU32(colorchange[1],colorchange[2],colorchange[3],colorchange[4]),2)
+								end
+								if keypos > 1 then
+									local x4 = x - 5
+									GUI:AddLine(x4,preY3+1,x4,y3,GUI:ColorConvertFloat4ToU32(colorchange[1],colorchange[2],colorchange[3],colorchange[4]),2)
+								end
+								if Type(v,"table") and v.expanded then
+									local resultX, resultY, resultY2 = Draw(v,x2,y,depth+1)
+									--									if (resultX-10) > x then x = resultX-10 end
+									if (resultY) > y then y = resultY end
+									if LowestY then
+										if resultY2 > LowestY then LowestY = resultY2 end
+									else
+										LowestY = resultY2
+									end
+								end
+								preY3 = y3 or 0
+							end
+						end
+					end
+					return x, y+10, y2
+				end
+				Draw(Debug.Tree)
+			end
+		end
+	end
+end
+API.Event("Gameloop.Draw",selfs,"Draw",Debug.DrawTree)
+
+function Debug.AddTree(Parent, Name, Destroy, Color)
+	Destroy = Destroy or false
+	if Name then
+		if Is(Parent,"Start","Begin","Home","Create") then
+			InsertIfNil(Debug.Tree,Name,{})
+			InsertIfNil(Debug.Tree[Name],"expanded",true)
+			if Debug.Tree[Name].color == nil then
+				Debug.Tree[Name].color = Color or {1,1,0.4,1}
+			end
+			Debug.Tree[Name].destroy = Destroy
+			Debug.Tree[Name].time = Now()
+		else
+			local Branch = Debug.Tree
+			for key in Parent:gmatch("[^/.]+") do
+				if Branch[key] then
+					Branch = Branch[key]
+					Branch.time = Now()
+				else
+					Branch[key] = {}
+					Branch = Branch[key]
+					Branch.destroy = Destroy
+					Branch.time = Now()
+					Branch.expanded = true
+					Branch.color = {1,1,0.4,1}
+				end
+			end
+			if IsNil(Branch[Name]) then
+				Branch[Name] = {}
+				Branch[Name].destroy = Destroy
+				Branch[Name].time = Now()
+				Branch[Name].expanded = true
+				Branch[Name].color = Color or {1,1,0.4,1 }
+			else
+				Branch[Name].time = Now()
+			end
+		end
+	else
+		InsertIfNil(Debug.Tree,Parent,{})
+		InsertIfNil(Debug.Tree[Parent],"expanded",true)
+		if Debug.Tree[Parent].color == nil then
+			Debug.Tree[Parent].color = Color or {1,1,0.4,1}
+		end
+		Debug.Tree[Parent].destroy = Destroy
+		Debug.Tree[Parent].time = Now()
+	end
+end
+
+function Debug.RemoveTree(Parent, Name)
+	if Name then
+		if Is(Parent,"Start","Begin","Home","Create") then
+			Debug.Tree[Name] = nil
+		else
+			local Branch = Debug.Tree
+			for key in Parent:gmatch("[^/.]+") do
+				if NotNil(Branch[key]) then Branch = Branch[key] end
+			end
+			if NotNil(Branch[Name]) then
+				Branch[Name] = nil
+			end
+		end
+	else
+		Debug.Tree[Parent] = nil
+	end
+end
 -- End Debug Functions --
 
 -- Input and Output (IO) Functions --
@@ -1142,13 +1375,19 @@ function OS.CreateFolder(path)
 	folder:close()
 end
 
+local DeleteHistory = {}
 function OS.DeleteFile(path)
-	if FileExists(path) then
-		local file = io.popen([[del /f /q "]] .. path .. [["]])
-		file:close()
+	if DeleteHistory[path] == nil or TimeSince(DeleteHistory[path],500) then
+		if FileExists(path) then
+			DeleteHistory[path] = Now()
+			local file = io.popen([[del /f /q "]] .. path .. [["]])
+			file:close()
+			return false
+		end
+		return true
+	else
 		return false
 	end
-	return true
 end
 
 function OS.WriteToFile(path, str)
@@ -1173,95 +1412,141 @@ function OS.WipeFile(path)
 	OS.WriteToFile(path,"")
 end
 
-OS.Queue, OS.MaxConnections, OS.CurrentConnections = {}, 3, 0
-local lastcheck = 0
+function OS.CMDStream(tblstr, filename, cmd) -- Global Tables Only, MUST BE STRING --
+	if Type(tblstr,"string") then
+		local input = TempFolder..[[input\]]..filename
+		local output = TempFolder..[[output\]]..filename
+		if io.type(_G[tblstr]) ~= "file" then
+			_G[tblstr] = io.popen([[PowerShell -Command "Get-Content ']]..input..[[' -Wait -Tail 100 | Invoke-Expression -ErrorAction SilentlyContinue | Out-File -Encoding ascii ']]..output..[['"]])
+		end
+		local file = io.open(input, "a+") file:write(cmd) file:close()
+	else
+		Error("[CMDStream]: tblstr MUST be a STRING, not the actual table.")
+	end
+end
+
+OS.Queue, OS.MaxConnections, OS.CurrentConnections, OS.Pulse, OS.LastCheck, OS.Trash = {}, 2, 0, 100, 0, {}
 function OS.CMD(cmd)
-		local q, new, k = OS.Queue, true, 0
-		-- First, let's find the first open slot --
-		if Valid(q) then
+	AddTree("MoogleLib.Lua.OS","CMD")
+	--	if TimeSince(OS.LastCheck,OS.Pulse) then
+	--		OS.LastCheck = Now()
+	local q, new, k = OS.Queue, true, 0
+	-- First, let's find the first open slot --
+	AddTree("MoogleLib.Lua.OS.CMD","Checking Node",true)
+	if Valid(q) then
+		for key,v in pairs(q) do
+			if Type(q[key],"table") and table.size(q[key]) > 0 then
+				if Is(q[key].cmd, cmd:gsub("outputfile",TempFolder .. [[output]] .. key .. [[.txt]])) then
+					if TimeSince(q[key].time,"<",OS.Pulse) then return end
+					k = key
+					AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..key,"Existing Node",true)
+					debug(cmd,3)
+					debug("CMD: Found a matching cmd string, setting key to "..tostring(key),2)
+					new = false
+				end
+			end
+		end
+		if new and OS.CurrentConnections < OS.MaxConnections then
 			while true do
 				k = k + 1
-				if Type(q[k],"table") and table.size(q[k]) > 0 then
-					if Is(q[k].cmd, cmd:gsub("outputfile",TempFolder .. [[output]] .. k .. [[.txt]])) then
+				if DeleteHistory and ((DeleteHistory[TempFolder .. [[output]] .. k .. [[.txt]]] == nil) or TimeSince(DeleteHistory[TempFolder .. [[output]] .. k .. [[.txt]]],500)) then
+					if Type(q[k],"table") and table.size(q[k]) > 0 then
+						if TimeSince(q[k].time,1000) then
+							AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k,"New Node",true)
+							debug(cmd,3)
+							debug("CMD: Time has expired on this entry, clearing entry and setting k to "..tostring(k),2)
+							if q[k].CMD then q[k].CMD:close() end
+							q[k] = {}
+							break
+						end
+					else
+						AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k,"New Node",true)
 						debug(cmd,3)
-						debug("CMD: Found a matching cmd string, setting key to "..tostring(k),2)
-						new = false
-						break
-					elseif TimeSince(q[k].time,1000) then
-						debug(cmd,3)
-						debug("CMD: Time has expired on this entry, clearing entry and setting k to "..tostring(k),2)
-						if q[k].CMD then q[k].CMD:close() end
+						debug("CMD: Not Valid/Empty table entry, setting k to "..tostring(k),2)
 						q[k] = {}
 						break
 					end
-				else
-					debug(cmd,3)
-					debug("CMD: Not Valid/Empty table entry, setting k to "..tostring(k),2)
-					q[k] = {}
-					break
 				end
 			end
-		else
-			k = 1
-			debug(cmd,3)
-			debug("CMD: Queue Table empty, starting new table and setting k to "..tostring(k))
 		end
+	else
+		k = 1
+		AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k,"New Node",true)
+		debug(cmd,3)
+		debug("CMD: Queue Table empty, starting new table and setting k to "..tostring(k))
+	end
 
-		local outputfile = TempFolder .. [[output]] .. k .. [[.txt]]
-		cmd = cmd:gsub("outputfile",outputfile)
-		if new then
-			if OS.CurrentConnections < OS.MaxConnections then
-				if DeleteFile(outputfile) then
-					debug("CMD: New Entry, creating table and setting variables, while executing the command.")
-					q[k] = {}
-					q[k].cmd = cmd
-					q[k].timestart = Now()
-					q[k].time = Now()
-					q[k].CMD = io.popen(cmd)
-					OS.CurrentConnections = OS.CurrentConnections + 1
-				end
-			end
-		else
-			q[k].time = Now()
-			q[k].type = io.type(q[k].CMD)
-			if q[k].type == "file" and FileExists(outputfile) then
-				debug("CMD: Our CMD process is a file.",2)
-				local str, file = nil, io.open(outputfile) str = file:read("*a") file:close()
-				if Type(str,"string") and #str > 3 then
-					debug("CMD: We have a result and are sending it back, while also cleaning up our open files and table entry.",2)
-					debug("CMD: First 100 characters of the string: "..str:sub(1,100),3)
-					q[k].CMD:close()
-					q[k] = nil
-					Error(str)
---					Error("success")
-					WipeFile(outputfile)
-					OS.CurrentConnections = OS.CurrentConnections - 1
-					return str
-				end
-			else
-				debug("CMD: Our CMD process is not a file yet...",2)
+	local outputfile = TempFolder .. [[output]] .. k .. [[.txt]]
+	cmd = cmd:gsub("outputfile",outputfile)
+	--d(cmd)
+	if new then
+		if OS.CurrentConnections < OS.MaxConnections then
+			if DeleteFile(outputfile) then
+				AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".New Node","Sent CMD",true)
+				debug("CMD: New Entry, creating table and setting variables, while executing the command.")
+				q[k] = {}
+				q[k].cmd = cmd
+				q[k].timestart = Now()
+				q[k].time = Now()
+				q[k].CMD = io.popen(cmd)
+				OS.CurrentConnections = OS.CurrentConnections + 1
 			end
 		end
---	end
+	else
+		q[k].time = Now()
+		q[k].type = io.type(q[k].CMD)
+		if q[k].type == "file" and FileExists(outputfile) then
+			AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node","Output Exists",true)
+			debug("CMD: Our CMD process is a file.",2)
+			local str, file = nil, io.open(outputfile)
+			if file then
+				str = file:read("*a") file:close()
+			end
+			if Type(str,"string") and #str > 3 then
+				AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node.Output Exists","Valid Result",true)
+				debug("CMD: We have a result and are sending it back, while also cleaning up our open files and table entry.",2)
+				debug("CMD: First 100 characters of the string: "..str:sub(1,100),3)
+				q[k].CMD:close()
+				q[k] = nil
+				DeleteFile(outputfile)
+				OS.CurrentConnections = OS.CurrentConnections - 1
+				--					RemoveTree("OS.CMD.Checking Node.",tostring(k))
+				return str
+			end
+		else
+			debug("CMD: Our Start Time is.."..tostring(q[k].timestart),2)
+			debug("CMD: Our CMD process is not a file yet...",2)
+			if TimeSince(q[k].timestart,10000) then q[k] = nil end
+		end
+	end
+	--	end
 end
 
 function OS.DownloadString(url)
---	return OS.CMD([[PowerShell -Command "Begin { Remove-Item -path \"outputfile\"; $str = (New-Object System.Net.WebClient).DownloadString(\"]] .. url .. [[\") } End { Set-Content -Path \"outputfile\" -Value $str }"]])
-	return OS.CMD([[PowerShell -Command "(New-Object System.Net.WebClient).DownloadString(']] .. url .. [[') | Set-Content -Path 'outputfile'"]])
+	AddTree("MoogleLib.Lua.OS","Download String")
+	local result = OS.CMD([[PowerShell -Command "(New-Object System.Net.WebClient).DownloadString(']] .. url .. [[') | Set-Content -Path 'outputfile'"]])
+	if result then
+		AddTree("MoogleLib.Lua.OS.Download String","Valid Result",true)
+		return result
+	end
 end
 
 local tbl = {}
 function OS.DownloadFile(url, path, overwrite)
+	AddTree("MoogleLib.Lua.OS","Download File")
 	local result
+	Error(url)
 	if overwrite then
-		result = OS.CMD([[(New-Object System.Net.WebClient).DownloadFile(']] .. url .. [[',']] .. path .. [['); Write-Host 'MoogleDownload Complete']],true)
+		--		result = OS.CMD([[PowerShell -Command "Invoke-WebRequest ']]..url..[[' -OutFile ']]..path..[['; Set-Content -Path 'outputfile' -Value 'MoogleDownload Complete'"]])
+
+		result = OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile(']] .. url .. [[',']] .. path .. [['); Set-Content -Path 'outputfile' -Value 'MoogleDownload Complete'"]])
 	else
-		result = OS.CMD([[if(![System.IO.File]::Exists(']] .. path .. [[')){(New-Object System.Net.WebClient).DownloadFile(']] .. url .. [[',']] .. path .. [['); Write-Host 'MoogleDownload Complete'} Else{Write-Host 'MoogleDownload Skipped'}]],true)
+		--		result = OS.CMD([[PowerShell -Command "if(![System.IO.File]::Exists(']]..path..[[')){Invoke-WebRequest ']]..url..[[' -OutFile ']]..path..[['; Set-Content -Path 'outputfile' -Value 'MoogleDownload Complete'} Else{Set-Content -Path 'outputfile' -Value 'MoogleDownload Skipped'}"]])
+		result = OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; if(![System.IO.File]::Exists(']]..path..[[')){(New-Object System.Net.WebClient).DownloadFile(']] .. url .. [[',']]..path..[['); Set-Content -Path 'outputfile' -Value 'MoogleDownload Complete'} Else{Set-Content -Path 'outputfile' -Value 'MoogleDownload Skipped'}"]])
 	end
 	if result then
+		AddTree("MoogleLib.Lua.OS.Download File","Valid Result",true)
 		return true
-	else
-		return false
 	end
 	return false
 end
@@ -1345,6 +1630,34 @@ function String.ToTable(str)
 	return t
 end
 
+function String.ProperCase(str)
+	if Type(str,"string") then
+		local tbl = {}
+		for word in str:gmatch(" ") do
+			tbl[#tbl+1] = word
+		end
+		local newstr = ""
+		for i=1, #tbl do
+			local word = tbl[i]
+			if Is(i,1,#tbl) or #word:gsub("%W","") > 4 then
+				word = word:gsub("^%l", string.upper)
+			end
+			newstr = newstr..word
+		end
+		return newstr
+	else
+		return str
+	end
+end
+String.Proper, String.Case, String.Title, String.TitleCase = String.ProperCase, String.ProperCase, String.ProperCase, String.ProperCase
+
+function String.IsURL(str)
+	local tbl = {"http","https","www" }
+	for i=1, #tbl do
+		if str:match(tbl[i]) then return true end
+	end
+	return false
+end
 -- End String Functions --
 
 -- Table Functions --
@@ -1675,8 +1988,8 @@ function Table.Print(tbl, name, search, filelocation, depth, history)
 	end
 end
 
-MoogleSearch = Table.Print
-MooglePrint = Table.Print
+_G.MoogleSearch = Table.Print
+_G.MooglePrint = Table.Print
 -- End Table Functions --
 
 -- Gui Functions --
@@ -1907,22 +2220,40 @@ function Gui.WindowStyleClose(count)
 end
 
 function Gui.ColorConv(tbl, from, to)
-	if tbl[4] == nil then tbl[4] = 1 end
-	if In(from, "sRBG", "RBG", "rbg") then
-		if In(to, "Linear", "linear", "LinearRBG") then
-			local tbl2 = {
-				[1] = tbl[1] / 255,
-				[2] = tbl[2] / 255,
-				[3] = tbl[3] / 255,
-				[4] = tbl[4]
-			}
-			return tbl2
-		elseif to == "HSV" then
-		elseif to == "HSL" then
-		elseif to == "U32" then
-		elseif to == "Hex" or "HEX" then
+	if type(tbl) == "table" then
+		if tbl[4] == nil then tbl[4] = 1 end
+		if In(from, "sRBG", "RBG", "rbg") then
+			if In(to, "Linear", "linear", "LinearRBG") then
+				local tbl2 = {
+					[1] = tbl[1] / 255,
+					[2] = tbl[2] / 255,
+					[3] = tbl[3] / 255,
+					[4] = tbl[4]
+				}
+				return tbl2
+			elseif to == "HSV" then
+			elseif to == "HSL" then
+			elseif to == "U32" then
+			elseif to == "Hex" or "HEX" then
+			end
+		end
+	elseif type(tbl) == "string" then
+		local colors = {}
+		if colors[tbl] then
+			return colors[tbl]
+		elseif #tbl == 6 or #tbl == 3 then
+			local tbl = Split(tbl,#tbl/3)
+			for i=1, #tbl do
+				tbl[i] = tonumber(tbl[i],16)
+			end
+			tbl[4] = 1
+			return tbl
 		end
 	end
+end
+
+function Gui.ColorBrightness(tbl)
+	return (((tbl[1]*255)*299) + ((tbl[2]*255)*587) + ((tbl[3]*255)*114)) / 1000
 end
 
 function Gui.SameLine(posX, spacingX)
@@ -2704,7 +3035,9 @@ end
 local folders, create, timesince = {
 	["Moogle Images"] = false,
 	["Moogle Scripts"] = false,
-	["Temp"] = false
+	["Temp"] = false,
+	["Temp\\input"] = false,
+	["Temp\\output"] = false
 }, true, 0
 local function CreateFolders()
 	if create then
@@ -2735,14 +3068,14 @@ function self.OnUpdate()
 	if FinishedLoading then
 		if loaded then
 			if CheckVer then
---				local update, tbl = API.VersionCheck(selfs)
---				if update == true then
---	--                FileWrite(MooglePath..[[MoogleLib.lua]],tbl)
---	--                loadstring(tbl)()
---					CheckVer = false
---				elseif update == false then
---					CheckVer = false
---				end
+				--				local update, tbl = API.VersionCheck(selfs)
+				--				if update == true then
+				--	--                FileWrite(MooglePath..[[MoogleLib.lua]],tbl)
+				--	--                loadstring(tbl)()
+				--					CheckVer = false
+				--				elseif update == false then
+				--					CheckVer = false
+				--				end
 			end
 			LoadMoogleCore() CreateFolders()
 			MoogleSave({
@@ -2758,17 +3091,52 @@ function self.OnUpdate()
 		end
 		local q = OS.Queue
 		if Valid(q) then
+			if OS.Trash["ClearTrash"] then OS.Trash["ClearTrash"] = nil end
 			if TimeSince(lastcheck,1000) then
 				lastcheck = Now()
 				for k,v in pairs(q) do
 					if Type(v,"table") then
-						if v.time and TimeSince(v.time,10000) then
-							if q[k].CMD then q[k].CMD:close() end
-							if q[k].file then q[k].file:close() end
-							q[k] = nil
+						if v.time then
+							if TimeSince(v.time,5000) then
+								if OS.Queue[k].CMD then OS.Queue[k].CMD:close() end
+								if OS.Queue[k].file then OS.Queue[k].file:close() end
+								OS.Queue[k] = nil
+								--								RemoveTree("MoogleLib.Lua.OS.CMD.Checking Node.",tostring(k))
+							end
+						else
+							if v.cmd then
+								if OS.Trash[v.cmd] then
+									if TimeSince(OS.Trash[v.cmd],5000) then
+										--										RemoveTree("MoogleLib.Lua.OS.CMD.Checking Node.",tostring(k))
+										if OS.Queue[k].CMD then OS.Queue[k].CMD:close() end
+										if OS.Queue[k].file then OS.Queue[k].file:close() end
+										OS.Queue[k] = nil
+									end
+								else
+									OS.Trash[v.cmd] = Now()
+								end
+							else
+								if OS.Trash[k] then
+									if TimeSince(OS.Trash[k],5000) then
+										--										RemoveTree("MoogleLib.Lua.OS.CMD.Checking Node.",tostring(k))
+										OS.Queue[k] = nil
+									end
+								else
+									OS.Trash[k] = Now()
+								end
+							end
 						end
 					end
 				end
+			end
+		else
+			if OS.Trash["ClearTrash"] then
+				if TimeSince(OS.Trash["ClearTrash"],3000) then
+					--					RemoveTree("MoogleLib.Lua.OS.CMD","Checking Node")
+					OS.Trash = {}
+				end
+			else
+				OS.Trash["ClearTrash"] = Now()
 			end
 		end
 	else
@@ -2779,10 +3147,6 @@ function self.OnUpdate()
 	end
 end
 
-local function RegisterInitFunction() if self.Init then self.Init() end end
-local function RegisterDrawFunction() if self.Draw then self.Draw() end end
-local function RegisterUpdateFunction() if self.OnUpdate then self.OnUpdate() end end
-
-RegisterEventHandler("Module.Initalize", RegisterInitFunction)
-RegisterEventHandler("Gameloop.Draw", RegisterDrawFunction)
-RegisterEventHandler("Gameloop.Update", RegisterUpdateFunction)
+API.Event("Gameloop.Initalize",selfs,"Initialize",self.Init)
+API.Event("Gameloop.Update",selfs,"Update",self.OnUpdate)
+API.Event("Gameloop.Draw",selfs,"Draw",self.Draw)
