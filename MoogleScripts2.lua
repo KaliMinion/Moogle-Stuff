@@ -1,15 +1,5 @@
 local API = MoogleLib.API
-API.MinionPath = GetStartupPath() local MinionPath = API.MinionPath
-API.LuaPath = GetLuaModsPath() local LuaPath = API.LuaPath
-
 API.MooglePath = LuaPath .. [[MoogleStuff Files\]] local MooglePath = API.MooglePath
-API.ImageFolder = MooglePath .. [[Moogle Images\]] local ImageFolder = API.ImageFolder
-API.ScriptsFolder = MooglePath .. [[Moogle Scripts\]] local ScriptsFolder = API.ScriptsFolder
-API.TempFolder = MooglePath .. [[Temp\]] local TempFolder = API.TempFolder
-
-API.ACRFolder = LuaPath .. [[ACR\CombatRoutines\]] local ACRFolder = API.ACRFolder
-API.SenseProfiles = LuaPath .. [[Sense\profiles\]] local SenseProfiles = API.SenseProfiles
-API.SenseTriggers = LuaPath .. [[Sense\triggers\]] local SenseTriggers = API.SenseTriggers
 
 local MoogleScripts = {
 	[1] = {
