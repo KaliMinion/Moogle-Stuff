@@ -363,7 +363,10 @@ function self.Draw()
 						local xCategory,yCategory = GUI:CalcTextSize("Category:" .. category)
 						local xStability,yStability = GUI:CalcTextSize("Stability:" .. stability)
 
-
+						if Is(category,"Core Moogle Module") then
+							Image("CoreModule",19,19,{tooltip="Core Moogle Module"})
+						else
+						end
 						GUI:EndChild()
 						GUI:PopStyleVar(3)
 					end

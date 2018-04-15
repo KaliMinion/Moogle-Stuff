@@ -96,10 +96,11 @@ end
 
 --DownloadImages,MoogleLoad
 
-local Initialize, LoadModule, VersionCheck, LastPush, GitFileText, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, Keybinds, RecordKeybinds, ToasterTable, ToasterTime, Toaster, Error, debug, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, TimeSince, Size, Empty, NotEmpty, d2, DrawDebugInfo, DrawTree, AddTree, RemoveTree, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, WriteToFile, WipeFile, Queue, CMD, DownloadString, DownloadTable, DownloadFile, Ping, Split, starts, ends, ToTable, ProperCase, Proper, Case, Title, TitleCase, IsURL, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, BannedKeys, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables, FinishedLoading
+local Initialize, LoadModule, VersionCheck, LastPush, GitFileText, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, Keybinds, RecordKeybinds, ToasterTable, ToasterTime, Toaster, Error, debug, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, TimeSince, Size, Empty, NotEmpty, d2, DrawDebugInfo, DrawTree, AddTree, RemoveTree, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, WriteToFile, WipeFile, Queue, CMD, DownloadString, DownloadTable, DownloadFile, Ping, Split, starts, ends, ToTable, ProperCase, Proper, Case, Title, TitleCase, IsURL, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, BannedKeys, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Image, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables, FinishedLoading
 
 local loaded = true
 local function UpdateLocals4()
+	if loaded and VirtualKeys == nil then if Gui.VirtualKeys then VirtualKeys = Gui.VirtualKeys else loaded = false end end
 	if loaded and OrderedKeys == nil then if Gui.OrderedKeys then OrderedKeys = Gui.OrderedKeys else loaded = false end end
 	if loaded and IndexToDecimal == nil then if Gui.IndexToDecimal then IndexToDecimal = Gui.IndexToDecimal else loaded = false end end
 	if loaded and HotKey == nil then if Gui.HotKey then HotKey = Gui.HotKey else loaded = false end end
@@ -135,9 +136,9 @@ local function UpdateLocals3()
 	if loaded and Space == nil then if Gui.Space then Space = Gui.Space else loaded = false end end
 	if loaded and Text == nil then if Gui.Text then Text = Gui.Text else loaded = false end end
 	if loaded and Checkbox == nil then if Gui.Checkbox then Checkbox = Gui.Checkbox else loaded = false end end
+	if loaded and Image == nil then if Gui.Image then Image = Gui.Image else loaded = false end end
 	if loaded and Tooltip == nil then if Gui.Tooltip then Tooltip = Gui.Tooltip else loaded = false end end
 	if loaded and GetRemaining == nil then if Gui.GetRemaining then GetRemaining = Gui.GetRemaining else loaded = false end end
-	if loaded and VirtualKeys == nil then if Gui.VirtualKeys then VirtualKeys = Gui.VirtualKeys else loaded = false end end
 	if loaded then UpdateLocals4() end
 end
 
@@ -2392,6 +2393,25 @@ function Gui.Checkbox(string, varname, varstring, reverse, tooltip)
 		return key[value]
 	else
 		return varname
+	end
+end
+
+function Gui.Image(path,x,y,more)
+	if not path:match([[\]]) then
+		path = ImageFolder..path
+		if not path:match([[.]]) then
+			path = path..[[.png]]
+		end
+	end
+	if FileExists(path) then
+		local c = GUI:Image(path, x, y)
+		local tooltip = more.tooltip
+
+		if tooltip then
+			if GUI:IsItemHovered(c) then
+				Tooltip(tooltip)
+			end
+		end
 	end
 end
 
