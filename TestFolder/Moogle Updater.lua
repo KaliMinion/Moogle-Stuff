@@ -209,11 +209,11 @@ function self.OnUpdate()
 							local pass = true
 							for i = 1, #webpage do
 								local entry = webpage[i]
-								local name, status, filepath, tablestr, etable, url, category, info =
-								entry.name, entry.status, entry.filepath, entry.table, loadstring(entry.table), GitURL(entry.url), entry.category, entry.info
+								local name, status, filepath, tablestr, url, category, info =
+								entry.name, entry.status, entry.filepath, entry.table, GitURL(entry.url), entry.category, entry.info
 
 								if CurrentVersions[name] == nil then
-									local update, str, result = VersionCheck(tablestr:gsub("return ",""), url, MoogleVersions[name])
+									local update, str, result = VersionCheck(tablestr, url, MoogleVersions[name])
 									if str then
 										CurrentVersions[name] = str
 										if MoogleVersions[name] then
@@ -245,7 +245,7 @@ function self.OnUpdate()
 								end
 
 								if FileExists(filepath) then
-									if _G[tablestr:gsub("return ","")] then -- Checking if you have the module installed and loaded --
+									if _G[tablestr] then -- Checking if you have the module installed and loaded --
 									else
 										LoadModule(filepath)
 										--										pass = false
@@ -365,10 +365,11 @@ function self.Draw()
 
 						if Is(category,"Core Moogle Module") then
 							Image("CoreModule",19,19,{tooltip=category})
-						elseif loadstring(table)() then
+							--						elseif _G[table:gsub("return ","")] then
+						elseif _G[table] then
 							Text("Loaded")
 						else
-							Text("NotLoaded")
+							Text("Not Loaded")
 						end
 						GUI:EndChild()
 						GUI:PopStyleVar(3)
