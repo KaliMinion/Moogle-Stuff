@@ -365,7 +365,10 @@ function self.Draw()
 
 						if Is(category,"Core Moogle Module") then
 							Image("CoreModule",19,19,{tooltip=category})
+						elseif loadstring(table)() then
+							Text("Loaded")
 						else
+							Text("NotLoaded")
 						end
 						GUI:EndChild()
 						GUI:PopStyleVar(3)

@@ -61,5 +61,15 @@ local MoogleScripts = {
 		stability = [[open]],
 		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
 	},
+	[7] = {
+		name = [[Moogle PushButton2]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle PushButton2.lua]],
+		table = [[return MooglePushButton2]],
+		url = [[TestFolder/Moogle Scripts/Moogle PushButton2]],
+		category = [[Dev]],
+		stability = [[open]],
+		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
+	},
 }
 return MoogleScripts
