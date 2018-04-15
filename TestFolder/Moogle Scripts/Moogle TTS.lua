@@ -1,4 +1,4 @@
-MoogleTTS = {}
+local MoogleTTS = {}
 local self = MoogleTTS
 local selfs = "MoogleTTS"
 
@@ -19,13 +19,13 @@ self.Info = {
 
 self.GUI = {
 	WindowName = "MoogleTTS##MoogleTTS",
-	name = "MoogleTTS",
+	name = "Moogle TTS",
 	NavName = "NPC Dialog TTS",
 	MiniName = "MoogleTTS",
 	open = false,
 	visible = true,
 	MiniButton = false,
-	OnClick = loadstring("KaliMainWindow.GUI.open = true KaliMainWindow.GUI.NavigationMenu.selected = self.GUI.NavName"),
+	OnClick = loadstring("KaliMainWindow.GUI.open = true KaliMainWindow.GUI.NavigationMenu.selected = "..selfs..".GUI.NavName"),
 	IsOpen = loadstring("return KaliMainWindow.GUI.open"),
 	ToolTip = "A Text-to-Speech module for narrating NPC dialog."
 }
@@ -70,18 +70,19 @@ self.Data = {
 			LastString = ""
 		},
 		WideText = {}
-	}
+	},
+	Play = true
 }
 local data = self.Data
 
 function self.ModuleInit()
 	Initialize(self.GUI)
---		if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]]) then
---			FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]],self.VBS)
---	end
---	if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) then
---		FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]],"")
---	end
+	--		if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]]) then
+	--			FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS.vbs]],self.VBS)
+	--	end
+	--	if not FileExists(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]]) then
+	--		FileWrite(LuaPath..[[MoogleStuff Files\Moogle Scripts\Moogle TTS\TTS Status.txt]],"")
+	--	end
 end
 
 self.Filter = {
@@ -122,17 +123,27 @@ function self.Speak(str)
 				LastVolume = data.Volume
 			end
 			OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[$speech.SpeakAsync("]]..str..[[")]].."\r\n")
-		else
-			local file = io.open(TempFolder..[[input\Moogle TTS Voice]], "w+") file:write("") file:close()
-			OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[Add-Type -AssemblyName System.speech]].."\r\n"..[[$speech = (New-Object System.Speech.Synthesis.SpeechSynthesizer)]].."\r\n"..[[$speech.SelectVoice("]]..data.SelectedVoiceName..[[")]].."\r\n"..[[$speech.Rate = ]]..data.Rate.."\r\n"..[[$speech.Volume = ]]..data.Volume.."\r\n"..[[$speech.SpeakAsync("]]..str..[[")]].."\r\n")
-			LastVoice = data.SelectedVoiceName
-			LastRate = data.Rate
-			LastVolume = data.Volume
-			SpeechInitialized = true
 		end
-	else
-		Error("[Moogle TTS]: Speak recieved a value that's "..type(str)..", needs to be a string.")
+	elseif not SpeechInitialized then
+		local file = io.open(TempFolder..[[input\Moogle TTS Voice]], "w+") file:write("") file:close()
+		OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[Add-Type -AssemblyName System.speech]].."\r\n"..[[$speech = (New-Object System.Speech.Synthesis.SpeechSynthesizer)]].."\r\n"..[[$speech.SelectVoice("]]..data.SelectedVoiceName..[[")]].."\r\n"..[[$speech.Rate = ]]..data.Rate.."\r\n"..[[$speech.Volume = ]]..data.Volume.."\r\n")
+		LastVoice = data.SelectedVoiceName
+		LastRate = data.Rate
+		LastVolume = data.Volume
+		SpeechInitialized = true
 	end
+end
+
+function self.PlayPause()
+	data.Play = not data.Play
+	local str
+	if data.Play then str = "Resume" else str = "Pause" end
+	OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[$speech.]]..str.."()\r\n")
+end
+
+function self.Dispose()
+	OS.CMDStream(selfs.."Data.CMD","Moogle TTS Voice",[[$speech.Dispose]].."()\r\n"..[[Add-Type -AssemblyName System.speech]].."\r\n"..[[$speech = (New-Object System.Speech.Synthesis.SpeechSynthesizer)]].."\r\n"..[[$speech.SelectVoice("]]..data.SelectedVoiceName..[[")]].."\r\n"..[[$speech.Rate = ]]..data.Rate.."\r\n"..[[$speech.Volume = ]]..data.Volume.."\r\n")
+	data.Play = true
 end
 
 local toggled = false
@@ -257,6 +268,11 @@ function self.OnUpdate()
 				[selfs .. [[.NPCBattleTalk]]] = selfs .. [[.NPCBattleTalk]],
 				[selfs .. [[.NPCWideText]]] = selfs .. [[.NPCWideText]]
 			})
+			if data.SelectedVoice then MoogleSave({[selfs .. [[.SelectedVoice]]] = selfs .. [[.Data.SelectedVoice]]}) end
+			if data.SelectedVoiceIndex then MoogleSave({[selfs .. [[.SelectedVoiceIndex]]] = selfs .. [[.Data.SelectedVoiceIndex]]}) end
+			if data.SelectedVoiceName then MoogleSave({[selfs .. [[.SelectedVoiceName]]] = selfs .. [[.Data.SelectedVoiceName]]}) end
+			if data.Rate then MoogleSave({[selfs .. [[.Rate]]] = selfs .. [[.Data.Rate]]}) end
+			if data.Volume then MoogleSave({[selfs .. [[.Volume]]] = selfs .. [[.Data.Volume]]}) end
 		else
 			MoogleLoad({
 				[selfs .. [[.enable]]] = selfs .. [[.enable]],
@@ -266,7 +282,13 @@ function self.OnUpdate()
 				[selfs .. [[.NPCTTS]]] = selfs .. [[.NPCTTS]],
 				[selfs .. [[.NPCTalk]]] = selfs .. [[.NPCTalk]],
 				[selfs .. [[.NPCBattleTalk]]] = selfs .. [[.NPCBattleTalk]],
-				[selfs .. [[.NPCWideText]]] = selfs .. [[.NPCWideText]]
+				[selfs .. [[.NPCWideText]]] = selfs .. [[.NPCWideText]],
+
+				[selfs .. [[.SelectedVoice]]] = selfs .. [[.Data.SelectedVoice]],
+				[selfs .. [[.SelectedVoiceIndex]]] = selfs .. [[.Data.SelectedVoiceIndex]],
+				[selfs .. [[.SelectedVoiceName]]] = selfs .. [[.Data.SelectedVoiceName]],
+				[selfs .. [[.Rate]]] = selfs .. [[.Data.Rate]],
+				[selfs .. [[.Volume]]] = selfs .. [[.Data.Volume]]
 			})
 			loaded = true
 		end
@@ -279,7 +301,7 @@ function self.OnUpdate()
 end
 
 function self.Draw()
-	if self.enable then
+	if settings.enable then
 		local main = KaliMainWindow.GUI
 		local nav = main.NavigationMenu
 
@@ -288,7 +310,9 @@ function self.Draw()
 		end
 		if nav.selected == self.GUI.NavName then
 			main.Contents = function()
-				if data.SelectedVoiceIndex then
+				if data.SelectedVoiceIndex and data.SelectedVoiceTextSize then
+					if not SpeechInitialized then self.Speak() end
+					local h,label,x = GUI:GetTextLineHeightWithSpacing(),nil,nil
 					GUI:PushItemWidth(data.SelectedVoiceTextSize + 28)
 					local index, changed = GUI:Combo("##SelectVoice",data.SelectedVoiceIndex,data.VoiceNames,#data.VoiceNames)
 					if changed then
@@ -296,8 +320,14 @@ function self.Draw()
 						data.SelectedVoice = data.VoiceNames[index]
 						data.SelectedVoiceName = data.VoiceInfo[index].name
 					end
-					GUI:PopItemWidth()
-
+					GUI:PopItemWidth() Space()
+					if GUI:IsItemClicked(GUI:Image(ImageFolder.."Speaker.png", h * 0.95588235294117647059, h)) then
+						self.Speak("You have selected "..data.SelectedVoiceName.." as Moogle Manager's default voice.")
+					end
+					if data.Play then label = "Pause" x = h * 0.74545454545454545455 else label = "Play" x = h * 0.75438596491228070175 end
+					if GUI:IsItemClicked(GUI:Image(ImageFolder..label.."Button.png", x, h)) then
+						self.PlayPause()
+					end Space()
 					GUI:PushItemWidth(100)
 					Text("Volume: ",0)
 					local value, changed = GUI:SliderInt("##Volume",data.Volume,0,100)
@@ -310,13 +340,17 @@ function self.Draw()
 					if changed then
 						data.Rate = value
 					end
-					GUI:PopItemWidth()
+					GUI:PopItemWidth() Space()
+					if GUI:IsItemClicked(GUI:Image(ImageFolder.."Trash.png", h, h)) then
+						self.Dispose()
+					end
 				else
 					local time = os.clock()
 					local c = math.floor(math.floor((time - math.floor(time)) * 10) / 2)
 					Text("Loading"..string.rep(".",c))
 				end
 
+				--number UV0_x, number UV0_y, number UV1_x, number UV1_y, number framepadding,number bg_col_R, number bg_col_G, number bg_col_B, number bg_col_A, number tint_col_R, number tint_col_G, number tint_col_B, number tint_col_A )
 
 
 
@@ -338,50 +372,51 @@ function self.Draw()
 
 
 
---				NPCTTS = GUI:Checkbox("NPC Dialog Text To Speech",NPCTTS)
---				Indent()
---				NPCTalk = GUI:Checkbox("Listen to normal NPC Dialog that isn't voice acted.",NPCTalk)
---				NPCBattleTalk = GUI:Checkbox("Listen to NPC Dialog in battle.",NPCBattleTalk)
---				NPCWideText = GUI:Checkbox("Listen to special notifications which might indicate what a boss is doing.",NPCWideText)
---				Unindent()
---
---				local tbl = self.ReadTable
---				local Xend,Yend = GUI:GetContentRegionAvail()
---				local Ytrack = 0
---				local ReadSize = self.ReadSize
---				local Yspace = ml_gui.style.original.itemspacing["y"]
---				if In(ReadSize,0,1) then ReadSize = 1 else GUI:PushStyleColor(GUI.Col_ChildWindowBg,0,0,0,0.50) end
---				GUI:BeginChild("#ChatLines",0,ReadSize,false)
---				GUI:PushTextWrapPos(0)
---				GUI:PushItemWidth(-1)
---				if table.valid(tbl) then
---					local x,y = GUI:GetItemRectSize(GUI:Separator())
---					Ytrack = Ytrack + y
---					for k,v in table.pairsbykeys(tbl) do
---						Ytrack = Ytrack + Yspace
---						local x1,y1 = GUI:GetItemRectSize(Text(v.."\n"))
---						Ytrack = Ytrack + Yspace
---						local x2,y2 = GUI:GetItemRectSize(GUI:Separator())
---						Ytrack = (Ytrack + y1 + y2) - 1
---					end
---				end
---				GUI:PopItemWidth()
---				GUI:PopTextWrapPos()
---				GUI:EndChild()
---				if not In(ReadSize,0,1) then GUI:PopStyleColor() end
---				if Ytrack > Yend then
---					self.ReadSize = Yend
---				else
---					self.ReadSize = Ytrack
---				end
---				GUI:Text("TTL HotKey Toggle: ") GUI:SameLine(0,0)
---				local ReadHotkey = self.ReadHotkey
---				local ReturnedTable = ReadHotkey
---				ReturnedTable = HotKey(ReturnedTable)
---				if table.deepcompare(ReadHotkey,ReturnedTable) == false then
---					self.ReadHotkey = table.deepcopy(ReturnedTable)
---					MoogleSave("_G.MoogleTTS[Settings][ReadHotkey]")
---				end
+
+				--				NPCTTS = GUI:Checkbox("NPC Dialog Text To Speech",NPCTTS)
+				--				Indent()
+				--				NPCTalk = GUI:Checkbox("Listen to normal NPC Dialog that isn't voice acted.",NPCTalk)
+				--				NPCBattleTalk = GUI:Checkbox("Listen to NPC Dialog in battle.",NPCBattleTalk)
+				--				NPCWideText = GUI:Checkbox("Listen to special notifications which might indicate what a boss is doing.",NPCWideText)
+				--				Unindent()
+				--
+				--				local tbl = self.ReadTable
+				--				local Xend,Yend = GUI:GetContentRegionAvail()
+				--				local Ytrack = 0
+				--				local ReadSize = self.ReadSize
+				--				local Yspace = ml_gui.style.original.itemspacing["y"]
+				--				if In(ReadSize,0,1) then ReadSize = 1 else GUI:PushStyleColor(GUI.Col_ChildWindowBg,0,0,0,0.50) end
+				--				GUI:BeginChild("#ChatLines",0,ReadSize,false)
+				--				GUI:PushTextWrapPos(0)
+				--				GUI:PushItemWidth(-1)
+				--				if table.valid(tbl) then
+				--					local x,y = GUI:GetItemRectSize(GUI:Separator())
+				--					Ytrack = Ytrack + y
+				--					for k,v in table.pairsbykeys(tbl) do
+				--						Ytrack = Ytrack + Yspace
+				--						local x1,y1 = GUI:GetItemRectSize(Text(v.."\n"))
+				--						Ytrack = Ytrack + Yspace
+				--						local x2,y2 = GUI:GetItemRectSize(GUI:Separator())
+				--						Ytrack = (Ytrack + y1 + y2) - 1
+				--					end
+				--				end
+				--				GUI:PopItemWidth()
+				--				GUI:PopTextWrapPos()
+				--				GUI:EndChild()
+				--				if not In(ReadSize,0,1) then GUI:PopStyleColor() end
+				--				if Ytrack > Yend then
+				--					self.ReadSize = Yend
+				--				else
+				--					self.ReadSize = Ytrack
+				--				end
+				--				GUI:Text("TTL HotKey Toggle: ") GUI:SameLine(0,0)
+				--				local ReadHotkey = self.ReadHotkey
+				--				local ReturnedTable = ReadHotkey
+				--				ReturnedTable = HotKey(ReturnedTable)
+				--				if table.deepcompare(ReadHotkey,ReturnedTable) == false then
+				--					self.ReadHotkey = table.deepcopy(ReturnedTable)
+				--					MoogleSave("_G.MoogleTTS[Settings][ReadHotkey]")
+				--				end
 			end
 		end
 	else
@@ -391,13 +426,9 @@ function self.Draw()
 	end
 end
 
-local function RegisterInitFunction() if self.Init then self.Init() end end
-local function RegisterUpdateFunction() if self.OnUpdate then self.OnUpdate() end end
-local function RegisterDrawFunction() if self.Draw then self.Draw() end end
-
-RegisterEventHandler("Module.Initalize", RegisterInitFunction)
-RegisterEventHandler("Gameloop.Update", RegisterUpdateFunction)
-RegisterEventHandler("Gameloop.Draw", RegisterDrawFunction)
+API.Event("Gameloop.Initalize",selfs,"Initialize",self.Init)
+API.Event("Gameloop.Update",selfs,"Update",self.OnUpdate)
+API.Event("Gameloop.Draw",selfs,"Draw",self.Draw)
 
 _G.MoogleTTS = MoogleTTS
 -- End of File --

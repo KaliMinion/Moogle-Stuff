@@ -32,7 +32,7 @@ self.GUI = {
 	open = false,
 	visible = true,
 	MiniButton = false,
-	OnClick = loadstring("KaliMainWindow.GUI.open = true KaliMainWindow.GUI.NavigationMenu.selected = " .. selfs .. ".GUI.NavName"),
+	OnClick = loadstring("KaliMainWindow.GUI.open = true KaliMainWindow.GUI.NavigationMenu.selected = "..selfs..".GUI.NavName"),
 	IsOpen = loadstring("return KaliMainWindow.GUI.open"),
 	ToolTip = "Module HUB for updating and downloading Moogle Scripts."
 }
@@ -63,6 +63,7 @@ self.Data = {
 	UpdatedLabelScripts = {},
 	NeedWebRequest = true,
 	NeedWebContent = true,
+
 	TimeUnits = { "Seconds", "Minutes", "Hours", "Days", "Weeks", "Months" },
 	InstalledModules = {},
 	DownloadOneTimers = {},
@@ -71,6 +72,7 @@ self.Data = {
 	NeedImages = true,
 	FinishedUpdating = true,
 	FinishedImages = {},
+
 	webpage = {},
 	lastresult = nil,
 	timevalue = 0,
@@ -102,7 +104,6 @@ local function UpdateSettingLocals(setlocals)
 		--	if DrawReady ~= settings.DrawReady then DrawReady = settings.DrawReady end
 	end
 end
-
 local function UpdateDataLocals(setlocals)
 	if setlocals == nil then
 		if data.MoogleScripts ~= MoogleScripts then data.MoogleScripts = MoogleScripts end
@@ -158,7 +159,6 @@ local function UpdateDataLocals(setlocals)
 		if loaded ~= data.loaded then loaded = data.loaded end
 	end
 end
-
 local trash
 
 function self.Init()
@@ -200,7 +200,7 @@ function self.OnUpdate()
 				end
 				if os.difftime(os.time(), LastCheck) >= timevalue then -- Check to see if enough time has passed to do another check --
 					local result = lastresult or GitFileText("MoogleScripts2")
-					if Type(result, "string") and #result > 3 then
+					if Type(result,"string") and #result > 3 then
 						if #webpage == 0 then webpage = loadstring(result)() end
 						if Valid(webpage) then
 							if lastresult ~= result then lastresult = result end
@@ -213,7 +213,7 @@ function self.OnUpdate()
 								entry.name, entry.status, entry.filepath, entry.table, loadstring(entry.table), GitURL(entry.url), entry.category, entry.info
 
 								if CurrentVersions[name] == nil then
-									local update, str, result = VersionCheck(tablestr:gsub("return ", ""), url, MoogleVersions[name])
+									local update, str, result = VersionCheck(tablestr:gsub("return ",""), url, MoogleVersions[name])
 									if str then
 										CurrentVersions[name] = str
 										if MoogleVersions[name] then
@@ -231,7 +231,7 @@ function self.OnUpdate()
 								end
 
 								if CurrentLastPushes[name] == nil then
-									local result = LastPush(entry.url .. ".lua")
+									local result = LastPush(entry.url..".lua")
 									if result then CurrentLastPushes[name] = result else pass = false end
 									if CurrentLastPushes[name] then
 										if MoogleLastPushes[name] then
@@ -245,12 +245,13 @@ function self.OnUpdate()
 								end
 
 								if FileExists(filepath) then
-									if _G[tablestr:gsub("return ", "")] then -- Checking if you have the module installed and loaded --
+									if _G[tablestr:gsub("return ","")] then -- Checking if you have the module installed and loaded --
 									else
 										LoadModule(filepath)
 										--										pass = false
 									end
 								else
+
 								end
 							end
 							if pass then
@@ -317,7 +318,7 @@ function self.Draw()
 			main.Contents = function()
 				-- Start Settings --
 				local x = GUI:CalcTextSize(tostring(CheckInterval))
-				Text("Check Interval:") Space() GUI:PushItemWidth(x + 10) CheckInterval = GUI:InputText("##CheckInterval", CheckInterval, GUI.InputTextFlags_CharsDecimal + GUI.InputTextFlags_CharsNoBlank + GUI.InputTextFlags_AutoSelectAll) CheckInterval = tonumber(CheckInterval) GUI:PopItemWidth() Space(0)
+				Text("Check Interval:") Space() GUI:PushItemWidth(x+10) CheckInterval = GUI:InputText("##CheckInterval", CheckInterval, GUI.InputTextFlags_CharsDecimal + GUI.InputTextFlags_CharsNoBlank + GUI.InputTextFlags_AutoSelectAll) CheckInterval = tonumber(CheckInterval) GUI:PopItemWidth() Space(0)
 				local x = GUI:CalcTextSize(tostring(CheckUnit))
 				local UnitIndex
 				GUI:PushItemWidth(x + 30) UnitIndex = GUI:Combo("##CheckUnit", table.find(TimeUnits, CheckUnit), TimeUnits, #TimeUnits) GUI:PopItemWidth()
@@ -350,22 +351,18 @@ function self.Draw()
 					Beta = not Beta
 				end
 				-- End Settings --
-				for k, v in table.pairsbykeys(MoogleScripts) do
+				for k,v in table.pairsbykeys(MoogleScripts) do
 					local name, status, filepath, table, url, category, stability, info = v.name, v.status, v.filepath, v.table, v.url, v.category, v.stability, v.info
-					if NotAll(stability, "Beta", "Dev") or (stability == "Beta" and (Beta or settings.Dev)) or (Is(stability, "Locked", "Closed", "Broken", "Breaks Other Modules") and settings.Dev) then
+					if NotAll(stability,"Beta","Dev") or (stability == "Beta" and (Beta or settings.Dev)) or (Is(stability,"Locked","Closed","Broken","Breaks Other Modules") and settings.Dev) then
 						local yChild = AdjustChildren[k] or 50
 
 						GUI:PushStyleVar(GUI.StyleVar_WindowPadding, 5, 5) GUI:PushStyleVar(GUI.StyleVar_ItemSpacing, 0, 0) GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing, 0, 0)
 						GUI:BeginChild("##" .. name:gsub(" ", ""), 0, yChild, true, GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoInputs)
-							local width, icon = GUI:GetContentRegionAvailWidth(), 23
-							local xName, yName = GUI:CalcTextSize(name)
-							local xCategory, yCategory = GUI:CalcTextSize("Category:" .. category)
-							local xStability, yStability = GUI:CalcTextSize("Stability:" .. stability)
+						local width, icon = GUI:GetContentRegionAvailWidth(), 23
+						local xName, yName = GUI:CalcTextSize(name)
+						local xCategory,yCategory = GUI:CalcTextSize("Category:" .. category)
+						local xStability,yStability = GUI:CalcTextSize("Stability:" .. stability)
 
-							if Is(category,"Core Moogle Module") then
-
-							else
-							end
 
 						GUI:EndChild()
 						GUI:PopStyleVar(3)
@@ -378,9 +375,9 @@ function self.Draw()
 	end
 end
 
-API.Event("Gameloop.Initalize", selfs, "Initialize", self.Init)
-API.Event("Gameloop.Update", selfs, "Update", self.OnUpdate)
-API.Event("Gameloop.Draw", selfs, "Draw", self.Draw)
+API.Event("Gameloop.Initalize",selfs,"Initialize",self.Init)
+API.Event("Gameloop.Update",selfs,"Update",self.OnUpdate)
+API.Event("Gameloop.Draw",selfs,"Draw",self.Draw)
 
 _G.MoogleUpdater = MoogleUpdater
 -- End of File --

@@ -1,6 +1,5 @@
 [Module]
 Name=MoogleLib
 Dependencies=minionlib
-Version=1
-Files=MoogleLib.lua,Moogle Updater.lua,Main Window.lua
+Files=MoogleLib.lua
 enabled=1

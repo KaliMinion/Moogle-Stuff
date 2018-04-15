@@ -1,4 +1,4 @@
-MoogleFPS = {}
+local MoogleFPS = {}
 local self = MoogleFPS
 local selfs = "MoogleFPS"
 
@@ -28,7 +28,7 @@ self.GUI = {
 	open = false,
 	visible = true,
 	MiniButton = false,
-	OnClick = loadstring("KaliMainWindow.GUI.open = true KaliMainWindow.GUI.NavigationMenu.selected = self.GUI.NavName"),
+	OnClick = loadstring("KaliMainWindow.GUI.open = true KaliMainWindow.GUI.NavigationMenu.selected = "..selfs..".GUI.NavName"),
 	IsOpen = loadstring("return KaliMainWindow.GUI.open"),
 	ToolTip = "FPS and stuff"
 }
@@ -99,9 +99,6 @@ function self.Init()
 		["self.ShowLabels"] = "self.Settings.ShowLabels",
 		["self.Scale"] = "self.Settings.Scale"
 	})
-	--if not FileExists(ImageFolder..self.GUI.name..".png") then
-	--	DownloadFile([[https://i.imgur.com/cdbXSLt.png]],ImageFolder..self.GUI.name..".png")
-	--end
 end
 
 function self.Draw()
@@ -197,16 +194,16 @@ function self.Draw()
 			local y = 35
 			GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
 			GUI:BeginChild("##TL",x,y,true)
-				TopLeft,c = Checkbox("TL",TopLeft,"TL")
+			TopLeft,c = Checkbox("TL",TopLeft,"TL")
 			GUI:EndChild() SameLine()
 			GUI:BeginChild("##TR",x,y,true)
-				TopRight,c = Checkbox("TR",TopRight,"TR",true)
+			TopRight,c = Checkbox("TR",TopRight,"TR",true)
 			GUI:EndChild()
 			GUI:BeginChild("##BL",x,y,true)
-				BottomLeft,c = Checkbox("BL",BottomLeft,"BL")
+			BottomLeft,c = Checkbox("BL",BottomLeft,"BL")
 			GUI:EndChild() SameLine()
 			GUI:BeginChild("##BR",x,y,true)
-				BottomRight,c = Checkbox("BR",BottomRight,"BR",true)
+			BottomRight,c = Checkbox("BR",BottomRight,"BR",true)
 			GUI:EndChild()
 			GUI:PopStyleVar()
 
@@ -217,19 +214,19 @@ function self.Draw()
 					self.Settings.Position = "M"
 				end
 			elseif TopRight ~= TopRight2 then
-					self.Settings.Position = "TR"
+				self.Settings.Position = "TR"
 				if TopRight then
 				else
 					self.Settings.Position = "M"
 				end
 			elseif BottomLeft ~= BottomLeft2 then
-					self.Settings.Position = "BL"
+				self.Settings.Position = "BL"
 				if BottomLeft then
 				else
 					self.Settings.Position = "M"
 				end
 			elseif BottomRight ~= BottomRight2 then
-					self.Settings.Position = "BR"
+				self.Settings.Position = "BR"
 				if BottomRight then
 				else
 					self.Settings.Position = "M"
@@ -436,15 +433,9 @@ function self.OnUpdate()
 	end
 end
 
-local function RegisterInitFunction() if self.Init then self.Init() end end
-
-local function RegisterDrawFunction() if self.Draw then self.Draw() end end
-
-local function RegisterUpdateFunction() if self.OnUpdate then self.OnUpdate() end end
-
-RegisterEventHandler("Module.Initalize", RegisterInitFunction)
-RegisterEventHandler("Gameloop.Draw", RegisterDrawFunction)
-RegisterEventHandler("Gameloop.Update", RegisterUpdateFunction)
+API.Event("Gameloop.Initalize",selfs,"Initialize",self.Init)
+API.Event("Gameloop.Update",selfs,"Update",self.OnUpdate)
+API.Event("Gameloop.Draw",selfs,"Draw",self.Draw)
 
 _G.MoogleFPS = MoogleFPS
 -- End of File --

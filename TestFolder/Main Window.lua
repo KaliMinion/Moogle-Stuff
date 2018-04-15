@@ -162,205 +162,205 @@ function self.Draw()
 		local gamestate = GetGameState()
 
 		-- START MAIN WINDOW --
-			local MainX = 0
-			local MainY = 0
-			local MainH = 0
+		local MainX = 0
+		local MainY = 0
+		local MainH = 0
 
-			local StyleVars = WindowStyle(self.GUI.WindowStyle)
-			if self.GUI.open then
-				GUI:PushStyleVar(GUI.StyleVar_WindowMinSize,615,500)
-				if NotNil(self.GUI.oldPOS) and self.GUI.name ~= self.GUI.oldPOS.name then
-					local oldPOS = self.GUI.oldPOS
-					GUI:SetNextWindowPos(oldPOS.pos.x, oldPOS.pos.y)
-					GUI:SetNextWindowSize(oldPOS.size.x, oldPOS.size.y)
-					self.GUI.oldPOS = nil
-				end
-				self.GUI.visible, self.GUI.open = GUI:Begin(self.GUI.name, self.GUI.open)
-				MainX,MainY = GUI:GetWindowPos()
-				MainH = GUI:GetWindowHeight()
-				if self.GUI.visible then
-					self.GUI.NavigationMenu.open = true
-					self.GUI["Contents"]()
-				else
-					self.GUI.NavigationMenu.open = false
-				end
-				GUI:PopStyleVar()
-				GUI:End()
+		local StyleVars = WindowStyle(self.GUI.WindowStyle)
+		if self.GUI.open then
+			GUI:PushStyleVar(GUI.StyleVar_WindowMinSize,615,500)
+			if NotNil(self.GUI.oldPOS) and self.GUI.name ~= self.GUI.oldPOS.name then
+				local oldPOS = self.GUI.oldPOS
+				GUI:SetNextWindowPos(oldPOS.pos.x, oldPOS.pos.y)
+				GUI:SetNextWindowSize(oldPOS.size.x, oldPOS.size.y)
+				self.GUI.oldPOS = nil
 			end
-			WindowStyleClose(StyleVars)
+			self.GUI.visible, self.GUI.open = GUI:Begin(self.GUI.name, self.GUI.open)
+			MainX,MainY = GUI:GetWindowPos()
+			MainH = GUI:GetWindowHeight()
+			if self.GUI.visible then
+				self.GUI.NavigationMenu.open = true
+				self.GUI["Contents"]()
+			else
+				self.GUI.NavigationMenu.open = false
+			end
+			GUI:PopStyleVar()
+			GUI:End()
+		end
+		WindowStyleClose(StyleVars)
 		-- END MAIN WINDOW --
 
 		-- START SIDEBAR NAVIGATION MENU --
 
-			local StyleVars = WindowStyle(self.GUI.NavigationMenu.WindowStyle)
-			if self.GUI.NavigationMenu.open then
-				GUI:SetNextWindowPos(MainX-self.GUI.NavigationMenu.x+1,MainY+19)
-				GUI:SetNextWindowSize(self.GUI.NavigationMenu.x,MainH-29)
-				GUI:PushStyleVar(GUI.StyleVar_WindowRounding,0)
-				GUI:PushStyleVar(GUI.StyleVar_WindowPadding,0,0)
-				GUI:PushStyleVar(GUI.StyleVar_WindowMinSize,1,1)
-				GUI:PushStyleColor(GUI.Col_WindowBg, 0.0174509803921569, 0, 0.0270588235294118, 0.95)
-				self.GUI.NavigationMenu.visible, self.GUI.NavigationMenu.open = GUI:Begin(self.GUI.NavigationMenu.name, self.GUI.NavigationMenu.open,GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoMove + GUI.WindowFlags_NoCollapse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoScrollWithMouse)
-				if self.GUI.NavigationMenu.visible then
-					-- Start Navigation Menu Animation --
+		local StyleVars = WindowStyle(self.GUI.NavigationMenu.WindowStyle)
+		if self.GUI.NavigationMenu.open then
+			GUI:SetNextWindowPos(MainX-self.GUI.NavigationMenu.x+1,MainY+19)
+			GUI:SetNextWindowSize(self.GUI.NavigationMenu.x,MainH-29)
+			GUI:PushStyleVar(GUI.StyleVar_WindowRounding,0)
+			GUI:PushStyleVar(GUI.StyleVar_WindowPadding,0,0)
+			GUI:PushStyleVar(GUI.StyleVar_WindowMinSize,1,1)
+			GUI:PushStyleColor(GUI.Col_WindowBg, 0.0174509803921569, 0, 0.0270588235294118, 0.95)
+			self.GUI.NavigationMenu.visible, self.GUI.NavigationMenu.open = GUI:Begin(self.GUI.NavigationMenu.name, self.GUI.NavigationMenu.open,GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoMove + GUI.WindowFlags_NoCollapse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoScrollWithMouse)
+			if self.GUI.NavigationMenu.visible then
+				-- Start Navigation Menu Animation --
 
-						local x,y = GUI:GetMousePos()
-						if GUI:IsWindowHovered() or ((((MainX-self.GUI.NavigationMenu.x+1) - x) <= 20) and (x <= MainX) and (y >= MainY+19) and (y <= MainY+19+(MainH-29)+15)) then
-							-- Mouse cursor is hovering window, expand window until you reach desired width --
-							local duration = 250
-							local CurrentDistance = self.GUI.NavigationMenu.x
-							local MinDistance = 8
-							local MaxDistance = 243
+				local x,y = GUI:GetMousePos()
+				if GUI:IsWindowHovered() or ((((MainX-self.GUI.NavigationMenu.x+1) - x) <= 20) and (x <= MainX) and (y >= MainY+19) and (y <= MainY+19+(MainH-29)+15)) then
+					-- Mouse cursor is hovering window, expand window until you reach desired width --
+					local duration = 250
+					local CurrentDistance = self.GUI.NavigationMenu.x
+					local MinDistance = 8
+					local MaxDistance = 243
 
-							if not AnimatedHovering then
-								AnimatedHovering = true
-								AnimatedLastHover = Now()
+					if not AnimatedHovering then
+						AnimatedHovering = true
+						AnimatedLastHover = Now()
 
-								local RatioCompleted = (CurrentDistance - MinDistance) / (MaxDistance - MinDistance)
+						local RatioCompleted = (CurrentDistance - MinDistance) / (MaxDistance - MinDistance)
 
-								AnimationRemainingDuration = duration - (RatioCompleted * duration)
+						AnimationRemainingDuration = duration - (RatioCompleted * duration)
 
-								local DistanceRemaining = MaxDistance - CurrentDistance
+						local DistanceRemaining = MaxDistance - CurrentDistance
 
-								AnimationRate = DistanceRemaining / AnimationRemainingDuration
-								AnimationLastFrame = Now()
+						AnimationRate = DistanceRemaining / AnimationRemainingDuration
+						AnimationLastFrame = Now()
+					end
+
+					local time = TimeSince(AnimatedLastHover)
+
+					if time < AnimationRemainingDuration then
+						self.GUI.NavigationMenu.x = self.GUI.NavigationMenu.x + ((TimeSince(AnimationLastFrame) * AnimationRate))
+						AnimationLastFrame = Now()
+					else
+						self.GUI.NavigationMenu.x = MaxDistance
+					end
+				else
+					-- Mouse cursor has left the window, retract the window until you reach your minimum width --
+					local duration = 1000
+					local CurrentDistance = self.GUI.NavigationMenu.x
+					local MinDistance = 8
+					local MaxDistance = 243
+
+					if AnimatedHovering then
+						AnimatedHovering = false
+						AnimatedLastNotHover = Now()
+
+						local RatioCompleted = (CurrentDistance - MinDistance) / (MaxDistance - MinDistance)
+
+						AnimationRemainingDuration = duration - ((1 - RatioCompleted) * duration)
+
+						local DistanceRemaining = CurrentDistance - MinDistance
+
+						AnimationRate = DistanceRemaining / AnimationRemainingDuration
+						AnimationLastFrame = Now()
+					end
+
+					local time = TimeSince(AnimatedLastNotHover)
+
+					if time < AnimationRemainingDuration then
+						self.GUI.NavigationMenu.x = self.GUI.NavigationMenu.x - ((TimeSince(AnimationLastFrame) * AnimationRate))
+						AnimationLastFrame = Now()
+					else
+						self.GUI.NavigationMenu.x = MinDistance
+					end
+
+					if GUI:GetWindowWidth() < 10 then
+						self.GUI.NavigationMenu.x = 8
+						GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
+						GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing,0,0)
+						if self.AnimatedSideBar then
+							if (AnimatedSpot + GUI:GetTextLineHeightWithSpacing()) >= (MainH - 35) then
+								AnimatedIncrease = false
+								AnimatedSpot = (MainH - 35) - GUI:GetTextLineHeightWithSpacing()
+							elseif AnimatedSpot <= 1 then
+								AnimatedIncrease = true
 							end
 
-							local time = TimeSince(AnimatedLastHover)
-
-							if time < AnimationRemainingDuration then
-								self.GUI.NavigationMenu.x = self.GUI.NavigationMenu.x + ((TimeSince(AnimationLastFrame) * AnimationRate))
-								AnimationLastFrame = Now()
+							if AnimatedIncrease then
+								GUI:Dummy(0,AnimatedSpot)
+								GUI:Text("«")
+								if (AnimatedSpot + (((MainH - 35) - GUI:GetTextLineHeightWithSpacing()) / (1000 / gPulseTime))) > 243 then
+									AnimatedSpot = 243
+								else
+									AnimatedSpot = AnimatedSpot + (((MainH - 35) - GUI:GetTextLineHeightWithSpacing()) / (1000 / gPulseTime))
+								end
 							else
-								self.GUI.NavigationMenu.x = MaxDistance
+								GUI:Dummy(0,AnimatedSpot)
+								GUI:Text("«")
+								AnimatedSpot = AnimatedSpot - (((MainH - 35) - GUI:GetTextLineHeightWithSpacing()) / (1000 / gPulseTime))
 							end
 						else
-							-- Mouse cursor has left the window, retract the window until you reach your minimum width --
-							local duration = 1000
-							local CurrentDistance = self.GUI.NavigationMenu.x
-							local MinDistance = 8
-							local MaxDistance = 243
-
-							if AnimatedHovering then
-								AnimatedHovering = false
-								AnimatedLastNotHover = Now()
-
-								local RatioCompleted = (CurrentDistance - MinDistance) / (MaxDistance - MinDistance)
-
-								AnimationRemainingDuration = duration - ((1 - RatioCompleted) * duration)
-
-								local DistanceRemaining = CurrentDistance - MinDistance
-
-								AnimationRate = DistanceRemaining / AnimationRemainingDuration
-								AnimationLastFrame = Now()
-							end
-
-							local time = TimeSince(AnimatedLastNotHover)
-
-							if time < AnimationRemainingDuration then
-								self.GUI.NavigationMenu.x = self.GUI.NavigationMenu.x - ((TimeSince(AnimationLastFrame) * AnimationRate))
-								AnimationLastFrame = Now()
-							else
-								self.GUI.NavigationMenu.x = MinDistance
-							end
-
-							if GUI:GetWindowWidth() < 10 then
-								self.GUI.NavigationMenu.x = 8
-								GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
-								GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing,0,0)
-								if self.AnimatedSideBar then
-									if (AnimatedSpot + GUI:GetTextLineHeightWithSpacing()) >= (MainH - 35) then
-										AnimatedIncrease = false
-										AnimatedSpot = (MainH - 35) - GUI:GetTextLineHeightWithSpacing()
-									elseif AnimatedSpot <= 1 then
-										AnimatedIncrease = true
-									end
-
-									if AnimatedIncrease then
-										GUI:Dummy(0,AnimatedSpot)
-										GUI:Text("«")
-										if (AnimatedSpot + (((MainH - 35) - GUI:GetTextLineHeightWithSpacing()) / (1000 / gPulseTime))) > 243 then
-											AnimatedSpot = 243
-										else
-											AnimatedSpot = AnimatedSpot + (((MainH - 35) - GUI:GetTextLineHeightWithSpacing()) / (1000 / gPulseTime))
-										end
-									else
-										GUI:Dummy(0,AnimatedSpot)
-										GUI:Text("«")
-										AnimatedSpot = AnimatedSpot - (((MainH - 35) - GUI:GetTextLineHeightWithSpacing()) / (1000 / gPulseTime))
-									end
-								else
-									GUI:Dummy(0,((GUI:GetWindowHeight() - GUI:GetTextLineHeightWithSpacing()) / 2))
-									GUI:Text("«")
-								end
-								GUI:PopStyleVar(2)
-							end
+							GUI:Dummy(0,((GUI:GetWindowHeight() - GUI:GetTextLineHeightWithSpacing()) / 2))
+							GUI:Text("«")
 						end
-					-- End Navigation Menu Animation --
-
-					if GUI:GetWindowWidth() > 10 then
-						GUI:Dummy(0,1)
-						GUI:Dummy(((243 - GUI:CalcTextSize("Main Menu")) / 2),0)GUI:SameLine(0,0)
-						GUI:Text("Main Menu")
-						GUI:Separator()
-
-						GUI:Dummy(1,1)
-						GUI:Dummy(5,0)GUI:SameLine(0,0)
-						GUI:PushItemWidth(232)
-							GUI:PushStyleColor(GUI.Col_FrameBg, 0,0,0,0)
-							GUI:ListBoxHeader("##NavigationList", table.size(self.GUI.NavigationMenu.Menu), math.floor((MainH - 70)/18))
-								local function IsSelected(str)
-									if Type(str,"string") then
-										-- d("str: "..str.." NavMenu.selected: "..self.GUI.NavigationMenu.selected.." IsTheSame: "..tostring(self.GUI.NavigationMenu.selected == str))
-										if self.GUI.NavigationMenu.selected == str then
-											return true
-										else
-											return false
-										end
-									else
-										ml_error("IsSelected string check failed, is "..tostring(type(str)))
-										return false
-									end
-								end
-
-								local c = GUI:Selectable("Moogle Script Management", IsSelected("Moogle Script Management"))
-								if GUI:IsItemClicked(c) then self.GUI.NavigationMenu.selected = MoogleUpdater.GUI.NavName end
-
-								for k,v in pairs(self.GUI.NavigationMenu.Menu) do
-									if v ~= "Moogle Script Management" then
-										local c = GUI:Selectable(v, IsSelected(v))
-										if GUI:IsItemClicked(c) then self.GUI.NavigationMenu.selected = v end
-									end
-								end
-							GUI:ListBoxFooter()
-
-							-- self.GUI.NavigationMenu.selected = GUI:ListBox("##NavigationList",self.GUI.NavigationMenu.selected,self.GUI.NavigationMenu.Menu,math.floor((MainH - 70)/18))
-							GUI:PopStyleColor()
-						GUI:PopItemWidth()
-						GUI:Dummy(0,0)
-
-						GUI:Separator()
-						GUI:Dummy(0,0)
-						GUI:Dummy(5,0)GUI:SameLine(0,0)
-						local x,y = GUI:CalcTextSize("Forum Topic")
-						local c = GUI:Button("Forum Topic",x+10,y+10)
-						if GUI:IsItemClicked(c) then
-							io.popen([[cmd /c start http://www.mmominion.com/thread-20229.html]])
-						end
-
-						GUI:SameLine(0,5)
-						local x,y = GUI:CalcTextSize("MoogleStuff Discord")
-						local c = GUI:Button("MoogleStuff Discord",x+10,y+10)
-						if GUI:IsItemClicked(c) then
-							io.popen([[cmd /c start https://discord.gg/Ytr9jJC]])
-						end
+						GUI:PopStyleVar(2)
 					end
 				end
-				GUI:PopStyleColor()
-				GUI:PopStyleVar(3)
-				GUI:End()
+				-- End Navigation Menu Animation --
+
+				if GUI:GetWindowWidth() > 10 then
+					GUI:Dummy(0,1)
+					GUI:Dummy(((243 - GUI:CalcTextSize("Main Menu")) / 2),0)GUI:SameLine(0,0)
+					GUI:Text("Main Menu")
+					GUI:Separator()
+
+					GUI:Dummy(1,1)
+					GUI:Dummy(5,0)GUI:SameLine(0,0)
+					GUI:PushItemWidth(232)
+					GUI:PushStyleColor(GUI.Col_FrameBg, 0,0,0,0)
+					GUI:ListBoxHeader("##NavigationList", table.size(self.GUI.NavigationMenu.Menu), math.floor((MainH - 70)/18))
+					local function IsSelected(str)
+						if Type(str,"string") then
+							-- d("str: "..str.." NavMenu.selected: "..self.GUI.NavigationMenu.selected.." IsTheSame: "..tostring(self.GUI.NavigationMenu.selected == str))
+							if self.GUI.NavigationMenu.selected == str then
+								return true
+							else
+								return false
+							end
+						else
+							ml_error("IsSelected string check failed, is "..tostring(type(str)))
+							return false
+						end
+					end
+
+					local c = GUI:Selectable("Moogle Script Management", IsSelected("Moogle Script Management"))
+					if GUI:IsItemClicked(c) then self.GUI.NavigationMenu.selected = MoogleUpdater.GUI.NavName end
+
+					for k,v in pairs(self.GUI.NavigationMenu.Menu) do
+						if v ~= "Moogle Script Management" then
+							local c = GUI:Selectable(v, IsSelected(v))
+							if GUI:IsItemClicked(c) then self.GUI.NavigationMenu.selected = v end
+						end
+					end
+					GUI:ListBoxFooter()
+
+					-- self.GUI.NavigationMenu.selected = GUI:ListBox("##NavigationList",self.GUI.NavigationMenu.selected,self.GUI.NavigationMenu.Menu,math.floor((MainH - 70)/18))
+					GUI:PopStyleColor()
+					GUI:PopItemWidth()
+					GUI:Dummy(0,0)
+
+					GUI:Separator()
+					GUI:Dummy(0,0)
+					GUI:Dummy(5,0)GUI:SameLine(0,0)
+					local x,y = GUI:CalcTextSize("Forum Topic")
+					local c = GUI:Button("Forum Topic",x+10,y+10)
+					if GUI:IsItemClicked(c) then
+						io.popen([[cmd /c start http://www.mmominion.com/thread-20229.html]])
+					end
+
+					GUI:SameLine(0,5)
+					local x,y = GUI:CalcTextSize("MoogleStuff Discord")
+					local c = GUI:Button("MoogleStuff Discord",x+10,y+10)
+					if GUI:IsItemClicked(c) then
+						io.popen([[cmd /c start https://discord.gg/Ytr9jJC]])
+					end
+				end
 			end
-			WindowStyleClose(StyleVars)
+			GUI:PopStyleColor()
+			GUI:PopStyleVar(3)
+			GUI:End()
+		end
+		WindowStyleClose(StyleVars)
 		-- END SIDEBAR NARVIGATION MENU --
 	end
 end
@@ -370,15 +370,15 @@ function self.OnUpdate()
 	if FinishedLoading then
 		if loaded then
 			if CheckVer then
---				local update, tbl = VersionCheck(selfs, self.Info.URL, self.Info.Version)
---				if update == true then
---	--					FileWrite(MooglePath..[[Main Window.lua]],tbl)
---	--					loadstring(tbl)()
---					CheckVer = false
---				elseif update == false then
---					Error("Window Test")
---					CheckVer = false
---				end
+				--				local update, tbl = VersionCheck(selfs, self.Info.URL, self.Info.Version)
+				--				if update == true then
+				--	--					FileWrite(MooglePath..[[Main Window.lua]],tbl)
+				--	--					loadstring(tbl)()
+				--					CheckVer = false
+				--				elseif update == false then
+				--					Error("Window Test")
+				--					CheckVer = false
+				--				end
 			end
 			MoogleSave({
 				[selfs .. [[.enable]]] = selfs .. [[.Settings.enable]],
@@ -398,19 +398,15 @@ function self.OnUpdate()
 		end
 	else
 		UpdateLocals()
-		if FinishedLoading then
-			Initialize(self.GUI)
-		end
+		--		if FinishedLoading then
+		--			Initialize(self.GUI)
+		--		end
 	end
 end
 
-local function RegisterInitFunction() if self.Init then self.Init() end end
-local function RegisterDrawFunction() if self.Draw then self.Draw() end end
-local function RegisterUpdateFunction() if self.OnUpdate then self.OnUpdate() end end
-
-RegisterEventHandler("Module.Initalize", RegisterInitFunction)
-RegisterEventHandler("Gameloop.Draw", RegisterDrawFunction)
-RegisterEventHandler("Gameloop.Update", RegisterUpdateFunction)
+API.Event("Gameloop.Initalize",selfs,"Initialize",self.Init)
+API.Event("Gameloop.Update",selfs,"Update",self.OnUpdate)
+API.Event("Gameloop.Draw",selfs,"Draw",self.Draw)
 
 _G.KaliMainWindow = KaliMainWindow
 -- End of File --
