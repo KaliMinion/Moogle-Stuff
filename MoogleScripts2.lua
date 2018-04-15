@@ -72,4 +72,4 @@ local MoogleScripts = {
 		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
 	},
 }
-MoogleScripts
+return MoogleScripts
