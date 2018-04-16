@@ -68,7 +68,7 @@ local MoogleScripts = {
 		table = [[MooglePushButton2]],
 		url = [[TestFolder/Moogle Scripts/Moogle PushButton]],
 		category = [[Dev]],
-		stability = [[open]],
+		stability = [[Beta]],
 		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
 	},
 }
