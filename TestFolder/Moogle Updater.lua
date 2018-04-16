@@ -365,11 +365,12 @@ function self.Draw()
 
 						if Is(category,"Core Moogle Module") then
 							Image("CoreModule",19,19,{tooltip=category})
-							--						elseif _G[table:gsub("return ","")] then
-						elseif _G[table] then
+						elseif _G[table] then -- loaded
 							Text("Loaded")
+						elseif FileExists(filepath) then
+							Text("Not Loaded but Installed")
 						else
-							Text("Not Loaded")
+							Text("Not Loaded and Not Installed")
 						end
 						GUI:EndChild()
 						GUI:PopStyleVar(3)
