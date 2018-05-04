@@ -62,14 +62,14 @@ local MoogleScripts = {
 		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
 	},
 	[7] = {
-		name = [[Moogle PushButton2]],
+		name = [[Moogle Recorder]],
 		status = [[open]],
-		filepath = MooglePath..[[Moogle Scripts\Moogle PushButton2.lua]],
-		table = [[MooglePushButton2]],
-		url = [[TestFolder/Moogle Scripts/Moogle PushButton]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle Recorder.lua]],
+		table = [[MoogleRecorder]],
+		url = [[TestFolder/Moogle Scripts/Moogle Recorder]],
 		category = [[Dev]],
 		stability = [[Beta]],
-		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
+		info = [[A developer module to record entity actions in a timeline fashion, recording behavior and patterns.]]
 	},
 }
 return MoogleScripts
