@@ -68,7 +68,7 @@ local MoogleScripts = {
 		table = [[MoogleRecorder]],
 		url = [[TestFolder/Moogle Scripts/Moogle Recorder]],
 		category = [[Dev]],
-		stability = [[open]],
+		stability = [[Beta]],
 		info = [[A developer module to record entity actions in a timeline fashion, recording behavior and patterns.]]
 	},
 }
