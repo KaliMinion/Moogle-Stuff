@@ -71,5 +71,15 @@ local MoogleScripts = {
 		stability = [[Beta]],
 		info = [[A developer module to record entity actions in a timeline fashion, recording behavior and patterns.]]
 	},
+	[8] = {
+		name = [[Moogle Music]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle Music.lua]],
+		table = [[MoogleMusic]],
+		url = [[TestFolder/Moogle Scripts/Moogle Music]],
+		category = [[Dev]],
+		stability = [[Beta]],
+		info = [[A branch off of Ace's Music player with a few extra features.]]
+	},
 }
 return MoogleScripts
