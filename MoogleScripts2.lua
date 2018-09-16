@@ -41,5 +41,45 @@ local MoogleScripts = {
 		stability = [[open]],
 		info = [[An FPS overlay like Fraps or Nvidia's GeForce Experience. For people who have issue using Minion with other overlays.]]
 	},
+	[5] = {
+		name = [[Moogle Text to Speech]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle TTS.lua]],
+		table = [[MoogleTTS]],
+		url = [[TestFolder/Moogle Scripts/Moogle TTS]],
+		category = [[Utility]],
+		stability = [[open]],
+		info = [[Narrates NPC dialog, as well as some other windows in game.]]
+	},
+	[6] = {
+		name = [[Moogle PushButton]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle PushButton.lua]],
+		table = [[MooglePushButton]],
+		url = [[TestFolder/Moogle Scripts/Moogle PushButton]],
+		category = [[Dev]],
+		stability = [[open]],
+		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
+	},
+	[7] = {
+		name = [[Moogle Recorder]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle Recorder.lua]],
+		table = [[MoogleRecorder]],
+		url = [[TestFolder/Moogle Scripts/Moogle Recorder]],
+		category = [[Dev]],
+		stability = [[Beta]],
+		info = [[A developer module to record entity actions in a timeline fashion, recording behavior and patterns.]]
+	},
+	[8] = {
+		name = [[Moogle Music]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle Music.lua]],
+		table = [[MoogleMusic]],
+		url = [[TestFolder/Moogle Scripts/Moogle Music]],
+		category = [[Dev]],
+		stability = [[Beta]],
+		info = [[A branch off of Ace's Music player with a few extra features.]]
+	},
 }
 return MoogleScripts
