@@ -370,7 +370,7 @@ function API.LastPush(GitFile, date)
 	AddTree("MoogleLib.API","LastPush")
 	AddTree("MoogleLib.API.LastPush",tostring(GitFile:gsub("%.lua",""):gsub("%/"," - ")),true)
 	local tbl = {}
-	local result = OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; @((Invoke-WebRequest 'https://github.com/KaliMinion/Moogle-Stuff/commits/master/]] .. GitFile ..[[').ParsedHtml.body.getElementsByTagName('relative-time'))[0].outerHTML | Set-Content -Path 'outputfile'"]])
+	local result = OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $content = (New-Object System.Net.WebClient).DownloadString('https://github.com/KaliMinion/Moogle-Stuff/commits/master/]] .. GitFile ..[['); $HTML = New-Object -Com 'HTMLFile'; $src = [System.Text.Encoding]::Unicode.GetBytes($content); $HTML.write($src); @($HTML.body.getElementsByTagName('relative-time'))[0].outerHTML | %{$_.split('"')[1]} | Set-Content -Path 'outputfile'"]])
 	if result then
 		AddTree("MoogleLib.API.LastPush."..tostring(GitFile:gsub("%.lua",""):gsub("%/"," - ")),"Valid Result",true)
 		for s in (result:match("\"[^\"]+"):gsub("\"","")):gmatch("[%d]+") do
@@ -390,8 +390,48 @@ function API.GitFileText(GitFile)
 	AddTree("MoogleLib.API","GitFile Text")
 	AddTree("MoogleLib.API.GitFile Text", GitFile,true)
 	local url; if IsURL(GitFile) then url = GitFile else url = [[https://github.com/KaliMinion/Moogle-Stuff/blob/master/]]..GitFile..[[.lua]] end
-	return OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; @((Invoke-WebRequest ']]..url..[[').ParsedHtml.body.getElementsByTagName('table'))[0].innerText | Set-Content -Path 'outputfile'"]])
+	return OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $content = (New-Object System.Net.WebClient).DownloadString(']]..url..[['); $HTML = New-Object -Com 'HTMLFile'; $src = [System.Text.Encoding]::Unicode.GetBytes($content); $HTML.write($src); @($HTML.body.getElementsByTagName('table'))[0].innerText | Set-Content -Path 'outputfile'"]])
 end
+
+local init = true
+API.InputTable = {}
+function API.Input(event, message, wParam, lParam)
+	if table.size(API.InputTable) ~= 0 then API.InputTable = {} end
+	if ml_input_mgr.InputHandler and init then
+		ml_input_mgr.InputHandler = function(event, message, wParam, lParam)
+			--			d(tostring(message).." "..tostring(wParam).." "..tostring(lParam)) -- all string values received.
+			if (string.valid(message) and string.valid(wParam) and string.valid(lParam)) then
+				-- scrolling zoom for btree, keep this for minion function
+				if (message == "522") then
+					BehaviorManager:ChangeZoom(tonumber(lParam))
+				end
+			end
+			API.InputTable.message = message
+			API.InputTable.wParam = wParam
+			API.InputTable.lParam = lParam
+		end
+		init = false
+		-- Unable to use my event function due to issues --
+		if MoogleLib["MoogleLib - Gameloop.Input - Input"] == nil then
+			RegisterEventHandler("Gameloop.Input", ml_input_mgr.InputHandler)
+			MoogleLib["MoogleLib - Gameloop.Input - Input"] = true
+		end
+	end
+end
+
+function API.MouseWheel()
+	if API.InputTable.message == "522" then
+		return tonumber(API.InputTable.lParam) / 120
+	end
+end
+
+-- Example Usage --
+--local wheel = API.MouseWheel()
+--if wheel then
+--	local state = ""; if wheel > 0 then state = "Up" else state = "Down" end
+--	local add = string.rep("!", math.abs(wheel))
+--	Error("Scrolling "..state..add)
+--end
 
 function API.Vars(Tbl, load, UseJustSettings)
 	for k, v in pairs(Tbl) do
@@ -436,19 +476,27 @@ function API.Vars(Tbl, load, UseJustSettings)
 				end
 			else
 				if load then
-					if type(SaveTable[savevar]) == nil then
-						SaveTable[savevar] = ModuleTable[e]
+--					if type(SaveTable[savevar]) == nil then
+--						SaveTable[savevar] = ModuleTable[e]
+--					end
+--					ModuleTable[e] = SaveTable[savevar] or ModuleTable[e]
+					if type(SaveTable[savevar]) ~= nil and SaveTable[savevar] ~= ModuleTable[e] then
+						ModuleTable[e] = SaveTable[savevar] or ModuleTable[e]
 					end
-					ModuleTable[e] = SaveTable[savevar] or ModuleTable[e]
 				else
 					if type(SaveTable[savevar]) == nil or SaveTable[savevar] ~= ModuleTable[e] then
 						SaveTable[savevar] = ModuleTable[e]
-						ml_settings_mgr:Save()
+						ml_settings_mgr:SaveSettings()
 					end
 				end
 			end
 		end
 	end
+end
+
+MoogleSave = API.Vars
+function MoogleLoad(tbl)
+	API.Vars(tbl, true)
 end
 
 API.ImageList, API.FinishedImages, API.ImageLastCheck = {},{},0
@@ -470,11 +518,6 @@ function API.DownloadImages(image,path)
 	end
 end
 API.Event("Gameloop.Update",selfs,"DownloadImages",API.DownloadImages)
-
-MoogleSave = API.Vars
-function MoogleLoad(Tbl)
-	API.Vars(Tbl, true)
-end
 
 function API.Distance2D(table1, table2)
 	if table2 == nil then
@@ -1497,26 +1540,30 @@ function OS.CMD(cmd)
 	else
 		q[k].time = Now()
 		q[k].type = io.type(q[k].CMD)
-		if q[k].type == "file" and FileExists(outputfile) then
-			AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node","Output Exists",true)
-			debug("CMD: Our CMD process is a file.",2)
-			local str, file = nil, io.open(outputfile)
-			if file then
-				str = file:read("*a") file:close()
-			end
-			if Type(str,"string") and #str > 3 then
-				AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node.Output Exists","Valid Result",true)
-				debug("CMD: We have a result and are sending it back, while also cleaning up our open files and table entry.",2)
-				debug("CMD: First 100 characters of the string: "..str:sub(1,100),3)
-				q[k].CMD:close()
-				q[k] = nil
-				DeleteFile(outputfile)
-				OS.CurrentConnections = OS.CurrentConnections - 1
-				--					RemoveTree("OS.CMD.Checking Node.",tostring(k))
-				return str
+		if q[k].type == "file" then
+			if FileExists(outputfile) then
+				AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node","Output Exists",true)
+				debug("CMD: Our CMD process is a file.",2)
+				local str, file = nil, io.open(outputfile)
+				if file then
+					str = file:read("*a") file:close()
+				end
+				if Type(str,"string") and #str > 3 then
+					AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node.Output Exists","Valid Result",true)
+					debug("CMD: We have a result and are sending it back, while also cleaning up our open files and table entry.",2)
+					debug("CMD: First 100 characters of the string: "..str:sub(1,100),3)
+					q[k].CMD:close()
+					q[k] = nil
+					DeleteFile(outputfile)
+					OS.CurrentConnections = OS.CurrentConnections - 1
+					--					RemoveTree("OS.CMD.Checking Node.",tostring(k))
+					return str
+				end
+			else
+				debug("CMD: Our output file doesn't exist. outputfile = "..outputfile,3)
 			end
 		else
-			debug("CMD: Our Start Time is.."..tostring(q[k].timestart),2)
+			debug("CMD: Our Start Time is.."..tostring(q[k].timestart),3)
 			debug("CMD: Our CMD process is not a file yet...",2)
 			if TimeSince(q[k].timestart,10000) then q[k] = nil end
 		end
@@ -2296,14 +2343,17 @@ end
 function Gui.Text(string, RGB, SameLineSpacing, beforetext)
 	local ColorText = false
 
-	local RGB = RGB
-	local SameLineSpacing = SameLineSpacing
-	local beforetext = beforetext
-
-	if type(RGB) ~= "table" then
-		beforetext = SameLineSpacing
-		SameLineSpacing = RGB
-		RGB = nil
+	local t = type(RGB)
+	if t ~= "table" then
+		if t == "boolean" then
+			beforetext = RGB
+			SameLineSpacing = nil
+			RGB = nil
+		else
+			beforetext = SameLineSpacing
+			SameLineSpacing = RGB
+			RGB = nil
+		end
 	else
 		ColorText = true
 	end
@@ -2335,6 +2385,10 @@ function Gui.Text(string, RGB, SameLineSpacing, beforetext)
 			end
 		end
 	else
+		if beforetext then
+			SameLineSpacing = SameLineSpacing or 4
+			SameLine(SameLineSpacing)
+		end
 		if ColorText then
 			GUI:AlignFirstTextHeightToWidgets()
 			GUI:PushStyleColor(GUI.Col_Text, RGB[1], RGB[2], RGB[3], RGB[4])
@@ -2344,6 +2398,7 @@ function Gui.Text(string, RGB, SameLineSpacing, beforetext)
 			GUI:AlignFirstTextHeightToWidgets()
 			GUI:Text(string)
 		end
+		if beforetext==nil and SameLineSpacing then SameLine(SameLineSpacing) end
 	end
 end
 
@@ -2716,6 +2771,7 @@ function Gui.DrawTables(tbl, depth)
 	end
 end
 
+
 -- End GUI Functions --
 -- End Core Functions & Helper Functions --
 
@@ -3039,7 +3095,7 @@ local function LoadMoogleCore()
 				pass = false
 				local file = MooglePath..k..".lua"
 				if fileexist(file) then
-					--					d("MoogleLib: Loading "..k)
+--					d("MoogleLib: Loading "..k)
 					LoadModule(file)
 					corefiles[k] = true
 				else
@@ -3171,3 +3227,4 @@ end
 API.Event("Gameloop.Initalize",selfs,"Initialize",self.Init)
 API.Event("Gameloop.Update",selfs,"Update",self.OnUpdate)
 API.Event("Gameloop.Draw",selfs,"Draw",self.Draw)
+API.Event("Gameloop.Update",selfs,"InitializeInput",API.Input)
