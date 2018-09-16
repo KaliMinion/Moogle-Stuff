@@ -31,5 +31,15 @@ local MoogleScripts = {
 		stability = [[open]],
 		info = [[Where all my Moogle Functions are stored.]]
 	},
+	[4] = {
+		name = [[Moogle FPS]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle FPS.lua]],
+		table = [[MoogleFPS]],
+		url = [[TestFolder/Moogle Scripts/Moogle FPS]],
+		category = [[Utility]],
+		stability = [[open]],
+		info = [[An FPS overlay like Fraps or Nvidia's GeForce Experience. For people who have issue using Minion with other overlays.]]
+	},
 }
 return MoogleScripts
