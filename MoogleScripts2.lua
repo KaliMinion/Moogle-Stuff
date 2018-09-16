@@ -41,16 +41,6 @@ local MoogleScripts = {
 		stability = [[open]],
 		info = [[An FPS overlay like Fraps or Nvidia's GeForce Experience. For people who have issue using Minion with other overlays.]]
 	},
-	[5] = {
-		name = [[Moogle Text to Speech]],
-		status = [[open]],
-		filepath = MooglePath..[[Moogle Scripts\Moogle TTS.lua]],
-		table = [[MoogleTTS]],
-		url = [[TestFolder/Moogle Scripts/Moogle TTS]],
-		category = [[Utility]],
-		stability = [[open]],
-		info = [[Narrates NPC dialog, as well as some other windows in game.]]
-	},
 	[6] = {
 		name = [[Moogle PushButton]],
 		status = [[open]],
