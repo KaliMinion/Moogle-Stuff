@@ -35,7 +35,8 @@ local enable = settings.enable
 
 self.Data = {
 	loaded = false,
-	Database = {}
+	MusicDir = GetLuaModsPath()..[[ffxivminion\MMLFiles\]],
+	FileList = {}
 }
 local data = self.Data
 local loaded = data.loaded
@@ -43,9 +44,45 @@ local loaded = data.loaded
 function self.Init()
 end
 
+function self.DirList(dir)
+	local FullDir = self.Data.FileList
+	local function scan(dir,tbl)
+		tbl = tbl or FullDir
+		for k,v in pairs(FolderList(dir,"",true)) do
+			if v:match("^[^\.]*$") then
+				tbl[k] = {} tbl[k].name = v
+				scan(dir.."\\"..v,tbl[k])
+			else
+				tbl[k] = v
+			end
+		end
+	end
+	scan(dir)
+	table.print(FullDir)
+end
+
 function self.Draw()
 	if nav.selected == self.GUI.NavName then
 		main.Contents = function()
+			if NotValid(self.Data.FileList) then
+				if FolderExists(self.Data.MusicDir) then
+					self.DirList(self.Data.MusicDir)
+				end
+			end
+			Text("Music Directory:",5)
+			GUI:PushItemWidth(GUI:GetContentRegionAvailWidth())
+			local text,changed = GUI:InputText("##MusicDir", self.Data.MusicDir)
+			if changed then
+				if FolderExists(text) then
+					self.Data.MusicDir = text
+					self.DirList(text)
+				end
+			end
+			GUI:PopItemWidth()
+
+
+
+
 		end
 	end
 end
