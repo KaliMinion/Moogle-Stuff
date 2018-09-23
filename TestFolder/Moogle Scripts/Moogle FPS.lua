@@ -102,221 +102,223 @@ function self.Init()
 end
 
 function self.Draw()
-	local main = KaliMainWindow.GUI
-	local nav = KaliMainWindow.GUI.NavigationMenu
-	local settings = self.Settings
+	if FinishedLoading then
+		local main = KaliMainWindow.GUI
+		local nav = KaliMainWindow.GUI.NavigationMenu
+		local settings = self.Settings
 
-	if nav.selected == self.GUI.NavName then
-		main.Contents = function()
-			Text("Record FPS, MPF, and PER for ") SameLine()
-			GUI:PushItemWidth(75)
-			self.Settings.FPSTime,c = GUI:InputInt("##FPSTime",self.Settings.FPSTime)
-			if c then
+		if nav.selected == self.GUI.NavName then
+			main.Contents = function()
+				Text("Record FPS, MPF, and PER for ") SameLine()
+				GUI:PushItemWidth(75)
+				self.Settings.FPSTime,c = GUI:InputInt("##FPSTime",self.Settings.FPSTime)
+				if c then
+				end
+				GUI:PopItemWidth()
+				SameLine() Text(" seconds to calculate average")
+
+				Text("Calculate once every ") SameLine()
+				GUI:PushItemWidth(85)
+				self.Settings.PulseDelay,c = GUI:InputInt("##PulseDelay",self.Settings.PulseDelay,50)
+				if c then
+				end
+				GUI:PopItemWidth()
+				SameLine() Text(" milliseconds")
+
+				self.Settings.ShowLabels,c = Checkbox("Show Labels",self.Settings.ShowLabels,"ShowLabels")
+				if c then
+				end
+				SameLine(5)
+
+				self.Settings.ShowMs,c = Checkbox("Show MPF(ms)",self.Settings.ShowMs,"ShowMs")
+				if c then
+				end
+				SameLine(5)
+
+
+				self.Settings.ShowPer,c = Checkbox("Show Bot Performance",self.Settings.ShowPer,"ShowPer")
+				if c then
+				end
+
+				Text("Set Text Scaling for Mini Window to ") SameLine()
+				GUI:PushItemWidth(85)
+				self.Settings.Scale,c = GUI:InputFloat("##Scale",self.Settings.Scale,0.1,0.1,1)
+				if c then
+				end
+				GUI:PopItemWidth()
+				SameLine() Text(" x normal size")
+
+				Text("Leave ") SameLine()
+				GUI:PushItemWidth(85)
+				self.Settings.EdgeDistance,c = GUI:InputInt("##EdgeDistance",self.Settings.EdgeDistance,1)
+				if c then
+				end
+				GUI:PopItemWidth()
+				SameLine() Text(" pixels of padding on each side when snapping")
+
+				Text("Set the Mini Window's opacity to ") SameLine()
+				GUI:PushItemWidth(85)
+				self.Settings.Opacity,c = GUI:InputFloat("##Opacity",self.Settings.Opacity,0.1,0.1,1)
+				if c then
+				end
+				GUI:PopItemWidth()
+
+				Text("Snap the Mini Window to a corner of the screen:")
+
+				local TopLeft = false
+				local TopRight = false
+				local BottomLeft = false
+				local BottomRight = false
+
+				local TopLeft2 = false
+				local TopRight2 = false
+				local BottomLeft2 = false
+				local BottomRight2 = false
+
+				local Position = self.Settings.Position
+
+				if Is(Position,"TL") then
+					TopLeft = true
+					TopLeft2 = true
+				elseif Is(Position,"TR") then
+					TopRight = true
+					TopRight2 = true
+				elseif Is(Position,"BL") then
+					BottomLeft = true
+					BottomLeft2 = true
+				elseif Is(Position,"BR") then
+					BottomRight = true
+					BottomRight2 = true
+				end
+
+				local x = 55
+				local y = 35
+				GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
+				GUI:BeginChild("##TL",x,y,true)
+					TopLeft,c = Checkbox("TL",TopLeft,"TL")
+				GUI:EndChild() SameLine()
+				GUI:BeginChild("##TR",x,y,true)
+					TopRight,c = Checkbox("TR",TopRight,"TR",true)
+				GUI:EndChild()
+				GUI:BeginChild("##BL",x,y,true)
+					BottomLeft,c = Checkbox("BL",BottomLeft,"BL")
+				GUI:EndChild() SameLine()
+				GUI:BeginChild("##BR",x,y,true)
+					BottomRight,c = Checkbox("BR",BottomRight,"BR",true)
+				GUI:EndChild()
+				GUI:PopStyleVar()
+
+				if TopLeft ~= TopLeft2 then
+					if TopLeft then
+						self.Settings.Position = "TL"
+					else
+						self.Settings.Position = "M"
+					end
+				elseif TopRight ~= TopRight2 then
+						self.Settings.Position = "TR"
+					if TopRight then
+					else
+						self.Settings.Position = "M"
+					end
+				elseif BottomLeft ~= BottomLeft2 then
+						self.Settings.Position = "BL"
+					if BottomLeft then
+					else
+						self.Settings.Position = "M"
+					end
+				elseif BottomRight ~= BottomRight2 then
+						self.Settings.Position = "BR"
+					if BottomRight then
+					else
+						self.Settings.Position = "M"
+					end
+				end
 			end
-			GUI:PopItemWidth()
-			SameLine() Text(" seconds to calculate average")
+		end
 
-			Text("Calculate once every ") SameLine()
-			GUI:PushItemWidth(85)
-			self.Settings.PulseDelay,c = GUI:InputInt("##PulseDelay",self.Settings.PulseDelay,50)
-			if c then
-			end
-			GUI:PopItemWidth()
-			SameLine() Text(" milliseconds")
+		if self.Settings.enable and (self.MiniGUI.open) then
+			self.MiniGUI.WindowData.xScreen,self.MiniGUI.WindowData.yScreen = GUI:GetScreenSize()
+			local xSize = self.MiniGUI.WindowData.xSize
+			local ySize = self.MiniGUI.WindowData.ySize
+			local xScreen = self.MiniGUI.WindowData.xScreen
+			local yScreen = self.MiniGUI.WindowData.yScreen
+			local EdgeDistance = self.Settings.EdgeDistance
 
-			self.Settings.ShowLabels,c = Checkbox("Show Labels",self.Settings.ShowLabels,"ShowLabels")
-			if c then
-			end
-			SameLine(5)
-
-			self.Settings.ShowMs,c = Checkbox("Show MPF(ms)",self.Settings.ShowMs,"ShowMs")
-			if c then
-			end
-			SameLine(5)
-
-
-			self.Settings.ShowPer,c = Checkbox("Show Bot Performance",self.Settings.ShowPer,"ShowPer")
-			if c then
-			end
-
-			Text("Set Text Scaling for Mini Window to ") SameLine()
-			GUI:PushItemWidth(85)
-			self.Settings.Scale,c = GUI:InputFloat("##Scale",self.Settings.Scale,0.1,0.1,1)
-			if c then
-			end
-			GUI:PopItemWidth()
-			SameLine() Text(" x normal size")
-
-			Text("Leave ") SameLine()
-			GUI:PushItemWidth(85)
-			self.Settings.EdgeDistance,c = GUI:InputInt("##EdgeDistance",self.Settings.EdgeDistance,1)
-			if c then
-			end
-			GUI:PopItemWidth()
-			SameLine() Text(" pixels of padding on each side when snapping")
-
-			Text("Set the Mini Window's opacity to ") SameLine()
-			GUI:PushItemWidth(85)
-			self.Settings.Opacity,c = GUI:InputFloat("##Opacity",self.Settings.Opacity,0.1,0.1,1)
-			if c then
-			end
-			GUI:PopItemWidth()
-
-			Text("Snap the Mini Window to a corner of the screen:")
-
-			local TopLeft = false
-			local TopRight = false
-			local BottomLeft = false
-			local BottomRight = false
-
-			local TopLeft2 = false
-			local TopRight2 = false
-			local BottomLeft2 = false
-			local BottomRight2 = false
-
-			local Position = self.Settings.Position
-
-			if Is(Position,"TL") then
-				TopLeft = true
-				TopLeft2 = true
-			elseif Is(Position,"TR") then
-				TopRight = true
-				TopRight2 = true
-			elseif Is(Position,"BL") then
-				BottomLeft = true
-				BottomLeft2 = true
-			elseif Is(Position,"BR") then
-				BottomRight = true
-				BottomRight2 = true
-			end
-
-			local x = 55
-			local y = 35
+			GUI:PushStyleColor(GUI.Col_Text,1,1,0,1)
+			GUI:PushStyleColor(GUI.Col_WindowBg,0,0,0,self.Settings.Opacity)
+			GUI:PushStyleVar(GUI.StyleVar_WindowPadding,10,3)
+			GUI:PushStyleVar(GUI.StyleVar_WindowRounding,3)
 			GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
-			GUI:BeginChild("##TL",x,y,true)
-			TopLeft,c = Checkbox("TL",TopLeft,"TL")
-			GUI:EndChild() SameLine()
-			GUI:BeginChild("##TR",x,y,true)
-			TopRight,c = Checkbox("TR",TopRight,"TR",true)
-			GUI:EndChild()
-			GUI:BeginChild("##BL",x,y,true)
-			BottomLeft,c = Checkbox("BL",BottomLeft,"BL")
-			GUI:EndChild() SameLine()
-			GUI:BeginChild("##BR",x,y,true)
-			BottomRight,c = Checkbox("BR",BottomRight,"BR",true)
-			GUI:EndChild()
-			GUI:PopStyleVar()
+			GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing,0,0)
 
-			if TopLeft ~= TopLeft2 then
-				if TopLeft then
-					self.Settings.Position = "TL"
-				else
-					self.Settings.Position = "M"
-				end
-			elseif TopRight ~= TopRight2 then
-				self.Settings.Position = "TR"
-				if TopRight then
-				else
-					self.Settings.Position = "M"
-				end
-			elseif BottomLeft ~= BottomLeft2 then
-				self.Settings.Position = "BL"
-				if BottomLeft then
-				else
-					self.Settings.Position = "M"
-				end
-			elseif BottomRight ~= BottomRight2 then
-				self.Settings.Position = "BR"
-				if BottomRight then
-				else
-					self.Settings.Position = "M"
-				end
+			local function FixedWindow()
+				self.MiniGUI.visible, self.MiniGUI.open = GUI:Begin(self.MiniGUI.name, self.MiniGUI.open, GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_AlwaysAutoResize + GUI.WindowFlags_NoMove)
 			end
-		end
-	end
-
-	if self.Settings.enable and (self.MiniGUI.open) then
-		self.MiniGUI.WindowData.xScreen,self.MiniGUI.WindowData.yScreen = GUI:GetScreenSize()
-		local xSize = self.MiniGUI.WindowData.xSize
-		local ySize = self.MiniGUI.WindowData.ySize
-		local xScreen = self.MiniGUI.WindowData.xScreen
-		local yScreen = self.MiniGUI.WindowData.yScreen
-		local EdgeDistance = self.Settings.EdgeDistance
-
-		GUI:PushStyleColor(GUI.Col_Text,1,1,0,1)
-		GUI:PushStyleColor(GUI.Col_WindowBg,0,0,0,self.Settings.Opacity)
-		GUI:PushStyleVar(GUI.StyleVar_WindowPadding,10,3)
-		GUI:PushStyleVar(GUI.StyleVar_WindowRounding,3)
-		GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
-		GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing,0,0)
-
-		local function FixedWindow()
-			self.MiniGUI.visible, self.MiniGUI.open = GUI:Begin(self.MiniGUI.name, self.MiniGUI.open, GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_AlwaysAutoResize + GUI.WindowFlags_NoMove)
-		end
-		local function FloatingWindow()
-			self.MiniGUI.visible, self.MiniGUI.open = GUI:Begin(self.MiniGUI.name, self.MiniGUI.open, GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_AlwaysAutoResize)
-		end
-
-		if Is(self.Settings.Position,"TL") then
-			GUI:SetNextWindowPos(EdgeDistance, EdgeDistance) FixedWindow()
-		elseif Is(self.Settings.Position,"TR") then
-			GUI:SetNextWindowPos(xScreen - (xSize + EdgeDistance), EdgeDistance) FixedWindow()
-		elseif Is(self.Settings.Position,"BL") then
-			GUI:SetNextWindowPos(EdgeDistance, yScreen - (ySize + EdgeDistance)) FixedWindow()
-		elseif Is(self.Settings.Position,"BR") then
-			GUI:SetNextWindowPos(xScreen - (xSize + EdgeDistance), yScreen - (ySize + EdgeDistance)) FixedWindow()
-		else
-			FloatingWindow()
-		end
-
-		self.MiniGUI.WindowData.xSize,self.MiniGUI.WindowData.ySize = GUI:GetWindowSize(); xSize = self.MiniGUI.WindowData.xSize; ySize = self.MiniGUI.WindowData.ySize
-		GUI:SetWindowFontScale(self.Settings.Scale)
-		if self.MiniGUI.visible then
-			if GUI:IsMouseHoveringWindow() then
-				Tooltip("FPS: Average Frames per Second\nms: Average Milliseconds between each Frame\nPER: Average Bot Performance, which is the time it takes to complete one cycle")
+			local function FloatingWindow()
+				self.MiniGUI.visible, self.MiniGUI.open = GUI:Begin(self.MiniGUI.name, self.MiniGUI.open, GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_AlwaysAutoResize)
 			end
-			local ShowLabels = self.Settings.ShowLabels
-			local FPS = self.Data.FPS.Average
-			local MPF = self.Data.MPF.Average
-			local PER = self.Data.BotPerformance.Average
-			local InfoSize = 0
-			local buffer = 0
 
-			local temp0 = GUI:CalcTextSize(string.format("%.1f",Round(FPS,0.1)))
-			local temp1 = GUI:CalcTextSize(string.format("%.1f",Round(MPF,0.1)))
-			local temp2 = GUI:CalcTextSize(string.format("%.4f",Round(PER,0.0001)))
+			if Is(self.Settings.Position,"TL") then
+				GUI:SetNextWindowPos(EdgeDistance, EdgeDistance) FixedWindow()
+			elseif Is(self.Settings.Position,"TR") then
+				GUI:SetNextWindowPos(xScreen - (xSize + EdgeDistance), EdgeDistance) FixedWindow()
+			elseif Is(self.Settings.Position,"BL") then
+				GUI:SetNextWindowPos(EdgeDistance, yScreen - (ySize + EdgeDistance)) FixedWindow()
+			elseif Is(self.Settings.Position,"BR") then
+				GUI:SetNextWindowPos(xScreen - (xSize + EdgeDistance), yScreen - (ySize + EdgeDistance)) FixedWindow()
+			else
+				FloatingWindow()
+			end
 
-			Text(string.format("%.1f",Round(FPS,0.1)))
-			if ShowLabels then
-				buffer = temp0
+			self.MiniGUI.WindowData.xSize,self.MiniGUI.WindowData.ySize = GUI:GetWindowSize(); xSize = self.MiniGUI.WindowData.xSize; ySize = self.MiniGUI.WindowData.ySize
+			GUI:SetWindowFontScale(self.Settings.Scale)
+			if self.MiniGUI.visible then
+				if GUI:IsMouseHoveringWindow() then
+					Tooltip("FPS: Average Frames per Second\nms: Average Milliseconds between each Frame\nPER: Average Bot Performance, which is the time it takes to complete one cycle")
+				end
+				local ShowLabels = self.Settings.ShowLabels
+				local FPS = self.Data.FPS.Average
+				local MPF = self.Data.MPF.Average
+				local PER = self.Data.BotPerformance.Average
+				local InfoSize = 0
+				local buffer = 0
+
+				local temp0 = GUI:CalcTextSize(string.format("%.1f",Round(FPS,0.1)))
+				local temp1 = GUI:CalcTextSize(string.format("%.1f",Round(MPF,0.1)))
+				local temp2 = GUI:CalcTextSize(string.format("%.4f",Round(PER,0.0001)))
+
+				Text(string.format("%.1f",Round(FPS,0.1)))
+				if ShowLabels then
+					buffer = temp0
+					if self.Settings.ShowMs then
+						if buffer < temp1 then buffer = temp1 end
+					end
+					if self.Settings.ShowPer then
+						if buffer < temp2 then buffer = temp2 end
+					end
+					Space((buffer-temp0) + 4)
+					Text("FPS")
+				end
+
 				if self.Settings.ShowMs then
-					if buffer < temp1 then buffer = temp1 end
+					Text(string.format("%.1f",Round(MPF,0.1)))
+					if ShowLabels then
+						Space((buffer-temp1) + 4)
+						Text("ms")
+					end
 				end
 				if self.Settings.ShowPer then
-					if buffer < temp2 then buffer = temp2 end
-				end
-				Space((buffer-temp0) + 4)
-				Text("FPS")
-			end
-
-			if self.Settings.ShowMs then
-				Text(string.format("%.1f",Round(MPF,0.1)))
-				if ShowLabels then
-					Space((buffer-temp1) + 4)
-					Text("ms")
+					Text(string.format("%.4f",Round(PER,0.0001)))
+					if ShowLabels then
+						Space((buffer-temp2) + 4)
+						Text("PER")
+					end
 				end
 			end
-			if self.Settings.ShowPer then
-				Text(string.format("%.4f",Round(PER,0.0001)))
-				if ShowLabels then
-					Space((buffer-temp2) + 4)
-					Text("PER")
-				end
-			end
+			GUI:PopStyleColor(2)
+			GUI:PopStyleVar(4)
+			GUI:End()
 		end
-		GUI:PopStyleColor(2)
-		GUI:PopStyleVar(4)
-		GUI:End()
 	end
 end
 
