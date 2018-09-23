@@ -190,7 +190,8 @@ function self.OnUpdate()
 							local c = 0
 							for id,e in pairs(Controls) do
 								local ControlName = e.name
-								if ControlName == "Talk" then
+								local IsOpen = e:IsOpen()
+								if ControlName == "Talk" and IsOpen then
 									local Talk, str, speaker, dialog = Dialog.Talk, e:GetStrings(), nil, nil
 									if data.Initialized then
 										if str[3] ~= Talk.LastString then
@@ -210,27 +211,27 @@ function self.OnUpdate()
 										Talk.LastString = str[3]
 									end
 								end
-								if ControlName == "_BattleTalk" then
-									local BattleTalk, str, speaker, dialog = Dialog.BattleTalk, e:GetStrings(), nil, nil
-									if data.Initialized then
-										if str[5] ~= BattleTalk.LastString then
-											BattleTalk.LastString = str[5]
-											speaker = str[4]
-											if Is(speaker,[[""]],[[???]],[[ ]],[[]]) then speaker = "Unknown Speaker" end
-											if BattleTalk.LastSpeaker ~= speaker then
-												BattleTalk.LastSpeaker = speaker
-												dialog = speaker.." says - "
-											else
-												dialog = ""
-											end
-											dialog = dialog..str[5]
-											self.Speak(dialog)
-										end
-									else
-										BattleTalk.LastString = str[5]
-									end
-								end
-								if ControlName == "_WideText" then
+--								if ControlName == "_BattleTalk" then
+--									local BattleTalk, str, speaker, dialog = Dialog.BattleTalk, e:GetStrings(), nil, nil
+--									if data.Initialized then
+--										if str[5] ~= BattleTalk.LastString then
+--											BattleTalk.LastString = str[5]
+--											speaker = str[4]
+--											if Is(speaker,[[""]],[[???]],[[ ]],[[]]) then speaker = "Unknown Speaker" end
+--											if BattleTalk.LastSpeaker ~= speaker then
+--												BattleTalk.LastSpeaker = speaker
+--												dialog = speaker.." says - "
+--											else
+--												dialog = ""
+--											end
+--											dialog = dialog..str[5]
+--											self.Speak(dialog)
+--										end
+--									else
+--										BattleTalk.LastString = str[5]
+--									end
+--								end
+								if ControlName == "_WideText" and IsOpen then
 									c = c + 1
 									local WideText, str = Dialog.WideText, e:GetStrings()[3]
 									if data.Initialized then
@@ -301,128 +302,130 @@ function self.OnUpdate()
 end
 
 function self.Draw()
-	if settings.enable then
-		local main = KaliMainWindow.GUI
-		local nav = main.NavigationMenu
+	if FinishedLoading then
+		if settings.enable then
+			local main = KaliMainWindow.GUI
+			local nav = main.NavigationMenu
 
-		if table.find(nav.Menu,self.GUI.NavName) == nil then
-			table.insert(nav.Menu,self.GUI.NavName)
-		end
-		if nav.selected == self.GUI.NavName then
-			main.Contents = function()
-				if data.SelectedVoiceIndex and data.SelectedVoiceTextSize then
-					if not SpeechInitialized then self.Speak() end
-					local h,label,x = GUI:GetTextLineHeightWithSpacing(),nil,nil
-					GUI:PushItemWidth(data.SelectedVoiceTextSize + 28)
-					local index, changed = GUI:Combo("##SelectVoice",data.SelectedVoiceIndex,data.VoiceNames,#data.VoiceNames)
-					if changed then
-						data.SelectedVoiceIndex = index
-						data.SelectedVoice = data.VoiceNames[index]
-						data.SelectedVoiceName = data.VoiceInfo[index].name
-					end
-					GUI:PopItemWidth() Space()
-					if GUI:IsItemClicked(GUI:Image(ImageFolder.."Speaker.png", h * 0.95588235294117647059, h)) then
-						self.Speak("You have selected "..data.SelectedVoiceName.." as Moogle Manager's default voice.")
-					end
-					if data.Play then label = "Pause" x = h * 0.74545454545454545455 else label = "Play" x = h * 0.75438596491228070175 end
-					if GUI:IsItemClicked(GUI:Image(ImageFolder..label.."Button.png", x, h)) then
-						self.PlayPause()
-					end Space()
-					GUI:PushItemWidth(100)
-					Text("Volume: ",0)
-					local value, changed = GUI:SliderInt("##Volume",data.Volume,0,100)
-					if changed then
-						data.Volume = value
-					end
-					Space(10)
-					Text("Rate: ",0)
-					local value,changed = GUI:SliderInt("##Rate",data.Rate,-10,10)
-					if changed then
-						data.Rate = value
-					end
-					GUI:PopItemWidth() Space()
-					if GUI:IsItemClicked(GUI:Image(ImageFolder.."Trash.png", h, h)) then
-						self.Dispose()
-					end
-				else
-					local time = os.clock()
-					local c = math.floor(math.floor((time - math.floor(time)) * 10) / 2)
-					Text("Loading"..string.rep(".",c))
-				end
-
-				--number UV0_x, number UV0_y, number UV1_x, number UV1_y, number framepadding,number bg_col_R, number bg_col_G, number bg_col_B, number bg_col_A, number tint_col_R, number tint_col_G, number tint_col_B, number tint_col_A )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-				--				NPCTTS = GUI:Checkbox("NPC Dialog Text To Speech",NPCTTS)
-				--				Indent()
-				--				NPCTalk = GUI:Checkbox("Listen to normal NPC Dialog that isn't voice acted.",NPCTalk)
-				--				NPCBattleTalk = GUI:Checkbox("Listen to NPC Dialog in battle.",NPCBattleTalk)
-				--				NPCWideText = GUI:Checkbox("Listen to special notifications which might indicate what a boss is doing.",NPCWideText)
-				--				Unindent()
-				--
-				--				local tbl = self.ReadTable
-				--				local Xend,Yend = GUI:GetContentRegionAvail()
-				--				local Ytrack = 0
-				--				local ReadSize = self.ReadSize
-				--				local Yspace = ml_gui.style.original.itemspacing["y"]
-				--				if In(ReadSize,0,1) then ReadSize = 1 else GUI:PushStyleColor(GUI.Col_ChildWindowBg,0,0,0,0.50) end
-				--				GUI:BeginChild("#ChatLines",0,ReadSize,false)
-				--				GUI:PushTextWrapPos(0)
-				--				GUI:PushItemWidth(-1)
-				--				if table.valid(tbl) then
-				--					local x,y = GUI:GetItemRectSize(GUI:Separator())
-				--					Ytrack = Ytrack + y
-				--					for k,v in table.pairsbykeys(tbl) do
-				--						Ytrack = Ytrack + Yspace
-				--						local x1,y1 = GUI:GetItemRectSize(Text(v.."\n"))
-				--						Ytrack = Ytrack + Yspace
-				--						local x2,y2 = GUI:GetItemRectSize(GUI:Separator())
-				--						Ytrack = (Ytrack + y1 + y2) - 1
-				--					end
-				--				end
-				--				GUI:PopItemWidth()
-				--				GUI:PopTextWrapPos()
-				--				GUI:EndChild()
-				--				if not In(ReadSize,0,1) then GUI:PopStyleColor() end
-				--				if Ytrack > Yend then
-				--					self.ReadSize = Yend
-				--				else
-				--					self.ReadSize = Ytrack
-				--				end
-				--				GUI:Text("TTL HotKey Toggle: ") GUI:SameLine(0,0)
-				--				local ReadHotkey = self.ReadHotkey
-				--				local ReturnedTable = ReadHotkey
-				--				ReturnedTable = HotKey(ReturnedTable)
-				--				if table.deepcompare(ReadHotkey,ReturnedTable) == false then
-				--					self.ReadHotkey = table.deepcopy(ReturnedTable)
-				--					MoogleSave("_G.MoogleTTS[Settings][ReadHotkey]")
-				--				end
+			if table.find(nav.Menu,self.GUI.NavName) == nil then
+				table.insert(nav.Menu,self.GUI.NavName)
 			end
+			if nav.selected == self.GUI.NavName then
+				main.Contents = function()
+					if data.SelectedVoiceIndex and data.SelectedVoiceTextSize then
+						if not SpeechInitialized then self.Speak() end
+						local h,label,x = GUI:GetTextLineHeightWithSpacing(),nil,nil
+						GUI:PushItemWidth(data.SelectedVoiceTextSize + 28)
+						local index, changed = GUI:Combo("##SelectVoice",data.SelectedVoiceIndex,data.VoiceNames,#data.VoiceNames)
+						if changed then
+							data.SelectedVoiceIndex = index
+							data.SelectedVoice = data.VoiceNames[index]
+							data.SelectedVoiceName = data.VoiceInfo[index].name
+						end
+						GUI:PopItemWidth() Space()
+						if GUI:IsItemClicked(GUI:Image(ImageFolder.."Speaker.png", h * 0.95588235294117647059, h)) then
+							self.Speak("You have selected "..data.SelectedVoiceName.." as Moogle Manager's default voice.")
+						end
+						if data.Play then label = "Pause" x = h * 0.74545454545454545455 else label = "Play" x = h * 0.75438596491228070175 end
+						if GUI:IsItemClicked(GUI:Image(ImageFolder..label.."Button.png", x, h)) then
+							self.PlayPause()
+						end Space()
+						GUI:PushItemWidth(100)
+						Text("Volume: ",0)
+						local value, changed = GUI:SliderInt("##Volume",data.Volume,0,100)
+						if changed then
+							data.Volume = value
+						end
+						Space(10)
+						Text("Rate: ",0)
+						local value,changed = GUI:SliderInt("##Rate",data.Rate,-10,10)
+						if changed then
+							data.Rate = value
+						end
+						GUI:PopItemWidth() Space()
+						if GUI:IsItemClicked(GUI:Image(ImageFolder.."Trash.png", h, h)) then
+							self.Dispose()
+						end
+					else
+						local time = os.clock()
+						local c = math.floor(math.floor((time - math.floor(time)) * 10) / 2)
+						Text("Loading"..string.rep(".",c))
+					end
+
+						--number UV0_x, number UV0_y, number UV1_x, number UV1_y, number framepadding,number bg_col_R, number bg_col_G, number bg_col_B, number bg_col_A, number tint_col_R, number tint_col_G, number tint_col_B, number tint_col_A )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					--				NPCTTS = GUI:Checkbox("NPC Dialog Text To Speech",NPCTTS)
+					--				Indent()
+					--				NPCTalk = GUI:Checkbox("Listen to normal NPC Dialog that isn't voice acted.",NPCTalk)
+					--				NPCBattleTalk = GUI:Checkbox("Listen to NPC Dialog in battle.",NPCBattleTalk)
+					--				NPCWideText = GUI:Checkbox("Listen to special notifications which might indicate what a boss is doing.",NPCWideText)
+					--				Unindent()
+					--
+					--				local tbl = self.ReadTable
+					--				local Xend,Yend = GUI:GetContentRegionAvail()
+					--				local Ytrack = 0
+					--				local ReadSize = self.ReadSize
+					--				local Yspace = ml_gui.style.original.itemspacing["y"]
+					--				if In(ReadSize,0,1) then ReadSize = 1 else GUI:PushStyleColor(GUI.Col_ChildWindowBg,0,0,0,0.50) end
+					--				GUI:BeginChild("#ChatLines",0,ReadSize,false)
+					--				GUI:PushTextWrapPos(0)
+					--				GUI:PushItemWidth(-1)
+					--				if table.valid(tbl) then
+					--					local x,y = GUI:GetItemRectSize(GUI:Separator())
+					--					Ytrack = Ytrack + y
+					--					for k,v in table.pairsbykeys(tbl) do
+					--						Ytrack = Ytrack + Yspace
+					--						local x1,y1 = GUI:GetItemRectSize(Text(v.."\n"))
+					--						Ytrack = Ytrack + Yspace
+					--						local x2,y2 = GUI:GetItemRectSize(GUI:Separator())
+					--						Ytrack = (Ytrack + y1 + y2) - 1
+					--					end
+					--				end
+					--				GUI:PopItemWidth()
+					--				GUI:PopTextWrapPos()
+					--				GUI:EndChild()
+					--				if not In(ReadSize,0,1) then GUI:PopStyleColor() end
+					--				if Ytrack > Yend then
+					--					self.ReadSize = Yend
+					--				else
+					--					self.ReadSize = Ytrack
+					--				end
+					--				GUI:Text("TTL HotKey Toggle: ") GUI:SameLine(0,0)
+					--				local ReadHotkey = self.ReadHotkey
+					--				local ReturnedTable = ReadHotkey
+					--				ReturnedTable = HotKey(ReturnedTable)
+					--				if table.deepcompare(ReadHotkey,ReturnedTable) == false then
+					--					self.ReadHotkey = table.deepcopy(ReturnedTable)
+					--					MoogleSave("_G.MoogleTTS[Settings][ReadHotkey]")
+					--				end
+				end
+			end
+		else
+			local main = KaliMainWindow.GUI
+			local nav = main.NavigationMenu
+			if NotNil(nav.Menu[table.find(nav.Menu,self.GUI.NavName)]) then nav.Menu[table.find(nav.Menu,self.GUI.NavName)] = nil end
 		end
-	else
-		local main = KaliMainWindow.GUI
-		local nav = main.NavigationMenu
-		if NotNil(nav.Menu[table.find(nav.Menu,self.GUI.NavName)]) then nav.Menu[table.find(nav.Menu,self.GUI.NavName)] = nil end
 	end
 end
 
