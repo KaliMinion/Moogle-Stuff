@@ -29,6 +29,7 @@ self.GUI = {
 	WindowName = "MoogleUpdater##MoogleUpdater",
 	name = "Moogle Script Management",
 	NavName = "Moogle Script Management",
+	MiniName = "Moogle Manager",
 	open = false,
 	visible = true,
 	MiniButton = false,
@@ -199,10 +200,13 @@ function self.OnUpdate()
 					if timevalue ~= CheckInterval * 2592000 then timevalue = CheckInterval * 2592000 end
 				end
 				if os.difftime(os.time(), LastCheck) >= timevalue then -- Check to see if enough time has passed to do another check --
+					AddTree("MoogleUpdater","Check Scripts",true)
 					local result = lastresult or GitFileText("MoogleScripts2")
 					if Type(result,"string") and #result > 3 then
+						AddTree("MoogleUpdater.Check Scripts","Obtained MoogleScripts",true)
 						if #webpage == 0 then webpage = loadstring(result)() end
 						if Valid(webpage) then
+							AddTree("MoogleUpdater.Check Scripts.Obtained MoogleScripts","Valid Script",true)
 							if lastresult ~= result then lastresult = result end
 							if MoogleScripts ~= webpage then MoogleScripts = webpage end
 
@@ -212,9 +216,12 @@ function self.OnUpdate()
 								local name, status, filepath, tablestr, url, category, info =
 								entry.name, entry.status, entry.filepath, entry.table, GitURL(entry.url), entry.category, entry.info
 
+								AddTree("MoogleUpdater.Check Scripts.Obtained MoogleScripts.Valid Script",name,true)
 								if CurrentVersions[name] == nil then
+									AddTree("MoogleUpdater.Check Scripts.Obtained MoogleScripts.Valid Script."..name,"Missing Current Version Record",true)
 									local update, str, result = VersionCheck(tablestr, url, MoogleVersions[name])
 									if str then
+										AddTree("MoogleUpdater.Check Scripts.Obtained MoogleScripts.Valid Script."..name..".Missing Current Version Record","Pass Success",true)
 										CurrentVersions[name] = str
 										if MoogleVersions[name] then
 											if CurrentVersions[name] > MoogleVersions[name] then MoogleVersions[name] = CurrentVersions[name] end
@@ -222,12 +229,15 @@ function self.OnUpdate()
 											MoogleVersions[name] = CurrentVersions[name]
 										end
 									else
+										AddTree("MoogleUpdater.Check Scripts.Obtained MoogleScripts.Valid Script."..name..".Missing Current Version Record","Pass Failed",true)
 										pass = false
 									end
 
 									if update then
 										-- You need to use the result to set the update live --
 									end
+								else
+									AddTree("MoogleUpdater.Check Scripts.Obtained MoogleScripts.Valid Script."..name,"Current Version Record Found",true)
 								end
 
 								if CurrentLastPushes[name] == nil then
@@ -248,7 +258,6 @@ function self.OnUpdate()
 									if _G[tablestr] then -- Checking if you have the module installed and loaded --
 									else
 										LoadModule(filepath)
-										--										pass = false
 									end
 								else
 
@@ -265,8 +274,14 @@ function self.OnUpdate()
 									table.print(MoogleLastPushes)
 								end
 							end
+						else
+							AddTree("MoogleUpdater.Check Scripts.Obtained MoogleScripts","Not Valid Script",true)
 						end
+					else
+						AddTree("MoogleUpdater.Check Scripts","Waiting for MoogleScripts",true)
 					end
+				else
+					AddTree("MoogleUpdater","Waiting for next check interval",true)
 				end
 			end
 			MoogleSave({
@@ -357,21 +372,58 @@ function self.Draw()
 						local yChild = AdjustChildren[k] or 50
 
 						GUI:PushStyleVar(GUI.StyleVar_WindowPadding, 5, 5) GUI:PushStyleVar(GUI.StyleVar_ItemSpacing, 0, 0) GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing, 0, 0)
-						GUI:BeginChild("##" .. name:gsub(" ", ""), 0, yChild, true, GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoInputs)
-						local width, icon = GUI:GetContentRegionAvailWidth(), 23
-						local xName, yName = GUI:CalcTextSize(name)
-						local xCategory,yCategory = GUI:CalcTextSize("Category:" .. category)
-						local xStability,yStability = GUI:CalcTextSize("Stability:" .. stability)
+						GUI:BeginChild("##" .. name:gsub(" ", ""), 0, yChild, true, GUI.WindowFlags_NoScrollWithMouse + GUI.WindowFlags_NoScrollbar)
+							local width, icon, module, LastPush = GUI:GetContentRegionAvailWidth(), 23, _G[table], MoogleLastPushes[name]
+							local xName, yName = GUI:CalcTextSize(name)
+							local xCategory,yCategory = GUI:CalcTextSize("Category:" .. category)
+							local xStability,yStability = GUI:CalcTextSize("Stability:" .. stability)
+							local label, labelSpace, labelWidth, stb = "", 0, 0, 0
+							local pushtime
 
-						if Is(category,"Core Moogle Module") then
-							Image("CoreModule",19,19,{tooltip=category})
-						elseif _G[table] then -- loaded
-							Text("Loaded")
-						elseif FileExists(filepath) then
-							Text("Not Loaded but Installed")
-						else
-							Text("Not Loaded and Not Installed")
-						end
+							if Is(category,"Core Moogle Module") then
+								Image("CoreModule",19,19,{tooltip=category})
+							elseif module then
+								module.Settings.enable = GUI:Checkbox("##"..table,module.Settings.enable)
+								if GUI:IsItemHoveredRect() then
+									local str,str2
+									if module.Settings.enable then
+										str = "enabled" str2 = "disable"
+									else
+										str = "disabled" str2 = "enable"
+									end
+									Tooltip("Currently "..str..", click to "..str2)
+								end
+							else
+								Image("Download",19,19,{tooltip="Install "..name})
+							end
+							Text(name,true)
+
+							if LastPush then
+								pushtime = os.difftime(os.time(),LastPush)
+--								if pushtime < week(4) then
+--									label = label .. "[New]"
+--									labelSpace = labelSpace + 4
+--									Text("[New]", { "1", "0", "0", "1" }, 4, true)
+--								end
+								if pushtime < day(3) then
+									label = label .. "[Updated]"
+									labelSpace = labelSpace + 4
+									Text("[Updated]", { "1", "1", "0", "1" }, 4, true)
+								end
+								if stability == "Beta" then
+									label = label .. "[Beta]"
+									labelSpace = labelSpace + 4
+									Text("[Beta]", { "0.3", "1", "0.3", "1" }, 4, true)
+								end
+								labelWidth = GUI:CalcTextSize(label) + labelSpace
+							end
+
+							if stability ~= "open" and stability ~= name then stb = xStability end
+							local add if stb then add = 8 else add = 4 end
+							Space(width - (icon + xName + labelWidth + xCategory + stb + add))
+							Text("Category:") Text(category, { "1", "1", "0", "1" }, 4, true)
+							if stb~=0 then Text("Stability:",true) Text(stability, { "1", "1", "0", "1" }, 4, true) end
+
 						GUI:EndChild()
 						GUI:PopStyleVar(3)
 					end
