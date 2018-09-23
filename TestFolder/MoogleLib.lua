@@ -67,6 +67,7 @@ API.MinionPath = GetStartupPath() local MinionPath = API.MinionPath
 API.LuaPath = GetLuaModsPath() local LuaPath = API.LuaPath
 
 API.MooglePath = LuaPath .. [[MoogleStuff Files\]] local MooglePath = API.MooglePath
+API.MoogleSettings = MooglePath .. [[MoogleSettings.lua]] local MoogleSettings = API.MoogleSettings
 API.ImageFolder = MooglePath .. [[Moogle Images\]] local ImageFolder = API.ImageFolder
 API.ScriptsFolder = MooglePath .. [[Moogle Scripts\]] local ScriptsFolder = API.ScriptsFolder
 API.TempFolder = MooglePath .. [[Temp\]] local TempFolder = API.TempFolder
@@ -74,7 +75,7 @@ API.TempFolder = MooglePath .. [[Temp\]] local TempFolder = API.TempFolder
 API.ACRFolder = LuaPath .. [[ACR\CombatRoutines\]] local ACRFolder = API.ACRFolder
 API.SenseProfiles = LuaPath .. [[Sense\profiles\]] local SenseProfiles = API.SenseProfiles
 API.SenseTriggers = LuaPath .. [[Sense\triggers\]] local SenseTriggers = API.SenseTriggers
-API.GitURL = function(ModuleFileName, Branch) Branch = Branch or "master" return [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/]] .. Branch .. [[/]] .. ModuleFileName .. [[.lua]] end local GitURL = API.GitURL
+API.GitURL = function(ModuleFileName, Branch) Branch = Branch or "master" return [[https://github.com/KaliMinion/Moogle-Stuff/blob/]] .. Branch .. [[/]] .. ModuleFileName .. [[.lua]] end local GitURL = API.GitURL
 
 local function sec(val,ms) val = val ms = ms or true if ms then return val*1000 else return val end end
 local function min(val,ms) val = val*60 ms = ms or true if ms then return val*1000 else return val end end
@@ -94,9 +95,21 @@ local function year(val,days,ms)
 	if ms then return val*1000 else return val end
 end
 
---DownloadImages,MoogleLoad
+local Initialize, LoadModule, VersionCheck, LastPush, GitFileText, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, Keybinds, RecordKeybinds, ToasterTable, ToasterTime, Toaster, CSV2Table, Error, debug, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, TimeSince, Size, Empty, NotEmpty, d2, DrawDebugInfo, DrawTree, AddTree, RemoveTree, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, WriteToFile, WipeFile, Queue, CMD, DownloadString, DownloadTable, DownloadFile, Ping, Split, starts, ends, ToTable, ProperCase, Proper, Case, Title, TitleCase, IsURL, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, BannedKeys, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Image, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables, FinishedLoading
 
-local Initialize, LoadModule, VersionCheck, LastPush, GitFileText, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, Keybinds, RecordKeybinds, ToasterTable, ToasterTime, Toaster, Error, debug, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, TimeSince, Size, Empty, NotEmpty, d2, DrawDebugInfo, DrawTree, AddTree, RemoveTree, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, WriteToFile, WipeFile, Queue, CMD, DownloadString, DownloadTable, DownloadFile, Ping, Split, starts, ends, ToTable, ProperCase, Proper, Case, Title, TitleCase, IsURL, Valid, NotValid, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, BannedKeys, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Image, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables, FinishedLoading
+--local loaded = true
+--local function VarInit(var,func)
+--	if loaded then
+--		if var == nil then
+--			if func then
+--			else
+--			end
+--		else
+--		end
+--	else
+--		return nil, false
+--	end
+--end
 
 local loaded = true
 local function UpdateLocals4()
@@ -105,6 +118,7 @@ local function UpdateLocals4()
 	if loaded and IndexToDecimal == nil then if Gui.IndexToDecimal then IndexToDecimal = Gui.IndexToDecimal else loaded = false end end
 	if loaded and HotKey == nil then if Gui.HotKey then HotKey = Gui.HotKey else loaded = false end end
 	if loaded and DrawTables == nil then if Gui.DrawTables then DrawTables = Gui.DrawTables else loaded = false end end
+	if loaded and CSV2Table == nil then if API.CSV2Table then CSV2Table = API.CSV2Table else loaded = false end end
 	if loaded then FinishedLoading = true end
 end
 local function UpdateLocals3()
@@ -286,7 +300,7 @@ end
 
 local LocalsStr
 function API.LoadModule(filepath)
-	AddTree("MoogleLib.API","Load Module")
+	AddTree("MoogleLib.API","Load Module",true)
 	AddTree("MoogleLib.API.Load Module",filepath:gsub("%.","_"),true)
 	if fileexist(filepath) then
 		AddTree("MoogleLib.API.Load Module."..filepath:gsub("%.","_"),"Valid Result",true)
@@ -308,18 +322,17 @@ function API.LoadModule(filepath)
 		local file = io.open(filepath,"r")
 		repeat line = file:read("*l") str = str..line.."\r\n" until line:match([[-- End of File --]]) file:close()
 
-		local pos = 0
 		loadstring(str)()
 		local filename = filepath:match("[^\\]+$"):gsub("%..+$","") if filename then d("MoogleLib: Loading "..filename) end
 	end
 end
 
 function API.VersionCheck(name, url, version)
-	AddTree("MoogleLib.API","Version Check")
+	AddTree("MoogleLib.API","Version Check",true)
 	AddTree("MoogleLib.API.Version Check",name,true)
 	url = url or GitURL(name)
 
-	local result, localversion = DownloadString(url), nil
+	local result, localversion = GitFileText(url), nil
 	if Type(_G[name],"table") then localversion = _G[name].Info.Version end
 	if Type(result,"string") and #result > 3 then
 		AddTree("MoogleLib.API.Version Check."..name,"Valid Result",true)
@@ -344,7 +357,11 @@ function API.VersionCheck(name, url, version)
 				elseif tbl[1] == tbl3[1] and (tbl[2] > tbl3[2]) then update = true
 				elseif tbl[1] == tbl3[1] and tbl[2] == tbl3[2] and (tbl[3] > tbl3[3]) then update = true
 				end
-				if update then AddTree("MoogleLib.API.Version Check."..name..".Valid Result","Update Available") end
+				if update then
+					AddTree("MoogleLib.API.Version Check."..name..".Valid Result","Update Available",true)
+				else
+					AddTree("MoogleLib.API.Version Check."..name..".Valid Result","No Update Available",true)
+				end
 
 				return update, str, result
 			elseif localversion then
@@ -356,24 +373,33 @@ function API.VersionCheck(name, url, version)
 				elseif tbl[1] == tbl2[1] and (tbl[2] > tbl2[2]) then update = true
 				elseif tbl[1] == tbl2[1] and tbl[2] == tbl2[2] and (tbl[3] > tbl2[3]) then update = true
 				end
-				if update then AddTree("MoogleLib.API.Version Check."..name..".Valid Result","Update Available") end
+				if update then
+					AddTree("MoogleLib.API.Version Check."..name..".Valid Result","Update Available",true)
+				else
+					AddTree("MoogleLib.API.Version Check."..name..".Valid Result","No Update Available",true)
+				end
 
 				return update, str, result
 			else
 				return false, str, result
 			end
+		else
+			return false, str, result
 		end
 	end
 end
 
 function API.LastPush(GitFile, date)
-	AddTree("MoogleLib.API","LastPush")
+	AddTree("MoogleLib.API","LastPush",true)
 	AddTree("MoogleLib.API.LastPush",tostring(GitFile:gsub("%.lua",""):gsub("%/"," - ")),true)
 	local tbl = {}
-	local result = OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $content = (New-Object System.Net.WebClient).DownloadString('https://github.com/KaliMinion/Moogle-Stuff/commits/master/]] .. GitFile ..[['); $HTML = New-Object -Com 'HTMLFile'; $src = [System.Text.Encoding]::Unicode.GetBytes($content); $HTML.write($src); @($HTML.body.getElementsByTagName('relative-time'))[0].outerHTML | %{$_.split('"')[1]} | Set-Content -Path 'outputfile'"]])
+	local url = [[https://github.com/KaliMinion/Moogle-Stuff/commits/master/]]..GitFile
+--	d("Last Push URL: "..url)
+	local result = OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $content = (New-Object System.Net.WebClient).DownloadString(']]..url..[['); $HTML = New-Object -Com 'HTMLFile'; $src = [System.Text.Encoding]::Unicode.GetBytes($content); $HTML.write($src); $result = (@($HTML.body.getElementsByTagName('relative-time'))[0].outerHTML).split('\"')[1]; $result >> "outputfile""]])
 	if result then
+		result = result:gsub("\n","")
 		AddTree("MoogleLib.API.LastPush."..tostring(GitFile:gsub("%.lua",""):gsub("%/"," - ")),"Valid Result",true)
-		for s in (result:match("\"[^\"]+"):gsub("\"","")):gmatch("[%d]+") do
+		for s in result:gmatch("[%d]+") do
 			tbl[#tbl+1] = s
 		end
 		if #tbl == 6 then
@@ -387,13 +413,14 @@ function API.LastPush(GitFile, date)
 end
 
 function API.GitFileText(GitFile)
-	AddTree("MoogleLib.API","GitFile Text")
+	AddTree("MoogleLib.API","GitFile Text",true)
 	AddTree("MoogleLib.API.GitFile Text", GitFile,true)
 	local url; if IsURL(GitFile) then url = GitFile else url = [[https://github.com/KaliMinion/Moogle-Stuff/blob/master/]]..GitFile..[[.lua]] end
 	return OS.CMD([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $content = (New-Object System.Net.WebClient).DownloadString(']]..url..[['); $HTML = New-Object -Com 'HTMLFile'; $src = [System.Text.Encoding]::Unicode.GetBytes($content); $HTML.write($src); @($HTML.body.getElementsByTagName('table'))[0].innerText | Set-Content -Path 'outputfile'"]])
 end
 
 local init = true
+MoogleInput = false
 API.InputTable = {}
 function API.Input(event, message, wParam, lParam)
 	if table.size(API.InputTable) ~= 0 then API.InputTable = {} end
@@ -401,14 +428,21 @@ function API.Input(event, message, wParam, lParam)
 		ml_input_mgr.InputHandler = function(event, message, wParam, lParam)
 			--			d(tostring(message).." "..tostring(wParam).." "..tostring(lParam)) -- all string values received.
 			if (string.valid(message) and string.valid(wParam) and string.valid(lParam)) then
-				-- scrolling zoom for btree, keep this for minion function
-				if (message == "522") then
-					BehaviorManager:ChangeZoom(tonumber(lParam))
+				API.InputTable.message = message
+				API.InputTable.wParam = wParam
+				API.InputTable.lParam = lParam
+
+				if MoogleInput then
+					table.print(API.InputTable)
 				end
+
+				-- Mouse Wheel --
+--				if (message == "522") then
+					-- scrolling zoom for btree, keep this for minion function
+--					BehaviorManager:ChangeZoom(tonumber(lParam))
+--					Error(tonumber(lParam)/120)
+--				end
 			end
-			API.InputTable.message = message
-			API.InputTable.wParam = wParam
-			API.InputTable.lParam = lParam
 		end
 		init = false
 		-- Unable to use my event function due to issues --
@@ -421,7 +455,9 @@ end
 
 function API.MouseWheel()
 	if API.InputTable.message == "522" then
-		return tonumber(API.InputTable.lParam) / 120
+		local power = tonumber(API.InputTable.lParam) / 120
+		Error("Mouse Wheel Power: "..power)
+		return power
 	end
 end
 
@@ -433,17 +469,10 @@ end
 --	Error("Scrolling "..state..add)
 --end
 
-function API.Vars(Tbl, load, UseJustSettings)
+MoogleSettingsTable = FileLoad(MoogleSettings) or {}
+function API.Vars(Tbl, load)
 	for k, v in pairs(Tbl) do
-		local SaveTable = _G.Settings
-		if UseJustSettings == nil then
-			if type(SaveTable.MoogleStuff) == "table" then
-				SaveTable = SaveTable.MoogleStuff
-			else
-				SaveTable.MoogleStuff = {}
-				SaveTable = SaveTable.MoogleStuff
-			end
-		end
+		local SettingsTable = MoogleSettingsTable
 		local savevar = ""
 		local ModuleTable = _G
 		local t = {}
@@ -454,13 +483,14 @@ function API.Vars(Tbl, load, UseJustSettings)
 		for w in tostring(v):gmatch("[%P/_/:]+") do
 			t2[#t2 + 1] = w
 		end
+
 		for i, e in pairs(t) do
 			if i < #t then
-				if type(SaveTable[e]) == "table" then
-					SaveTable = SaveTable[e]
+				if type(SettingsTable[e]) == "table" then
+					SettingsTable = SettingsTable[e]
 				else
-					SaveTable[e] = {}
-					SaveTable = SaveTable[e]
+					SettingsTable[e] = {}
+					SettingsTable = SettingsTable[e]
 				end
 			else
 				savevar = e
@@ -476,17 +506,13 @@ function API.Vars(Tbl, load, UseJustSettings)
 				end
 			else
 				if load then
---					if type(SaveTable[savevar]) == nil then
---						SaveTable[savevar] = ModuleTable[e]
---					end
---					ModuleTable[e] = SaveTable[savevar] or ModuleTable[e]
-					if type(SaveTable[savevar]) ~= nil and SaveTable[savevar] ~= ModuleTable[e] then
-						ModuleTable[e] = SaveTable[savevar] or ModuleTable[e]
+					if type(SettingsTable[savevar]) ~= nil and SettingsTable[savevar] ~= ModuleTable[e] then
+						ModuleTable[e] = SettingsTable[savevar] or ModuleTable[e]
 					end
 				else
-					if type(SaveTable[savevar]) == nil or SaveTable[savevar] ~= ModuleTable[e] then
-						SaveTable[savevar] = ModuleTable[e]
-						ml_settings_mgr:SaveSettings()
+					if type(SettingsTable[savevar]) == nil or SettingsTable[savevar] ~= ModuleTable[e] then
+						SettingsTable[savevar] = ModuleTable[e]
+						FileSave(MoogleSettings,MoogleSettingsTable)
 					end
 				end
 			end
@@ -504,14 +530,14 @@ function API.DownloadImages(image,path)
 	if FinishedLoading then
 		if image == nil then
 			if TimeSince(API.ImageLastCheck,min(1)) then
-				AddTree("MoogleLib.API","Download Image")
+				AddTree("MoogleLib.API","Download Image",true)
 				AddTree("MoogleLib.API.Download Image","Automated Check",true)
 				path = path or ImageFolder
 				API.ImageCMD = io.popen([[PowerShell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $path = ']]..path..[['; mkdir -Force $path | Out-Null; (Invoke-WebRequest -Uri 'https://github.com/KaliMinion/Moogle-Stuff/tree/master/Moogle%20Images').Links | Where-Object -Property class -EQ -Value 'js-navigation-open' | Select-Object -Skip 1 | ForEach-Object{$url = 'https://github.com' + ($_.href -replace 'blob/', 'raw/'); if(![System.IO.File]::Exists($path+$_.title)){try{Invoke-WebRequest $url -OutFile ($path+$_.title)} catch { $_.Exception.Response }}}"]])
 				API.ImageLastCheck = Now()
 			end
 		else
-			AddTree("MoogleLib.API","Download Image")
+			AddTree("MoogleLib.API","Download Image",true)
 			AddTree("MoogleLib.API.Download Image",image,true)
 			path = path or ImageFolder
 		end
@@ -787,6 +813,25 @@ function API.Toaster(Title, Text, Time)
 	end
 	if table.valid(API.ToasterTime) then
 		GUI:Begin("ToasterWindow" .. tostring())
+	end
+end
+
+function API.CSV2Table(filepath)
+	AddTree("MoogleLib.API","CSV2Table",true)
+	AddTree("MoogleLib.API.CSV2Table",filepath:gsub("%.","_"),true)
+	if fileexist(filepath) then
+		AddTree("MoogleLib.API.CSV2Table."..filepath:gsub("%.","_"),"Valid Result",true)
+		local file = {}
+		for line in io.lines(filepath) do
+			local key = #file+1
+			file[key] = {}
+			local k = 1
+			for w in line:gmatch("[^,]+") do
+				file[key][k] = w
+				k = k + 1
+			end
+		end
+		return file
 	end
 end
 
@@ -1502,6 +1547,7 @@ function OS.CMD(cmd)
 							debug("CMD: Time has expired on this entry, clearing entry and setting k to "..tostring(k),2)
 							if q[k].CMD then q[k].CMD:close() end
 							q[k] = {}
+							OS.CurrentConnections = OS.CurrentConnections - 1
 							break
 						end
 					else
@@ -1524,6 +1570,7 @@ function OS.CMD(cmd)
 	local outputfile = TempFolder .. [[output]] .. k .. [[.txt]]
 	cmd = cmd:gsub("outputfile",outputfile)
 	--d(cmd)
+	debug("CMD: "..cmd,3)
 	if new then
 		if OS.CurrentConnections < OS.MaxConnections then
 			if DeleteFile(outputfile) then
@@ -1541,8 +1588,9 @@ function OS.CMD(cmd)
 		q[k].time = Now()
 		q[k].type = io.type(q[k].CMD)
 		if q[k].type == "file" then
+			debug("CMD: Our CMD process is a file",3)
 			if FileExists(outputfile) then
-				AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node","Output Exists",true)
+				AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node","Output File Exists",true)
 				debug("CMD: Our CMD process is a file.",2)
 				local str, file = nil, io.open(outputfile)
 				if file then
@@ -1560,9 +1608,22 @@ function OS.CMD(cmd)
 					return str
 				end
 			else
-				debug("CMD: Our output file doesn't exist. outputfile = "..outputfile,3)
+				local timesince = q[k].time - q[k].timestart
+				AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node","Output File Missing",true)
+				debug("CMD: Our output file doesn't exist.",3)
+				debug("outputfile = "..outputfile,3)
+				debug("Seconds Taken: "..timesince/1000,3)
+				if timesince > 10000 then
+					AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k,"New Node",true)
+					debug(cmd,3)
+					debug("CMD: Time has expired on this entry, clearing entry and setting k to "..tostring(k),2)
+					if q[k].CMD then q[k].CMD:close() end
+					q[k] = {}
+					OS.CurrentConnections = OS.CurrentConnections - 1
+				end
 			end
 		else
+			AddTree("MoogleLib.Lua.OS.CMD.Checking Node."..k..".Existing Node","Missing Lua IO File",true)
 			debug("CMD: Our Start Time is.."..tostring(q[k].timestart),3)
 			debug("CMD: Our CMD process is not a file yet...",2)
 			if TimeSince(q[k].timestart,10000) then q[k] = nil end
@@ -1573,6 +1634,7 @@ end
 
 function OS.DownloadString(url)
 	AddTree("MoogleLib.Lua.OS","Download String")
+--	debug("OS.DownloadString: URL ["..url.."]",3)
 	local result = OS.CMD([[PowerShell -Command "(New-Object System.Net.WebClient).DownloadString(']] .. url .. [[') | Set-Content -Path 'outputfile'"]])
 	if result then
 		AddTree("MoogleLib.Lua.OS.Download String","Valid Result",true)
@@ -1885,15 +1947,14 @@ local ResumePrinting = true
 local PrintToFile = false
 local PrintToFileTable = {}
 local PrintTables = {}
-function Table.Print(tbl, name, search, filelocation, depth, history)
+function Table.Print(tbl, search, filelocation, name, depth, history, valuesonly, keysonly)
 	local max = 50
-	if IsNil(name) then
-		if Type(tbl, "string") then
-			local t = {};
-			for w in tbl:gmatch("[%P/_/:]+") do
-				t[#t + 1] = w
-			end
-			name = ""
+	if Type(tbl, "string") or type(search)=="boolean" then
+		if type(search)=="boolean" then filelocation=search search=nil end
+		if tbl:match("[%P/_/:]+") ~= tbl then -- checking to make sure that tbl was a string of a table address
+			local t = {}
+			for w in tbl:gmatch("[%P/_/:]+") do t[#t + 1] = w end
+			name = "_G"
 			tbl = _G
 			for k, v in pairs(t) do
 				tbl = tbl[v]
@@ -1901,17 +1962,20 @@ function Table.Print(tbl, name, search, filelocation, depth, history)
 				name = name .. v
 				if t[k + 1] then name = name .. "]" end
 			end
-		else
-			name = name or ""
+		else -- tbl wasn't a string of a table address, it was just a search variable
+			if IsNil(name) and IsNil(search) then search = tbl end
+			tbl = _G
+			name = "_G"
 		end
 	end
+	name = name or "_G"
 	search = search or ""
 	depth = tonumber(depth) or 0
 	history = history or ""
 	if filelocation ~= nil then
 		PrintToFile = true
 		if filelocation == true then
-			filelocation = MooglePath .. [[output.lua]]
+			filelocation = MooglePath .. [[Temp\TablePrintOutput.txt]]
 		end
 	end
 
@@ -1944,9 +2008,10 @@ function Table.Print(tbl, name, search, filelocation, depth, history)
 				allowed = false
 				if NotAll(nil, k, v, search) then
 					local search = search:lower()
-					if tostring(k):lower():match(search) then
+					if valuesonly~=true and tostring(k):lower():match(search) then
 						allowed = true
-					elseif type(v) ~= "table" and tostring(v):lower():match(search) then
+					end
+					if keysonly~=true and type(v) ~= "table" and tostring(v):lower():match(search) then
 						allowed = true
 					end
 				end
@@ -1968,7 +2033,7 @@ function Table.Print(tbl, name, search, filelocation, depth, history)
 			if type(v) == "table" then
 				if depth < max then
 					d3(string.rep("   ", depth) .. "[" .. name .. "]" .. history .. " " .. tostring(k) .. " = \{")
-					Table.Print(v, name, search, filelocation, depth + 1, history .. " [" .. k .. "]")
+					Table.Print(v, search, filelocation, name, depth + 1, history .. " [" .. k .. "]", valuesonly, keysonly)
 					d3(string.rep("   ", depth) .. "[" .. name .. "]" .. history .. " \}")
 				else
 					d3(string.rep("   ", depth) .. "[" .. name .. "]" .. history .. " " .. tostring(k) .. " has reached its limit at a depth of " .. max .. " and will not continue to print deeper.")
@@ -1982,7 +2047,9 @@ function Table.Print(tbl, name, search, filelocation, depth, history)
 				elseif Type(v, "boolean") then
 					str = tostring(v):upper()
 				elseif Type(v, "function") then
-					if Table.BannedKeys[lasthistory] then
+					str = "function"
+					-- temp disable function --
+					--[[if Table.BannedKeys[lasthistory] then
 						InsertIfNil(TempFunctionStrings, tostring(v), true)
 						if lasthistory == lastlasthistory then
 							ResumePrinting = true
@@ -1996,7 +2063,7 @@ function Table.Print(tbl, name, search, filelocation, depth, history)
 						else
 							str = FunctionString .. " : " .. string.dump(v):gsub("[^ !#-~]", "."):gsub("(\n|\r)", ""):gsub("[@|%%|%`|%$|%'|%?]", ""):gsub("[.][,|!|@|#|$|^|&|*|(|)|_|=|>|<|%:|%;|~|`|\"|/|[| |a-z|A-Z|0-9|%]|%-|%+|%\|%/|?|%>|%<|%{|%}][.]", ""):gsub("[.][A-Z]+[.]", ""):gsub("[.][.]*[.]", "..."):gsub("\.LuaQ\.\.\.", "")
 						end
-					end
+					end]]--
 				else
 					str = tostring(v)
 				end
@@ -2033,6 +2100,7 @@ function Table.Print(tbl, name, search, filelocation, depth, history)
 
 			PrintToFile = false
 			table.clear(PrintToFileTable)
+			io.popen([[Powershell -Command "Start-Process notepad ']]..filelocation..[['"]])
 		end
 	end
 end
