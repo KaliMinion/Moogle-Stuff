@@ -1,6 +1,0 @@
-[Module]
-Name=Moogle MultiSession Manager
-Dependencies=minionlib
-Version=1
-Files=Moogle MultiSession Manager.lua
-enabled=1

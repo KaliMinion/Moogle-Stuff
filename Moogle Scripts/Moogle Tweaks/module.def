@@ -1,6 +1,0 @@
-[Module]
-Name=Moogle Tweaks
-Dependencies=minionlib
-Version=1
-Files=Moogle Tweaks.lua
-enabled=1

@@ -1,139 +1,85 @@
-local tbl =
-{
+local MooglePath = GetLuaModsPath() .. [[MoogleStuff Files\]]
+
+local MoogleScripts = {
 	[1] = {
-		name = "Moogle Updater",
-		status = "open",
-		filepath = [[Moogle Updater.lua]],
-		table = "return MoogleUpdater",
-		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Updater.lua]],
-		version = "1.3.6",
-		category = "Core Moogle Module",
-		stability = "Core Moogle Module",
-		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1519938708,
-		info = [[Downloads scripts, keeps them updated. :P!]],
+		name = [[Moogle Updater]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Updater.lua]],
+		table = [[MoogleUpdater]],
+		url = [[TestFolder/Moogle Updater]],
+		category = [[Core Moogle Module]],
+		stability = [[open]],
+		info = [[Downloads scripts, keeps them updated. :P!]]
 	},
 	[2] = {
-		name = "Main Window",
-		status = "open",
-		filepath = [[Main Window.lua]],
-		table = "return KaliMainWindow",
-		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Main%20Window.lua]],
-		version = "1.3.3",
-		category = "Core Moogle Module",
-		stability = "Core Moogle Module",
-		instver = KaliMainWindow.Info.Version or false,
-		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1519938341,
-		info = [[The Main Window that all Moogle Scripts share to display the settings for each module.]],
+		name = [[Main Window]],
+		status = [[open]],
+		filepath = MooglePath..[[Main Window.lua]],
+		table = [[KaliMainWindow]],
+		url = [[TestFolder/Main Window]],
+		category = [[Core Moogle Module]],
+		stability = [[open]],
+		info = [[The Main Window that all Moogle Scripts share to display the settings for each module.]]
 	},
 	[3] = {
-		name = "MoogleLib",
-		status = "open",
-		filepath = [[MoogleLib.lua]],
-		table = "return MoogleLib",
-		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/MoogleLib.lua]],
-		version = "1.3.10",
-		category = "Core Moogle Module",
-		stability = "Core Moogle Module",
-		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1519868875,
-		info = [[Where all my Moogle Functions are stored.]],
+		name = [[MoogleLib]],
+		status = [[open]],
+		filepath = MooglePath..[[MoogleLib.lua]],
+		table = [[MoogleLib]],
+		url = [[TestFolder/MoogleLib]],
+		category = [[Core Moogle Module]],
+		stability = [[open]],
+		info = [[Where all my Moogle Functions are stored.]]
 	},
 	[4] = {
-		name = "Moogle Text to Speech",
-		status = "open",
-		filepath = [[Moogle Scripts\Moogle TTS\Moogle TTS.lua]],
-		table = "return MoogleTTS",
-		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Scripts/Moogle%20TTS/Moogle%20TTS.lua]],
-		version = "1.1.6",
-		category = "Utility",
-		stability = "WiP but Working",
-		releasedate = os.time { year = 2017, month = 12, day = 9 },
-		lastupdate = 1519607134,
-		info = [[Narrates NPC dialog, as well as some other windows in game.]],
-		module = [[[Module]
-Name=Moogle TTS
-Dependencies=minionlib
-Version=1
-Files=Moogle TTS.lua
-enabled=1]],
+		name = [[Moogle FPS]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle FPS.lua]],
+		table = [[MoogleFPS]],
+		url = [[TestFolder/Moogle Scripts/Moogle FPS]],
+		category = [[Utility]],
+		stability = [[open]],
+		info = [[An FPS overlay like Fraps or Nvidia's GeForce Experience. For people who have issue using Minion with other overlays.]]
 	},
 	[5] = {
-		name = "Moogle FPS",
-		status = "open",
-		filepath = [[Moogle Scripts\Moogle FPS\Moogle FPS.lua]],
-		table = "return MoogleFPS",
-		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Scripts/Moogle%20FPS/Moogle%20FPS.lua]],
-		version = "1.2.8",
-		category = "Utility",
-		stability = "Working",
-		releasedate = os.time { year = 2017, month = 05, day = 29 },
-		lastupdate = 1519534672,
-		info = [[An FPS overlay like Fraps or Nvidia's GeForce Experience. For people who have issue using Minion with other overlays.]],
-		module = [[[Module]
-Name=Moogle FPS
-Dependencies=minionlib
-Version=1
-Files=Moogle FPS.lua
-enabled=1]]
+		name = [[Moogle Text to Speech]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle TTS.lua]],
+		table = [[MoogleTTS]],
+		url = [[TestFolder/Moogle Scripts/Moogle TTS]],
+		category = [[Utility]],
+		stability = [[open]],
+		info = [[Narrates NPC dialog, as well as some other windows in game.]]
 	},
 	[6] = {
-		name = "Moogle PushButton",
-		status = "open",
-		filepath = [[Moogle Scripts\Moogle PushButton\Moogle PushButton.lua]],
-		table = "return MooglePushButton",
-		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Scripts/Moogle%20PushButton/Moogle%20PushButton.lua]],
-		version = "1.0.1",
-		category = "Dev",
-		stability = "Working",
-		releasedate = os.time { year = 2018, month = 01, day = 25 },
-		lastupdate = 1519064147,
-		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]],
-		module = [[[Module]
-Name=Moogle PushButton
-Dependencies=minionlib
-Version=1
-Files=Moogle PushButton.lua
-enabled=1]]
+		name = [[Moogle PushButton]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle PushButton.lua]],
+		table = [[MooglePushButton]],
+		url = [[TestFolder/Moogle Scripts/Moogle PushButton]],
+		category = [[Dev]],
+		stability = [[open]],
+		info = [[A developer module like the one in Dev, but able to iterate PushButton presses.]]
 	},
 	[7] = {
-		name = "Moogle Tweaks",
-		status = "open",
-		filepath = [[Moogle Scripts\Moogle Tweaks\Moogle Tweaks.lua]],
-		table = "return MoogleTweaks",
-		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Scripts/Moogle%20Tweaks/Moogle%20Tweaks.lua]],
-		version = "1.0.3",
-		category = "Utility",
-		stability = "WiP but Working",
-		releasedate = os.time { year = 2018, month = 02, day = 19 },
-		lastupdate = 1519868918,
-		info = [[Navigate to NPCs and trade in items for stuffs, temp name, will make it better later.]],
-		module = [[[Module]
-Name=Moogle Tweaks
-Dependencies=minionlib
-Version=1
-Files=Moogle Tweaks.lua
-enabled=1]]
+		name = [[Moogle Recorder]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle Recorder.lua]],
+		table = [[MoogleRecorder]],
+		url = [[TestFolder/Moogle Scripts/Moogle Recorder]],
+		category = [[Dev]],
+		stability = [[Beta]],
+		info = [[A developer module to record entity actions in a timeline fashion, recording behavior and patterns.]]
 	},
 	[8] = {
-		name = "Moogle MultiSession Manager",
-		status = "open",
-		filepath = [[Moogle Scripts\Moogle MultiSession Manager\Moogle MultiSession Manager.lua]],
-		table = "return MoogleMultiSessionManager",
-		url = [[https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle%20Scripts/Moogle%20MultiSession%20Manager/Moogle%20MultiSession%20Manager.lua]],
-		version = "0.0.11",
-		category = "Utility",
-		stability = "Beta",
-		releasedate = os.time { year = 2018, month = 02, day = 28 },
-		lastupdate = 1519904582,
-		info = [[A module to monitor what other bot instances on your computer are doing, send commands to specific instances or all at the same time.]],
-		module = [[[Module]
-Name=Moogle MultiSession Manager
-Dependencies=minionlib
-Version=1
-Files=Moogle MultiSession Manager.lua
-enabled=1]]
+		name = [[Moogle Music]],
+		status = [[open]],
+		filepath = MooglePath..[[Moogle Scripts\Moogle Music.lua]],
+		table = [[MoogleMusic]],
+		url = [[TestFolder/Moogle Scripts/Moogle Music]],
+		category = [[Dev]],
+		stability = [[Beta]],
+		info = [[A branch off of Ace's Music player with a few extra features.]]
 	},
 }
-return tbl
+return MoogleScripts

@@ -1,11 +1,14 @@
-KaliMainWindow = {}
+local KaliMainWindow = {}
+local self = KaliMainWindow
+local selfs = "KaliMainWindow"
 
-KaliMainWindow.Info = {
+self.Info = {
 	Creator = "Kali",
-	Version = "1.3.3",
+	Version = "1.3.4",
 	StartDate = "09/24/17",
 	ReleaseDate = "09/24/17",
 	LastUpdate = "09/24/17",
+	URL = "https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Main%20Window.lua",
 	ChangeLog = {
 		["1.0.0"] = "Initial release",
 		["1.1.0"] = "Rework for MoogleLib",
@@ -17,12 +20,12 @@ KaliMainWindow.Info = {
 	}
 }
 
-KaliMainWindow.GUI = {
+self.GUI = {
 	WindowName = "KaliMainWindow##KaliMainWindow",
 	name = "Moogle Script Management",
 	NavName = "Moogle Script Management",
-	open = false,
-	visible = false,
+	open = true,
+	visible = true,
 	MiniButton = false,
 	OnClick = loadstring("KaliMainWindow.GUI.open = not KaliMainWindow.GUI.open"),
 	IsOpen = loadstring("return KaliMainWindow.GUI.open"),
@@ -131,34 +134,19 @@ KaliMainWindow.GUI = {
 	}
 }
 
-KaliMainWindow.Settings = {
+self.Settings = {
 	enable = true,
 	open = false,
-	selected = ""
+	requirefocus = true
 }
-local self = "KaliMainWindow"
 
-local API, Lua, General, Debug, IO, Math, OS, String, Table, Gui, MinionPath, LuaPath, MooglePath, ImageFolder, ScriptsFolder, ACRFolder, SenseProfiles, SenseTriggers, Initialize, Vars, Distance2D, Distance3D, CurrentTarget, MovePlayer, SetTarget, ConvertCID, Entities, Entities2, EntitiesUpdateInterval, EntitiesLastUpdate, UpdateEntities, CMDKeyPress, SendKey, RecordKeybinds, Error, IsNil, NotNil, Is, IsAll, Not, NotAll, Type, NotType, Size, Empty, NotEmpty, d2, DrawDebugInfo, Sign, Round, Convert4Bytes, PowerShell, CreateFolder, DeleteFile, MoogleCMDQueue, MoogleDownloadBuffer, CMDTable, CMD, DownloadString, DownloadTable, DownloadFile, VersionCheck, Ping, Split, starts, ends, StrToTable, Valid, NotValid, pairs, InsertIfNil, RemoveIfNil, UpdateIfChanged, RemoveExpired, Unpack, Print, WindowStyle, WindowStyleClose, ColorConv, SameLine, Indent, Unindent, Space, Text, Checkbox, Tooltip, GetRemaining, VirtualKeys, OrderedKeys, IndexToDecimal, HotKey, DrawTables
-
-local function UpdateLocals1()
-	API = MoogleLib.API Lua = MoogleLib.Lua General = Lua.general Debug = Lua.debug IO = Lua.io Math = Lua.math OS = Lua.os String = Lua.string Table = Lua.table Gui = MoogleLib.Gui MinionPath = API.MinionPath LuaPath = API.LuaPath MooglePath = API.MooglePath ImageFolder = API.ImageFolder ScriptsFolder = API.ScriptsFolder ACRFolder = API.ACRFolder SenseProfiles = API.SenseProfiles SenseTriggers = API.SenseTriggers Initialize = API.Initialize Vars = API.Vars Distance2D = API.Distance2D Distance3D = API.Distance3D CurrentTarget = API.CurrentTarget MovePlayer = API.MovePlayer SetTarget = API.SetTarget ConvertCID = API.ConvertCID Entities = API.Entities Entities2 = API.Entities2 EntitiesUpdateInterval = API.EntitiesUpdateInterval EntitiesLastUpdate = API.EntitiesLastUpdate UpdateEntities = API.UpdateEntities CMDKeyPress = API.CMDKeyPress SendKey = API.SendKey RecordKeybinds = API.RecordKeybinds Error = General.Error IsNil = General.IsNil NotNil = General.NotNil Is = General.Is IsAll = General.IsAll Not = General.Not NotAll = General.NotAll Type = General.Type NotType = General.NotType Size = General.Size Empty = General.Empty NotEmpty = General.NotEmpty d2 = Debug.d2 DrawDebugInfo = Debug.DrawDebugInfo Sign = Math.Sign Round = Math.Round Convert4Bytes = Math.Convert4Bytes PowerShell = OS.PowerShell CreateFolder = OS.CreateFolder DeleteFile = OS.DeleteFile MoogleCMDQueue = OS.MoogleCMDQueue MoogleDownloadBuffer = OS.MoogleDownloadBuffer CMDTable = OS.CMDTable CMD = OS.CMD DownloadString = OS.DownloadString DownloadTable = OS.DownloadTable
-end
-
-local function UpdateLocals2()
-	DownloadFile = OS.DownloadFile VersionCheck = OS.VersionCheck Ping = OS.Ping Split = String.Split starts = String.starts ends = String.ends StrToTable = String.ToTable Valid = Table.Valid NotValid = Table.NotValid pairs = Table.pairs InsertIfNil = Table.InsertIfNil RemoveIfNil = Table.RemoveIfNil UpdateIfChanged = Table.UpdateIfChanged RemoveExpired = Table.RemoveExpired Unpack = Table.Unpack Print = Table.Print WindowStyle = Gui.WindowStyle WindowStyleClose = Gui.WindowStyleClose ColorConv = Gui.ColorConv SameLine = Gui.SameLine Indent = Gui.Indent Unindent = Gui.Unindent Space = Gui.Space Text = Gui.Text Checkbox = Gui.Checkbox Tooltip = Gui.Tooltip GetRemaining = Gui.GetRemaining VirtualKeys = Gui.VirtualKeys OrderedKeys = Gui.OrderedKeys IndexToDecimal = Gui.IndexToDecimal HotKey = Gui.HotKey DrawTables = Gui.DrawTables
-end
-
-function KaliMainWindow.ModuleInit()
-	if MoogleLib then
-		UpdateLocals1() UpdateLocals2()
-		Initialize(KaliMainWindow.GUI)
-		MoogleLoad({
-			["KaliMainWindow.enable"] = "KaliMainWindow.Settings.enable",
-			["KaliMainWindow.open"] = "KaliMainWindow.GUI.open",
-			["KaliMainWindow.selected"] = "KaliMainWindow.GUI.NavigationMenu.selected"
-		})
-	end
-end
+self.Data = {
+	CheckVer = true,
+	lastsave = 0,
+	loaded = false
+}
+local data = self.Data
+local CheckVer, lastsave, loaded = data.CheckVer, data.lastsave, data.loaded
 
 local AnimatedLastHover = 0
 local AnimatedLastNotHover = 0
@@ -177,40 +165,37 @@ local count = 0
 -- local TestTable = {}
 
 local lastsave = 0
-function KaliMainWindow.Draw()
-	local gamestate = GetGameState()
-	if MoogleLib then
-		MoogleSave({
-			["KaliMainWindow.enable"] = "KaliMainWindow.Settings.enable",
-			["KaliMainWindow.open"] = "KaliMainWindow.GUI.open",
-		})
-		if TimeSince(lastsave) > 60000 then
-			MoogleSave({["KaliMainWindow.selected"] = "KaliMainWindow.GUI.NavigationMenu.selected"})
-			lastsave = Now()
-		end
-
+function self.Draw()
+	if FinishedLoading then
 		-- START MAIN WINDOW --
 			local MainX = 0
 			local MainY = 0
 			local MainH = 0
 
-			local StyleVars = WindowStyle(KaliMainWindow.GUI.WindowStyle)
-			if KaliMainWindow.GUI.open then
+			local StyleVars = WindowStyle(self.GUI.WindowStyle)
+			if self.GUI.open then
 				GUI:PushStyleVar(GUI.StyleVar_WindowMinSize,615,500)
-				if NotNil(KaliMainWindow.GUI.oldPOS) and KaliMainWindow.GUI.name ~= KaliMainWindow.GUI.oldPOS.name then
-					local oldPOS = KaliMainWindow.GUI.oldPOS
+				if NotNil(self.GUI.oldPOS) and self.GUI.name ~= self.GUI.oldPOS.name then
+					local oldPOS = self.GUI.oldPOS
 					GUI:SetNextWindowPos(oldPOS.pos.x, oldPOS.pos.y)
 					GUI:SetNextWindowSize(oldPOS.size.x, oldPOS.size.y)
-					KaliMainWindow.GUI.oldPOS = nil
+					self.GUI.oldPOS = nil
 				end
-				KaliMainWindow.GUI.visible, KaliMainWindow.GUI.open = GUI:Begin(KaliMainWindow.GUI.name, KaliMainWindow.GUI.open)
-				MainX,MainY = GUI:GetWindowPos()
+				self.GUI.visible, self.GUI.open = GUI:Begin(self.GUI.name, self.GUI.open)
+				if self.GUI.focused ~= GUI:IsWindowFocused() then
+					self.GUI.focused = GUI:IsWindowFocused()
+					if self.GUI.focused then
+						GUI:SetWindowFocus(self.GUI.NavigationMenu.name)
+						GUI:SetWindowFocus(self.GUI.name)
+					end
+				end
+					MainX,MainY = GUI:GetWindowPos()
 				MainH = GUI:GetWindowHeight()
-				if KaliMainWindow.GUI.visible then
-					KaliMainWindow.GUI.NavigationMenu.open = true
-					KaliMainWindow.GUI["Contents"]()
+				if self.GUI.visible then
+					self.GUI.NavigationMenu.open = true
+					self.GUI["Contents"]()
 				else
-					KaliMainWindow.GUI.NavigationMenu.open = false
+					self.GUI.NavigationMenu.open = false
 				end
 				GUI:PopStyleVar()
 				GUI:End()
@@ -220,23 +205,42 @@ function KaliMainWindow.Draw()
 
 		-- START SIDEBAR NAVIGATION MENU --
 
-			local StyleVars = WindowStyle(KaliMainWindow.GUI.NavigationMenu.WindowStyle)
-			if KaliMainWindow.GUI.NavigationMenu.open then
-				GUI:SetNextWindowPos(MainX-KaliMainWindow.GUI.NavigationMenu.x+1,MainY+19)
-				GUI:SetNextWindowSize(KaliMainWindow.GUI.NavigationMenu.x,MainH-29)
+			local StyleVars = WindowStyle(self.GUI.NavigationMenu.WindowStyle)
+			if self.GUI.NavigationMenu.open then
+				GUI:SetNextWindowPos(MainX-self.GUI.NavigationMenu.x+1,MainY+19)
+				GUI:SetNextWindowSize(self.GUI.NavigationMenu.x,MainH-29)
 				GUI:PushStyleVar(GUI.StyleVar_WindowRounding,0)
 				GUI:PushStyleVar(GUI.StyleVar_WindowPadding,0,0)
 				GUI:PushStyleVar(GUI.StyleVar_WindowMinSize,1,1)
 				GUI:PushStyleColor(GUI.Col_WindowBg, 0.0174509803921569, 0, 0.0270588235294118, 0.95)
-				KaliMainWindow.GUI.NavigationMenu.visible, KaliMainWindow.GUI.NavigationMenu.open = GUI:Begin(KaliMainWindow.GUI.NavigationMenu.name, KaliMainWindow.GUI.NavigationMenu.open,GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoMove + GUI.WindowFlags_NoCollapse + GUI.WindowFlags_NoScrollbar + GUI.WindowFlags_NoScrollWithMouse)
-				if KaliMainWindow.GUI.NavigationMenu.visible then
+				self.GUI.NavigationMenu.visible, self.GUI.NavigationMenu.open = GUI:Begin(self.GUI.NavigationMenu.name, self.GUI.NavigationMenu.open,GUI.WindowFlags_NoTitleBar + GUI.WindowFlags_NoResize + GUI.WindowFlags_NoMove + GUI.WindowFlags_NoCollapse + GUI.WindowFlags_NoScrollbar)
+				if self.GUI.NavigationMenu.visible then
+
+					if self.GUI.NavigationMenu.focused ~= GUI:IsWindowFocused() then
+						self.GUI.NavigationMenu.focused = GUI:IsWindowFocused()
+					end
+					if self.GUI.NavigationMenu.hovered ~= GUI:IsWindowHovered() then
+						self.GUI.NavigationMenu.hovered = GUI:IsWindowHovered()
+					end
 					-- Start Navigation Menu Animation --
 
 						local x,y = GUI:GetMousePos()
-						if GUI:IsWindowHovered() or ((((MainX-KaliMainWindow.GUI.NavigationMenu.x+1) - x) <= 20) and (x <= MainX) and (y >= MainY+19) and (y <= MainY+19+(MainH-29)+15)) then
+
+						local NavDimensions = (((MainX-self.GUI.NavigationMenu.x+1) - x) <= 20) and (x <= MainX) and (y >= MainY+19) and (y <= MainY+19+(MainH-29)+15)
+						if NavDimensions and ((self.GUI.NavigationMenu.hovered or self.GUI.NavigationMenu.focused or self.GUI.NavigationMenu.active) or self.Settings.requirefocus == false or self.GUI.NavigationMenu.ListBoxClicked) then
+							if self.GUI.NavigationMenu.FocusMain == false then --self.GUI.NavigationMenu.ListBoxClicked
+								if self.GUI.NavigationMenu.focused or self.GUI.NavigationMenu.ListBoxClicked then
+									GUI:SetWindowFocus(self.GUI.name)
+									GUI:SetWindowFocus(self.GUI.NavigationMenu.name)
+									self.GUI.NavigationMenu.FocusMain = true
+								end
+							end
+--								( or ) then
+
+--								and (self.GUI.NavigationMenu.hovered or  and (GUI:IsMouseDown(1) or GUI:IsMouseClicked(1))) then
 							-- Mouse cursor is hovering window, expand window until you reach desired width --
 							local duration = 250
-							local CurrentDistance = KaliMainWindow.GUI.NavigationMenu.x
+							local CurrentDistance = self.GUI.NavigationMenu.x
 							local MinDistance = 8
 							local MaxDistance = 243
 
@@ -257,15 +261,16 @@ function KaliMainWindow.Draw()
 							local time = TimeSince(AnimatedLastHover)
 
 							if time < AnimationRemainingDuration then
-								KaliMainWindow.GUI.NavigationMenu.x = KaliMainWindow.GUI.NavigationMenu.x + ((TimeSince(AnimationLastFrame) * AnimationRate))
+								self.GUI.NavigationMenu.x = self.GUI.NavigationMenu.x + ((TimeSince(AnimationLastFrame) * AnimationRate))
 								AnimationLastFrame = Now()
 							else
-								KaliMainWindow.GUI.NavigationMenu.x = MaxDistance
+								self.GUI.NavigationMenu.x = MaxDistance
 							end
 						else
 							-- Mouse cursor has left the window, retract the window until you reach your minimum width --
+							self.GUI.NavigationMenu.FocusMain = false
 							local duration = 1000
-							local CurrentDistance = KaliMainWindow.GUI.NavigationMenu.x
+							local CurrentDistance = self.GUI.NavigationMenu.x
 							local MinDistance = 8
 							local MaxDistance = 243
 
@@ -286,17 +291,17 @@ function KaliMainWindow.Draw()
 							local time = TimeSince(AnimatedLastNotHover)
 
 							if time < AnimationRemainingDuration then
-								KaliMainWindow.GUI.NavigationMenu.x = KaliMainWindow.GUI.NavigationMenu.x - ((TimeSince(AnimationLastFrame) * AnimationRate))
+								self.GUI.NavigationMenu.x = self.GUI.NavigationMenu.x - ((TimeSince(AnimationLastFrame) * AnimationRate))
 								AnimationLastFrame = Now()
 							else
-								KaliMainWindow.GUI.NavigationMenu.x = MinDistance
+								self.GUI.NavigationMenu.x = MinDistance
 							end
 
 							if GUI:GetWindowWidth() < 10 then
-								KaliMainWindow.GUI.NavigationMenu.x = 8
+								self.GUI.NavigationMenu.x = 8
 								GUI:PushStyleVar(GUI.StyleVar_ItemSpacing,0,0)
 								GUI:PushStyleVar(GUI.StyleVar_ItemInnerSpacing,0,0)
-								if KaliMainWindow.AnimatedSideBar then
+								if self.AnimatedSideBar then
 									if (AnimatedSpot + GUI:GetTextLineHeightWithSpacing()) >= (MainH - 35) then
 										AnimatedIncrease = false
 										AnimatedSpot = (MainH - 35) - GUI:GetTextLineHeightWithSpacing()
@@ -336,11 +341,11 @@ function KaliMainWindow.Draw()
 						GUI:Dummy(5,0)GUI:SameLine(0,0)
 						GUI:PushItemWidth(232)
 							GUI:PushStyleColor(GUI.Col_FrameBg, 0,0,0,0)
-							GUI:ListBoxHeader("##NavigationList", table.size(KaliMainWindow.GUI.NavigationMenu.Menu), math.floor((MainH - 70)/18))
+							local C = GUI:ListBoxHeader("##NavigationList", table.size(self.GUI.NavigationMenu.Menu), math.floor((MainH - 70)/18))
 								local function IsSelected(str)
 									if Type(str,"string") then
-										-- d("str: "..str.." NavMenu.selected: "..KaliMainWindow.GUI.NavigationMenu.selected.." IsTheSame: "..tostring(KaliMainWindow.GUI.NavigationMenu.selected == str))
-										if KaliMainWindow.GUI.NavigationMenu.selected == str then
+										-- d("str: "..str.." NavMenu.selected: "..self.GUI.NavigationMenu.selected.." IsTheSame: "..tostring(self.GUI.NavigationMenu.selected == str))
+										if self.GUI.NavigationMenu.selected == str then
 											return true
 										else
 											return false
@@ -351,18 +356,51 @@ function KaliMainWindow.Draw()
 									end
 								end
 
-								local c = GUI:Selectable("Moogle Script Management", IsSelected("Moogle Script Management"))
-								if GUI:IsItemClicked(c) then KaliMainWindow.GUI.NavigationMenu.selected = MoogleUpdater.GUI.NavName end
+								GUI:Selectable("Moogle Script Management", IsSelected("Moogle Script Management"))
+								if GUI:IsItemClicked(0) then
+									self.GUI.NavigationMenu.selected = MoogleUpdater.GUI.NavName
+								elseif GUI:IsItemHovered() and GUI:IsItemClicked(1) then
+									GUI:OpenPopup("Moogle Script Management")
+								end
+								if GUI:BeginPopup("Moogle Script Management") then
+									local checked, pressed = GUI:Checkbox("##Moogle Script Management".."MiniButton",MoogleUpdater.GUI.MiniButton)
+									Text("Mini Button",true)
+									if GUI:IsItemClicked() then
+										pressed = true
+									end
+									if pressed then
+										MoogleUpdater.GUI.MiniButton = not MoogleUpdater.GUI.MiniButton
 
-								for k,v in pairs(KaliMainWindow.GUI.NavigationMenu.Menu) do
+										if MoogleUpdater.GUI.MiniButton then
+											local ModuleTable = MoogleUpdater.GUI
+											local MiniName = ModuleTable.MiniName
+											local create = true
+											for k,v in pairs(ml_global_information.menu.windows) do if v.name == MiniName then create = false end end
+											if create then
+												table.insert(ml_global_information.menu.windows, { name = MiniName, openWindow = function() ModuleTable.OnClick() end, isOpen = function() return ModuleTable.IsOpen() end })
+											end
+										else
+											local ModuleTable = MoogleUpdater.GUI
+											local MiniName = ModuleTable.MiniName
+											for k,v in pairs(ml_global_information.menu.windows) do if v.name == MiniName then ml_global_information.menu.windows[k] = nil end end
+										end
+									end
+									GUI:EndPopup()
+								end
+
+								for k,v in pairs(self.GUI.NavigationMenu.Menu) do
 									if v ~= "Moogle Script Management" then
 										local c = GUI:Selectable(v, IsSelected(v))
-										if GUI:IsItemClicked(c) then KaliMainWindow.GUI.NavigationMenu.selected = v end
+										if GUI:IsItemClicked(c) then self.GUI.NavigationMenu.selected = v end
 									end
 								end
 							GUI:ListBoxFooter()
+							local active = GUI:IsItemClicked(C) or GUI:IsItemHovered(C)
+							if self.GUI.NavigationMenu.active ~= active then self.GUI.NavigationMenu.active = active end
+							if self.GUI.NavigationMenu.ListBoxClicked ~= GUI:IsItemClicked() then self.GUI.NavigationMenu.ListBoxClicked = GUI:IsItemClicked() end
+							if self.GUI.NavigationMenu.ListBoxHovered ~= GUI:IsItemHovered() then self.GUI.NavigationMenu.ListBoxHovered = GUI:IsItemHovered() end
 
-							-- KaliMainWindow.GUI.NavigationMenu.selected = GUI:ListBox("##NavigationList",KaliMainWindow.GUI.NavigationMenu.selected,KaliMainWindow.GUI.NavigationMenu.Menu,math.floor((MainH - 70)/18))
+							-- self.GUI.NavigationMenu.selected = GUI:ListBox("##NavigationList",self.GUI.NavigationMenu.selected,self.GUI.NavigationMenu.Menu,math.floor((MainH - 70)/18))
 							GUI:PopStyleColor()
 						GUI:PopItemWidth()
 						GUI:Dummy(0,0)
@@ -375,7 +413,7 @@ function KaliMainWindow.Draw()
 						if GUI:IsItemClicked(c) then
 							io.popen([[cmd /c start http://www.mmominion.com/thread-20229.html]])
 						end
-						
+
 						GUI:SameLine(0,5)
 						local x,y = GUI:CalcTextSize("MoogleStuff Discord")
 						local c = GUI:Button("MoogleStuff Discord",x+10,y+10)
@@ -393,6 +431,51 @@ function KaliMainWindow.Draw()
 	end
 end
 
-RegisterEventHandler("Module.Initalize", KaliMainWindow.ModuleInit)
-RegisterEventHandler("Gameloop.Draw", KaliMainWindow.Draw)
-RegisterEventHandler("Gameloop.Update", KaliMainWindow.OnUpdate)
+function self.OnUpdate()
+	if FinishedLoading then -- Initiate Locals --
+		if loaded then -- Load User Saved Settings --
+			if CheckVer then -- Do a version check --
+--				local update, tbl = VersionCheck(selfs, self.Info.URL, self.Info.Version)
+--				if update == true then
+--	--					FileWrite(MooglePath..[[Main Window.lua]],tbl)
+--	--					loadstring(tbl)()
+--					CheckVer = false
+--				elseif update == false then
+--					Error("Window Test")
+--					CheckVer = false
+--				end
+			else -- We are running the current version, time for logic --
+			end
+			MoogleSave({
+				[selfs .. [[.enable]]] = selfs .. [[.Settings.enable]],
+				[selfs .. [[.requirefocus]]] = selfs .. [[.Settings.requirefocus]],
+				[selfs .. [[.open]]] = selfs .. [[.GUI.open]],
+			})
+			if TimeSince(lastsave, 60000) then
+				MoogleSave({[selfs .. [[.selected]]] = selfs .. [[.GUI.NavigationMenu.selected]]})
+				lastsave = Now()
+			end
+		else
+			MoogleLoad({
+				[selfs .. [[.enable]]] = selfs .. [[.Settings.enable]],
+				[selfs .. [[.requirefocus]]] = selfs .. [[.Settings.requirefocus]],
+				[selfs .. [[.open]]] = selfs .. [[.GUI.open]],
+				[selfs .. [[.selected]]] = selfs .. [[.GUI.NavigationMenu.selected]],
+			})
+			CheckVer, lastsave, loaded = data.CheckVer, data.lastsave, data.loaded
+			loaded = true
+		end
+	else
+		UpdateLocals()
+		if FinishedLoading then
+--			Initialize(self.GUI)
+		end
+	end
+end
+
+API.Event("Gameloop.Initalize",selfs,"Initialize",self.Init)
+API.Event("Gameloop.Update",selfs,"Update",self.OnUpdate)
+API.Event("Gameloop.Draw",selfs,"Draw",self.Draw)
+
+_G.KaliMainWindow = KaliMainWindow
+-- End of File --
