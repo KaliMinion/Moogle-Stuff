@@ -1,4 +1,4 @@
-local KaliMainWindow = {}
+local KaliMainWindow = {} --1
 local self = KaliMainWindow
 local selfs = "KaliMainWindow"
 
