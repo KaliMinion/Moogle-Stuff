@@ -6,15 +6,15 @@ md -Force $MoogleStuff
 }
 If(!(test-path $MoogleStuff'\Moogle Updater.lua'))
 {
-(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/MoogleUpdater.lua',$MoogleStuff+'\Moogle Updater.lua')
+(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Moogle Updater.lua',$MoogleStuff+'\Moogle Updater.lua')
 }
 If(!(test-path $MoogleStuff'\module.def'))
 {
-(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/MoogleStuffModule.def',$MoogleStuff+'\module.def')
+(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/module.def',$MoogleStuff+'\module.def')
 }
 If(!(test-path $MoogleStuff'\Main Window.lua'))
 {
-(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/MainWindow.lua',$MoogleStuff+'\Main Window.lua')
+(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/KaliMinion/Moogle-Stuff/master/Main Window.lua',$MoogleStuff+'\Main Window.lua')
 }
 If(!(test-path $MoogleStuff'\Moogle Scripts.lua'))
 {
